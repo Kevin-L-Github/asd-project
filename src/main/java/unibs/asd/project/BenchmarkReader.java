@@ -1,0 +1,80 @@
+package unibs.asd.project;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+public class BenchmarkReader {
+
+    public static int[][] readBenchmark(String filePath) {
+        System.out.printf("Reading benchmark %s%n", filePath);
+
+        // Read and filter file content
+        List<String> lines = readAndFilterFile(filePath);
+        if (lines.isEmpty()) {
+            System.out.println("No valid content found in file.");
+            return new int[0][0];
+        }
+
+        // Join lines and split into blocks
+        String content = String.join(System.lineSeparator(), lines);
+        System.out.println("File read:\n" + content);
+
+        // Parse blocks into matrix
+        int[][] matrix = parseContentToMatrix(content);
+
+        // Print the resulting matrix
+        printMatrix("Resulting matrix:", matrix);
+
+        return matrix;
+    }
+
+    private static List<String> readAndFilterFile(String filePath) {
+        Path path = Paths.get(filePath);
+
+        try (Stream<String> lines = Files.lines(path)) {
+            return lines.filter(line -> !line.startsWith(";"))
+                    .filter(line -> !line.trim().isEmpty())
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            System.err.println("Error reading file: " + e.getMessage());
+            return List.of();
+        }
+    }
+
+    private static int[][] parseContentToMatrix(String content) {
+        String[] blocks = content.split("-");
+
+        List<int[]> rows = new ArrayList<>();
+
+        for (String block : blocks) {
+            block = block.trim();
+            if (!block.isEmpty()) {
+                try {
+                    int[] row = Arrays.stream(block.split("\\s+"))
+                            .mapToInt(Integer::parseInt)
+                            .toArray();
+                    rows.add(row);
+                    System.out.println("Parsed row: " + Arrays.toString(row));
+                } catch (NumberFormatException e) {
+                    System.err.println("Error parsing numbers in block: " + block);
+                }
+            }
+        }
+
+        return rows.toArray(new int[0][]);
+    }
+
+    private static void printMatrix(String message, int[][] matrix) {
+        System.out.println(message);
+        for (int[] row : matrix) {
+            System.out.println(Arrays.toString(row));
+        }
+    }
+}
