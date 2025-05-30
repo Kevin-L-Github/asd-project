@@ -167,7 +167,7 @@ public class Hypothesis {
         return result;
     }
 
-    public List<boolean[]> getHseconds() {
+    public List<Hypothesis> getHseconds() {
 
         int msb = mostSignificantBit();
         int lsb = leastSignificantBit();
@@ -175,18 +175,28 @@ public class Hypothesis {
             throw new IllegalArgumentException("Non è possibile calcolare gli hsecondi per questa ipotesi");
         }
 
-        List<boolean[]> list = new ArrayList<>();
+        List<Hypothesis> list = new ArrayList<>();
 
         for (int i = 0; i < msb; i++) {
             boolean[] h_prime = bin.clone();
             h_prime[i] = true;
-            for (int j = i; j <= lsb; j++) {
+            for (int j = i+1; j <= lsb; j++) {
                 if (h_prime[j]) {
-                    h_prime[j] = false;
-                    list.add(h_prime.clone());
+                    boolean[] h_sec = h_prime.clone();
+                    h_sec[j] = false;
+                    list.add(new Hypothesis(h_sec.clone()));
                 }    
             }
         }
         return list;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        for (boolean b : bin) {
+            sb.append(b ? "1" : "0");
+        }
+        return sb.toString();
     }
 }
