@@ -42,7 +42,7 @@ public class Modules {
     }
 
     private int[] initial(int[] h, int[] h1) {
-        List <int[]> = new ArrayList<>();
+//        List <int[]> = new ArrayList<>();
         for(int i = 0; i < LM1(h); i++) {
             h[i] = 1;
         }

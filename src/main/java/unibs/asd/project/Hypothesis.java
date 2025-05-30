@@ -24,6 +24,13 @@ public class Hypothesis {
         this.bin = new boolean[size];
     }
 
+    public Hypothesis(boolean[] bin) {
+        if (bin == null) {
+            throw new IllegalArgumentException("L'array binario non può essere null");
+        }
+        this.bin = bin.clone();  // Clona l'array per garantire l'immutabilità
+    }
+
     /**
      * Restituisce la dimensione dell'ipotesi.
      * @return la dimensione dell'array binario
@@ -170,16 +177,16 @@ public class Hypothesis {
 
         List<boolean[]> list = new ArrayList<>();
 
-        
-
-
-
-
-
-        
-
-        list.add(bin);
+        for (int i = 0; i < msb; i++) {
+            boolean[] h_prime = bin.clone();
+            h_prime[i] = true;
+            for (int j = i; j <= lsb; j++) {
+                if (h_prime[j]) {
+                    h_prime[j] = false;
+                    list.add(h_prime.clone());
+                }    
+            }
+        }
         return list;
     }
-
 }
