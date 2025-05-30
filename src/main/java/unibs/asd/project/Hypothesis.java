@@ -37,7 +37,7 @@ public class Hypothesis {
      * @return numero di bit a false
      */
     public int numberOfSuccessors() {
-        return bin.length - numberOfPredecessors();  // Ottimizzazione: evita un loop separato
+        return bin.length - numberOfPredecessors();
     }
 
     /**
@@ -115,6 +115,16 @@ public class Hypothesis {
         return -1;
     }
 
+    public int leastSignificantBit() {
+        // Ottimizzazione: loop standard invece di enhanced for
+        for (int i = bin.length - 1; i >= 0; i--) {
+            if (bin[i]) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
     /**
      * Confronta questa ipotesi con un altro oggetto per uguaglianza.
      * @param obj oggetto da confrontare
@@ -149,4 +159,27 @@ public class Hypothesis {
         }
         return result;
     }
+
+    public List<boolean[]> getHseconds() {
+
+        int msb = mostSignificantBit();
+        int lsb = leastSignificantBit();
+        if (mostSignificantBit() == -1 || msb == 0 || lsb == -1 ) {
+            throw new IllegalArgumentException("Non è possibile calcolare gli hsecondi per questa ipotesi");
+        }
+
+        List<boolean[]> list = new ArrayList<>();
+
+        
+
+
+
+
+
+        
+
+        list.add(bin);
+        return list;
+    }
+
 }
