@@ -22,6 +22,13 @@ public class Hypothesis {
             throw new IllegalArgumentException("La dimensione non può essere negativa");
         }
         this.bin = new boolean[size];
+        for (int i = 0; i < size; i++) {
+            bin[i] = false;  // Inizializza tutti i bit a false
+        }
+    }
+
+    public boolean[] getBin() {
+        return bin;  // Restituisce una copia dell'array per garantire l'immutabilità
     }
 
     public Hypothesis(boolean[] bin) {
@@ -30,6 +37,7 @@ public class Hypothesis {
         }
         this.bin = bin.clone();  // Clona l'array per garantire l'immutabilità
     }
+
 
     /**
      * Restituisce la dimensione dell'ipotesi.
@@ -325,23 +333,13 @@ public class Hypothesis {
         }
     }
 
-    // Metodo helper per trovare tutti i predecessori che condividono lo stesso successore h'
-    private List<Hypothesis> findSharedPredecessors(Hypothesis hPrime) {
-        List<Hypothesis> predecessors = new ArrayList<>();
+    public List<Hypothesis> generateChildren(List<Hypothesis> current) {
         
-        // Trova la posizione del bit che differisce tra this e h'
-        int changedBit = -1;
-        for (int i = 0; i < bin.length; i++) {
-            if (bin[i] != hPrime.bin[i]) {
-                changedBit = i;
-                break;
-            }
-        }
-        
-        
-        return predecessors;
-    }
 
+
+
+        return null;
+    }   
 
 
 }
