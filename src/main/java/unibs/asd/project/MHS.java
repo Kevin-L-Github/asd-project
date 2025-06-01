@@ -17,13 +17,12 @@ public class MHS {
                 if (check(instance, h.getBin())) {
                     solutions.add(h);
                     current.remove(h);
-                } else if (isEmptyHypothesis(h)) {
+                } else if (h.isEmptyHypothesis()) {
                     next.addAll(generateSuccessors(h));
                 } else if (h.mostSignificantBit() != 0) {
                     processNonEmptyHypothesis(h, current, next);
                 }
             }
-
             current = next;
         }
         return solutions;
@@ -59,15 +58,6 @@ public class MHS {
             }
         }
         return false;
-    }
-
-    private boolean isEmptyHypothesis(Hypothesis h) {
-        for (boolean b : h.getBin()) {
-            if (b) {
-                return false;
-            }
-        }
-        return true;
     }
 
     public static boolean isGreater(boolean[] bin1, boolean[] bin2) {
