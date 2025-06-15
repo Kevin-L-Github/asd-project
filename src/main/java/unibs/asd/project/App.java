@@ -1,7 +1,5 @@
 package unibs.asd.project;
 
-import java.util.List;
-
 /**
  * Hello world!
  *

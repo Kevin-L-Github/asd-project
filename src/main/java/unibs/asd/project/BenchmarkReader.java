@@ -88,10 +88,4 @@ public class BenchmarkReader {
         return rows.toArray(new boolean[0][]);
     }
 
-    private static void printMatrix(String message, boolean[][] matrix) {
-        System.out.println(message);
-        for (boolean[] row : matrix) {
-            System.out.println(Arrays.toString(row));
-        }
-    }
 }
