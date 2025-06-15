@@ -3,10 +3,12 @@ package unibs.asd.project;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Classe che rappresenta un'ipotesi come un array di valori booleani.
- * Ogni elemento dell'array rappresenta uno stato binario (true = attivo, false = inattivo).
+ * Ogni elemento dell'array rappresenta uno stato binario (true = attivo, false
+ * = inattivo).
  * Fornisce metodi per manipolare e analizzare la configurazione binaria.
  */
 public class Hypothesis {
@@ -85,7 +87,7 @@ public class Hypothesis {
     }
 
     private List<Hypothesis> generateSuccessors(int start, int end) {
-        List<Hypothesis> successors = new ArrayList<>(end - start+1);
+        List<Hypothesis> successors = new ArrayList<>(end - start + 1);
         for (int i = start; i < end; i++) {
             if (!bin[i]) {
                 boolean[] successor = bin.clone();
@@ -105,7 +107,7 @@ public class Hypothesis {
                 predecessors.add(new Hypothesis(predecessor));
             }
         }
-        return predecessors;
+        return predecessors.reversed();
     }
 
     public int mostSignificantBit() {
@@ -124,20 +126,6 @@ public class Hypothesis {
             }
         }
         return -1;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (!(obj instanceof Hypothesis)) return false;
-
-        Hypothesis other = (Hypothesis) obj;
-        return Arrays.equals(bin, other.bin);
-    }
-
-    @Override
-    public int hashCode() {
-        return Arrays.hashCode(bin);
     }
 
     public List<Hypothesis> getHseconds() {
@@ -200,7 +188,7 @@ public class Hypothesis {
         }
 
         List<Hypothesis> predecessors = hPrime.generatePredecessors();
-        return predecessors.get(predecessors.size() - 1);
+        return predecessors.get(0);
     }
 
     public Hypothesis finalPred(Hypothesis hPrime) {
@@ -208,16 +196,14 @@ public class Hypothesis {
             throw new IllegalArgumentException("h' deve essere un successore left valido di h");
         }
 
-        if (numberOfPredecessors() == 0) {
-            return hPrime;
-        }
-
         List<Hypothesis> predecessors = hPrime.generatePredecessors();
+        if (predecessors.isEmpty()) {
+            throw new IllegalArgumentException("h' deve essere un successore left valido di h");
+        }
         if (predecessors.size() < 2) {
             throw new IllegalArgumentException("Non ci sono abbastanza predecessori per h'");
         }
-
-        return predecessors.get(1);
+        return predecessors.get(predecessors.size() - 2);
     }
 
     private boolean isValidSuccessor(Hypothesis hPrime, boolean left) {
@@ -243,7 +229,6 @@ public class Hypothesis {
         int msb = this.mostSignificantBit();
         return left ? diffIndex < msb : diffIndex >= msb;
     }
-
 
     public int cardinality() {
         int cardinality = 0;
@@ -272,5 +257,24 @@ public class Hypothesis {
         this.vector = vector.clone();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        Hypothesis that = (Hypothesis) o;
+        for (int i = 0; i < bin.length; i++) {
+            if (this.bin[i] != that.bin[i]) {
+                return false;
+            }
+        }
+        return true; // Confronta gli array binari per l'uguaglianza
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(bin); // Coerente con equals()
+    }
 
 }

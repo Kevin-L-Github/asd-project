@@ -61,63 +61,59 @@ public class MHS {
             iteration++;
             System.out.println("\n--- Iteration " + iteration + " ---");
             System.out.println("Current hypotheses: " + current.size());
-            for (Hypothesis h : current) {
-                System.out.println("  Processing: " + h);
-            }
 
             List<Hypothesis> next = new ArrayList<>();
+            List<Hypothesis> toRemove = new ArrayList<>();
+            List<Hypothesis> toAdd = new ArrayList<>();
 
+            // Fase 1: Identificare elementi da rimuovere e nuove ipotesi
             for (Hypothesis h : current) {
                 System.out.println("\n  Evaluating hypothesis: " + h);
+
                 if (check(h)) {
                     System.out.println("    Found solution: " + h);
                     solutions.add(h);
-                    current.remove(h);
+                    toRemove.add(h);
                 } else if (h.isEmptyHypothesis()) {
                     System.out.println("    Hypothesis is empty, generating children");
                     List<Hypothesis> children = generateChildren(h);
                     System.out.println("    Generated " + children.size() + " children");
-                    next.addAll(children);
+                    toAdd.addAll(children);
+                    toRemove.add(h);
                 } else if (h.mostSignificantBit() != 0) {
                     System.out.println("    Processing non-empty hypothesis with MSB: " + h.mostSignificantBit());
-                    processNonEmptyHypothesis(h, current, next);
+                    Hypothesis h_sec = h.globalInitial();
+                    System.out.println("    Global initial: " + h_sec);
+
+                    // Aggiungi alla lista di rimozione le ipotesi maggiori
+                    for (Hypothesis hypothesis : current) {
+                        if (isGreater(hypothesis.getBin(), h_sec.getBin())) {
+                            toRemove.add(hypothesis);
+                        }
+                    }
+
+                    if (!current.isEmpty() && !current.get(0).equals(h)) {
+                        System.out.println("    Current first hypothesis is different, merging successors");
+                        List<Hypothesis> successors = generateChildren(h);
+                        List<Hypothesis> merged = merge(toAdd, successors);
+                        System.out.println("    Merged result size: " + merged.size());
+                        toAdd.clear();
+                        toAdd.addAll(merged);
+                    }
                 }
             }
+
+            // Fase 2: Applicare tutte le modifiche
+            current.removeAll(toRemove);
+            next.addAll(toAdd);
+
+            System.out.println("Removed " + toRemove.size() + " hypotheses");
+            System.out.println("Next iteration will process " + next.size() + " hypotheses");
+
             current = next;
-            System.out.println("Next iteration will process " + current.size() + " hypotheses");
         }
 
-        System.out.println("\nAlgorithm completed. Found " + solutions.size() + " solutions:");
-        for (Hypothesis sol : solutions) {
-            System.out.println("  " + sol);
-        }
         return solutions;
-    }
-
-    private List<Hypothesis> generateSuccessors(Hypothesis h) {
-        System.out.println("    Generating successors for: " + h);
-        List<Hypothesis> successors = h.leftSuccessors();
-        System.out.println("    Generated " + successors.size() + " successors");
-        return successors;
-    }
-
-    private void processNonEmptyHypothesis(Hypothesis h, List<Hypothesis> current, List<Hypothesis> next) {
-        System.out.println("    Processing non-empty hypothesis: " + h);
-        Hypothesis h_sec = h.globalInitial();
-        System.out.println("    Global initial: " + h_sec);
-
-        int beforeRemove = current.size();
-        current.removeIf(hypothesis -> isGreater(hypothesis.getBin(), h_sec.getBin()));
-        int removed = beforeRemove - current.size();
-        System.out.println("    Removed " + removed + " hypotheses greater than global initial");
-
-        if (!current.getFirst().equals(h)) {
-            System.out.println("    Current first hypothesis is different, merging successors");
-            List<Hypothesis> successors = generateSuccessors(h);
-            List<Hypothesis> merged = merge(next, successors);
-            System.out.println("    Merged result size: " + merged.size());
-            next = merged;
-        }
     }
 
     public static boolean isGreater(boolean[] bin1, boolean[] bin2) {
@@ -137,7 +133,7 @@ public class MHS {
         }
 
         // Se tutti i bit sono uguali
-        return false;
+        return true;
     }
 
     private static List<Hypothesis> merge(Collection<Hypothesis> hypotheses, Collection<Hypothesis> toMerge) {
@@ -164,18 +160,17 @@ public class MHS {
                 vector[i] = instance[i][m];
             }
             h.setVector(vector);
-            System.out.println("    Set empty hypothesis vector: " + Arrays.toString(vector));
+
         } else {
             boolean[] vector = new boolean[m];
             Arrays.fill(vector, false);
             h.setVector(vector);
-            System.out.println("    Set non-empty hypothesis vector: " + Arrays.toString(vector));
         }
     }
 
     public boolean check(Hypothesis h) {
         boolean[] vector = h.getVector();
-        System.out.println("    Checking hypothesis with vector: " + Arrays.toString(vector));
+        //System.out.println("    Checking hypothesis with vector: " + Arrays.toString(vector));
         for (int i = 0; i < vector.length; i++) {
             if (!vector[i]) {
                 System.out.println("    Hypothesis is NOT a solution (false at position " + i + ")");
@@ -196,7 +191,7 @@ public class MHS {
             newVector[i] = vector[i] || vector_prime[i];
         }
         h_prime.setVector(newVector);
-        System.out.println("    New vector after propagation: " + Arrays.toString(newVector));
+        //System.out.println("    New vector after propagation: " + Arrays.toString(newVector));
     }
 
     public List<Hypothesis> generateChildren(Hypothesis h) {
@@ -216,7 +211,7 @@ public class MHS {
             return children;
         }
 
-        Hypothesis h_p = current.get(0);
+        Hypothesis h_p = current.getFirst();
         System.out.println("    Using h_p: " + h_p);
 
         for (int i = 0; i < h.mostSignificantBit(); i++) {
@@ -234,7 +229,7 @@ public class MHS {
             System.out.println("    h_s_f: " + h_s_f);
 
             int counter = 0;
-
+            
             while (!isGreater(h_p, h_s_i) && isGreater(h_p, h_s_f)) {
                 System.out.println("    While loop iteration with h_p: " + h_p);
                 if ((distance(h_p, h_prime) == 1) && (distance(h_p, h) == 2)) {
