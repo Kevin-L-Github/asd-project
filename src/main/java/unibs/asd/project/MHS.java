@@ -4,10 +4,15 @@ import java.util.*;
 
 public class MHS {
 
-    private List<Hypothesis> current = new ArrayList<>();
-    private List<Hypothesis> solutions = new ArrayList<>();
+    private List<Hypothesis> current;
+    private List<Hypothesis> solutions;
     private boolean[][] instance = null;
     
+    public MHS(boolean[][] instance) {
+        current = new ArrayList<>();
+        solutions = new ArrayList<>();
+        this.instance = instance;
+    }
 
     public List<Hypothesis> getSolutions() {
         return solutions;
@@ -19,6 +24,10 @@ public class MHS {
 
     public void setInstance(boolean[][] instance) {
         this.instance = instance;
+    }
+
+    public List<Hypothesis> getCurrent() {
+        return current;
     }
 
     /**
@@ -48,7 +57,6 @@ public class MHS {
                     next.addAll(generateChildren(h));
                 } else if (h.mostSignificantBit() != 0) {
                     processNonEmptyHypothesis(h, current, next);
-
                 }
             }
             current = next;
@@ -189,6 +197,7 @@ public class MHS {
 
             while (!isGreater(h_p, h_s_i) && isGreater(h_p, h_s_f)) {
                 if ((distance(h_p, h_prime) == 1) && (distance(h_p, h) == 2)) {
+                    propagate(h_p, h_prime);
                     counter++;
                 }
                 h_p = current.get(1);
@@ -215,5 +224,7 @@ public class MHS {
         }
         return distance;
     }
+
+
 
 }
