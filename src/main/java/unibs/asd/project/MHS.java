@@ -4,6 +4,23 @@ import java.util.*;
 
 public class MHS {
 
+    private List<Hypothesis> current = new ArrayList<>();
+    private List<Hypothesis> solutions = new ArrayList<>();
+    private boolean[][] instance = null;
+    
+
+    public List<Hypothesis> getSolutions() {
+        return solutions;
+    }
+
+    public boolean[][] getInstance() {
+        return instance;
+    }
+
+    public void setInstance(boolean[][] instance) {
+        this.instance = instance;
+    }
+
     /**
      * Computes the Minimal Hitting Sets (MHS) for a given instance represented as a
      * boolean matrix.
@@ -11,14 +28,14 @@ public class MHS {
      * @param instance A boolean matrix where each row represents a set of features.
      * @return A list of hypotheses representing the MHS.
      */
-    public List<Hypothesis> run(boolean[][] instance) {
+    public List<Hypothesis> run() {
         if (instance == null || instance.length == 0 || instance[0].length == 0) {
             throw new IllegalArgumentException("Instance must be a non-empty boolean matrix.");
         }
         int m = instance[0].length;
         int n = instance.length;
-        List<Hypothesis> current = new ArrayList<>(List.of(new Hypothesis(m, n)));
-        List<Hypothesis> solutions = new ArrayList<>();
+
+        current.add(new Hypothesis(m,n));
 
         while (!current.isEmpty()) {
             List<Hypothesis> next = new ArrayList<>();
@@ -28,7 +45,7 @@ public class MHS {
                     solutions.add(h);
                     current.remove(h);
                 } else if (h.isEmptyHypothesis()) {
-                    next.addAll(generateChildren(h, current));
+                    next.addAll(generateChildren(h));
                 } else if (h.mostSignificantBit() != 0) {
                     processNonEmptyHypothesis(h, current, next);
 
@@ -90,7 +107,10 @@ public class MHS {
         return merged;
     }
  
-    public void setFields(Hypothesis h, int m, int n, boolean[][] instance) {
+    public void setFields(Hypothesis h) {
+        int n = instance.length;
+        int m = instance[0].length;
+
         if (h.isEmptyHypothesis()) {
             boolean[] vector = new boolean[n];
             for (int i = 0; i < n; i++) {
@@ -140,11 +160,18 @@ public class MHS {
         h_prime.setVector(newVector);
     }
 
-    public List<Hypothesis> generateChildren(Hypothesis h, List<Hypothesis> current) {
+    public List<Hypothesis> generateChildren(Hypothesis h) {
         List<Hypothesis> children = new ArrayList<>();
 
         if (h.isEmptyHypothesis()) {
-            return h.leftSuccessors();
+            for (int i = 0; i < h.getBin().length; i++){
+                boolean[] h_new = h.getBin().clone();
+                h_new[i] = true;
+                Hypothesis H_new = new Hypothesis(h_new);
+                setFields(H_new);
+                children.add(H_new);
+            }
+            return children;
         }
 
         Hypothesis h_p = current.get(0);
@@ -153,12 +180,15 @@ public class MHS {
             h_pr[i] = true;
             Hypothesis h_prime = new Hypothesis(h_pr);
 
+            setFields(h_prime);
+            propagate(h, h_prime);
+            
             Hypothesis h_s_i = h.initial(h_prime);
             Hypothesis h_s_f = h.finalPred(h_prime);
             int counter = 0;
 
-            while (!h_p.isGreater(h_s_i.getBin()) && h_p.isGreater(h_s_f.getBin())) {
-                if ((h_p.distance(h_prime) == 1) && (h_p.distance(h) == 2)) {
+            while (!isGreater(h_p, h_s_i) && isGreater(h_p, h_s_f)) {
+                if ((distance(h_p, h_prime) == 1) && (distance(h_p, h) == 2)) {
                     counter++;
                 }
                 h_p = current.get(1);
@@ -170,6 +200,20 @@ public class MHS {
         }
 
         return children;
+    }
+
+    public boolean isGreater(Hypothesis h1, Hypothesis h2) {
+        return isGreater(h1.getBin(), h2.getBin());
+    }
+
+    public int distance(Hypothesis h1, Hypothesis h2) {
+        int distance = 0;
+        for (int i = 0; i < h2.getBin().length; i++) {
+            if (h1.getBin()[i] != h2.getBin()[i]) {
+                distance++;
+            }
+        }
+        return distance;
     }
 
 }

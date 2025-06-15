@@ -255,16 +255,6 @@ public class Hypothesis {
         return cardinality;
     }
 
-    public int distance(Hypothesis h2) {
-        int distance = 0;
-        for (int i = 0; i < h2.getBin().length; i++) {
-            if (this.bin[i] != h2.getBin()[i]) {
-                distance++;
-            }
-        }
-        return distance;
-    }
-
     public boolean isEmptyHypothesis() {
         for (boolean b : this.getBin()) {
             if (b) {
@@ -272,33 +262,6 @@ public class Hypothesis {
             }
         }
         return true;
-    }
-
-    public boolean isGreater(boolean[] bin2) {
-        boolean[] trimmed1 = trimLeadingZeros(bin);
-        boolean[] trimmed2 = trimLeadingZeros(bin2);
-
-        if (trimmed1.length != trimmed2.length) {
-            return trimmed1.length > trimmed2.length;
-        }
-
-        for (int i = 0; i < trimmed1.length; i++) {
-            if (trimmed1[i] != trimmed2[i]) {
-                return trimmed1[i];
-            }
-        }
-        return false;
-    }
-
-    private boolean[] trimLeadingZeros(boolean[] binary) {
-        int firstOne = -1;
-        for (int i = 0; i < binary.length; i++) {
-            if (binary[i]) {
-                firstOne = i;
-                break;
-            }
-        }
-        return firstOne == -1 ? new boolean[] { false } : Arrays.copyOfRange(binary, firstOne, binary.length);
     }
 
     public boolean[] getVector() {
