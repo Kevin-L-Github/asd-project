@@ -188,7 +188,7 @@ public class Hypothesis {
         }
 
         List<Hypothesis> predecessors = hPrime.generatePredecessors();
-        return predecessors.get(0);
+        return predecessors.getFirst();
     }
 
     public Hypothesis finalPred(Hypothesis hPrime) {
@@ -203,7 +203,7 @@ public class Hypothesis {
         if (predecessors.size() < 2) {
             throw new IllegalArgumentException("Non ci sono abbastanza predecessori per h'");
         }
-        return predecessors.get(predecessors.size() - 2);
+        return predecessors.get( predecessors.size() - 2);
     }
 
     private boolean isValidSuccessor(Hypothesis hPrime, boolean left) {
