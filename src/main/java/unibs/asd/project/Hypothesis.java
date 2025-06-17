@@ -257,20 +257,20 @@ public class Hypothesis {
         this.vector = vector.clone();
     }
 
-    @Override
-    public boolean equals(Object o) {
-        Hypothesis that = (Hypothesis) o;
-        for (int i = 0; i < bin.length; i++) {
-            if (this.bin[i] != that.bin[i]) {
-                return false;
-            }
-        }
-        return true; // Confronta gli array binari per l'uguaglianza
-    }
+@Override
+public boolean equals(Object o) {
+    if (this == o) return true;  // Ottimizzazione per lo stesso oggetto
+    if (o == null || getClass() != o.getClass()) return false;  // Controllo di tipo
+    
+    Hypothesis that = (Hypothesis) o;
+    
+    // Confronta gli array elemento per elemento
+    return Arrays.equals(this.bin, that.bin);
+}
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(bin); // Coerente con equals()
-    }
+@Override
+public int hashCode() {
+    return Arrays.hashCode(bin);  // Coerente con Arrays.equals()
+}
 
 }

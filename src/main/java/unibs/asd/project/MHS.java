@@ -2,6 +2,7 @@ package unibs.asd.project;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class MHS {
 
@@ -62,20 +63,16 @@ public class MHS {
             iteration++;
             System.out.println("\n--- Iteration " + iteration + " ---");
             System.out.println("Current hypotheses: " + current.size());
-
             List<Hypothesis> next = new ArrayList<>();
-            List<Hypothesis> toRemove = new ArrayList<>();
-            List<Hypothesis> toAdd = new ArrayList<>();
 
-            // Fase 1: Identificare elementi da rimuovere e nuove ipotesi
-            Iterator<Hypothesis> iterator = current.iterator();
-            while (iterator.hasNext()) {
-                Hypothesis h = iterator.next();
+            for (int i = 0; i < current.size(); i++) {
+                Hypothesis h = current.get(i);
                 System.out.println("\nEvaluating hypothesis: " + h);
                 if (check(h)) {
                     System.out.println("Found solution: " + h);
                     solutions.add(h);
-                    iterator.remove();
+                    current.remove(i);
+                    i--;
                 } else if (h.isEmptyHypothesis()) {
                     List<Hypothesis> children = generateChildren(h);
                     next.addAll(children);
@@ -83,27 +80,15 @@ public class MHS {
                     Hypothesis h_sec = h.globalInitial();
                     System.out.println("Global initial: " + h_sec);
 
-                    List<Hypothesis> toRemoveNow = current.stream()
-                            .filter(hypothesis -> isGreater(hypothesis.getBin(), h_sec.getBin()))
-                            .collect(Collectors.toList());
+                    current.removeIf(hyp -> isGreater(hyp, h_sec));
 
-                    toRemove.addAll(toRemoveNow);
-                    Hypothesis h_p = current.getFirst();
-
-                    if (!h_p.equals(h)) {
+                    if (!current.getFirst().equals(h)) {
                         System.out.println("Current first hypothesis is different, merging successors");
-                        List<Hypothesis> merged = merge(toAdd, generateChildren(h));
-                        System.out.println("Merged result size: " + merged.size());
-                        toAdd.clear();
-                        toAdd.addAll(merged);
+                        next = merge(next, generateChildren(h));
+                        System.out.println("Merged result size: " + next.size());
                     }
                 }
             }
-
-            // Fase 2: Applicare tutte le modifiche
-            current.removeAll(toRemove);
-            next.addAll(toAdd);
-
             current = next;
         }
 
@@ -144,14 +129,12 @@ public class MHS {
     }
 
     private static List<Hypothesis> merge(Collection<Hypothesis> hypotheses, Collection<Hypothesis> toMerge) {
-        Set<Hypothesis> uniqueHyps = new LinkedHashSet<>();
-        uniqueHyps.addAll(hypotheses);
-        uniqueHyps.addAll(toMerge);
-
-        List<Hypothesis> merged = new ArrayList<>(uniqueHyps);
-        merged.sort(Comparator.comparing(Hypothesis::getBin, (bin1, bin2) -> isGreaterEqual(bin1, bin2) ? -1 : 1));
-
-        return merged;
+        return Stream.concat(hypotheses.stream(), toMerge.stream())
+                .distinct()
+                .sorted(Comparator.comparing(
+                        Hypothesis::getBin,
+                        (bin1, bin2) -> isGreaterEqual(bin1, bin2) ? -1 : 1))
+                .collect(Collectors.toList());
     }
 
     public void setFields(Hypothesis h) {
@@ -236,8 +219,6 @@ public class MHS {
             Hypothesis h_s_f = h.final_(h_prime);
             System.out.println("h_s_i: " + h_s_i);
             System.out.println("h_s_f: " + h_s_f);
-
-            
 
             int counter = 0;
 
