@@ -178,7 +178,7 @@ public class Hypothesis {
         return new Hypothesis(globalInitialBin);
     }
 
-    public Hypothesis initial(Hypothesis hPrime) {
+    public Hypothesis initial_(Hypothesis hPrime) {
         if (!isValidSuccessor(hPrime, true)) {
             throw new IllegalArgumentException("h' deve essere un successore left valido di h");
         }
@@ -191,7 +191,7 @@ public class Hypothesis {
         return predecessors.getFirst();
     }
 
-    public Hypothesis finalPred(Hypothesis hPrime) {
+    public Hypothesis final_(Hypothesis hPrime) {
         if (!isValidSuccessor(hPrime, true)) {
             throw new IllegalArgumentException("h' deve essere un successore left valido di h");
         }
@@ -259,10 +259,6 @@ public class Hypothesis {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (o == null || getClass() != o.getClass())
-            return false;
         Hypothesis that = (Hypothesis) o;
         for (int i = 0; i < bin.length; i++) {
             if (this.bin[i] != that.bin[i]) {

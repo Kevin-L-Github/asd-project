@@ -7,7 +7,7 @@ package unibs.asd.project;
 public class App {
     public static void main(String[] args) {
         
-        boolean[][] instance = BenchmarkReader.readBenchmark("src\\benchmarks1\\74283.007.matrix");
+        boolean[][] instance = BenchmarkReader.readBenchmark("src\\benchmarks1\\74182.042.matrix");
         //instance = BenchmarkReader.readBenchmark("src\\benchmarks1\\mybenchmark.matrix");
         MHS mhs = new MHS(instance);
         mhs.run();
