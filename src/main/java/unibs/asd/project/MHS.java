@@ -41,7 +41,7 @@ public class MHS {
         int n = instance.length;
 
         Hypothesis emptyHypothesis = new Hypothesis(m, n);
-        this.current.addAll(generateChildren(emptyHypothesis));
+        this.current.addAll(generateChildrenEmHypothesis(emptyHypothesis));
         System.out.println("Initial hypothesis added: " + current.get(0));
 
         int iteration = 0;
@@ -52,6 +52,7 @@ public class MHS {
             List<Hypothesis> next = new ArrayList<>();
 
             for (int i = 0; i < current.size(); i++) {
+
                 Hypothesis h = current.get(i);
                 System.out.println("Processing hypothesis " + (i + 1) + "/" + current.size() + " - solutions found: "
                         + solutions.size());
@@ -63,7 +64,10 @@ public class MHS {
                     System.out.println("Removed hypothesis. New current size: " + current.size());
                 } else if (h.mostSignificantBit() != 0) {
                     Hypothesis h_sec = h.globalInitial();
+                    int size = current.size();
                     current.removeIf(hyp -> isGreater(hyp, h_sec));
+                    int diff = size - current.size();
+                    i -= diff;
                     if (!current.getFirst().equals(h)) {
                         List<Hypothesis> children = generateChildren(h);
                         next = merge(next, children);
@@ -78,23 +82,24 @@ public class MHS {
         return solutions;
     }
 
+    public List<Hypothesis> generateChildrenEmHypothesis(Hypothesis h) {
+        List<Hypothesis> children = new ArrayList<>();
+        System.out.println("Generating children for empty hypothesis");
+        for (int i = 0; i < h.getBin().length; i++) {
+            boolean[] h_new = h.getBin().clone();
+            h_new[i] = true;
+            Hypothesis H_new = new Hypothesis(h_new);
+            setFields(H_new);
+            children.add(H_new);
+            System.out.println("Generated child: " + H_new);
+        }
+        return children;
+    }
+
     public List<Hypothesis> generateChildren(Hypothesis h) {
         List<Hypothesis> children = new ArrayList<>();
-
-        if (h.isEmptyHypothesis()) {
-            System.out.println("Generating children for empty hypothesis");
-            for (int i = 0; i < h.getBin().length; i++) {
-                boolean[] h_new = h.getBin().clone();
-                h_new[i] = true;
-                Hypothesis H_new = new Hypothesis(h_new);
-                setFields(H_new);
-                children.add(H_new);
-                System.out.println("Generated child: " + H_new);
-            }
-            return children;
-        }
-
-        List<Hypothesis> temp = new ArrayList<>(this.current);
+        Iterator<Hypothesis> it = current.iterator();
+        Hypothesis h_p = it.next();
 
         for (int i = 0; i < h.mostSignificantBit(); i++) {
             boolean[] h_pr = h.getBin().clone();
@@ -108,28 +113,24 @@ public class MHS {
             Hypothesis h_s_f = h.final_(h_prime);
             int counter = 0;
 
-            List<Hypothesis> toReinsert = new ArrayList<>();
-            Iterator<Hypothesis> it = temp.iterator();
-
-            while (it.hasNext()) {
-                Hypothesis h_p = it.next();
-                if (isLessEqual(h_p, h_s_i) && isGreaterEqual(h_p, h_s_f)
-                        && (distance(h_p, h_prime) == 1) && (distance(h_p, h) == 2)) {
-                    propagate(h_p, h_prime);
-                    counter++;
-                } else {
-                    toReinsert.add(h_p);
-                }
-                it.remove();
-                if (counter == h.cardinality()) {
-                    children.add(h_prime);
-                    break;
-                }
-                
+            while (isGreater(h_p, h_s_i)) {
+                h_p = it.next();
             }
 
-            temp.addAll(toReinsert);
-            
+            while (isLessEqual(h_p, h_s_i) && isGreaterEqual(h_p, h_s_f)) {
+
+                if (distance(h_p, h_prime) == 1 && distance(h_p, h) == 2) {
+                    propagate(h_p, h_prime);
+                    counter++;
+                }
+                h_p = it.hasNext() ? it.next() : null;
+            }
+
+            if (counter == h.cardinality()) {
+                children.add(h_prime);
+                // System.out.println("Generated child: " + h_prime);
+            }
+
         }
 
         return children;

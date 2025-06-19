@@ -7,11 +7,12 @@ package unibs.asd.project;
  */
 public class Playground {
 
-    public static final String BENCHMARK_FILE = "src\\benchmarks1\\example.matrix";
+    public static final String BENCHMARK_FILE = "src\\benchmarks1\\74283.007.matrix";
+
     public static void main(String[] args) {
 
         boolean[][] instance;
-        instance = BenchmarkReader.readBenchmark(BENCHMARK_FILE);
+        instance = identityMatrix(15);
         MHS mhs = new MHS(instance);
         mhs.run();
 
@@ -21,4 +22,13 @@ public class Playground {
         }
         System.out.println("Done.");
     }
+
+    public static boolean[][] identityMatrix(int size) {
+        boolean[][] matrix = new boolean[size][size];
+        for (int i = 0; i < size; i++) {
+            matrix[i][i] = true;
+        }
+        return matrix;
+    }
+
 }
