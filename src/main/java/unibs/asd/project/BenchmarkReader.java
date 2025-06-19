@@ -15,22 +15,14 @@ public class BenchmarkReader {
     public static boolean[][] readBenchmark(String filePath) {
         System.out.printf("Reading benchmark %s%n", filePath);
 
-        // Read and filter file content
         List<String> lines = readAndFilterFile(filePath);
         if (lines.isEmpty()) {
             System.out.println("No valid content found in file.");
             return new boolean[0][0];
         }
 
-        // Join lines and split into blocks
         String content = String.join(System.lineSeparator(), lines);
-        //System.out.println("File read:\n" + content);
-
-        // Parse blocks into matrix
         boolean[][] matrix = parseContentToBooleanMatrix(content);
-
-        // Print the resulting matrix
-        //printMatrix("Resulting matrix:", matrix);
 
         return matrix;
     }
@@ -57,7 +49,6 @@ public class BenchmarkReader {
             block = block.trim();
             if (!block.isEmpty()) {
                 try {
-                    // Convert to Boolean list first
                     List<Boolean> booleanList = Arrays.stream(block.split("\\s+"))
                             .map(s -> {
                                 if (s.equalsIgnoreCase("true") || s.equals("1")) {
@@ -70,14 +61,11 @@ public class BenchmarkReader {
                             })
                             .collect(Collectors.toList());
 
-                    // Convert to primitive boolean array
                     boolean[] row = new boolean[booleanList.size()];
                     for (int i = 0; i < booleanList.size(); i++) {
                         row[i] = booleanList.get(i);
                     }
-
                     rows.add(row);
-                    System.out.println("Parsed row: " + Arrays.toString(row));
                 } catch (IllegalArgumentException e) {
                     System.err.println("Error parsing boolean values in block: " + block);
                     System.err.println(e.getMessage());

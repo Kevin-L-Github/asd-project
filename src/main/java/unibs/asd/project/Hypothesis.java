@@ -14,8 +14,6 @@ public class Hypothesis {
 
     private final boolean[] bin; // Array immutabile che rappresenta lo stato binario
     private boolean[] vector;
-    private final int value;
-
 
     /**
      * Costruttore che inizializza una nuova ipotesi della dimensione specificata.
@@ -32,18 +30,7 @@ public class Hypothesis {
         Arrays.fill(this.bin, false);
         this.vector = new boolean[n];
         Arrays.fill(this.vector, false);
-        this.value = getInteger(bin);
 
-    }
-
-    public int getInteger(boolean[] bin) {
-        int result = 0;
-        for (int i = bin.length - 1; i >= 0; i--) {
-            if (bin[i]) {
-                result += Math.pow(2, i);
-            }
-        }
-        return result;
     }
 
     public Hypothesis(boolean[] bin) {
@@ -52,7 +39,6 @@ public class Hypothesis {
         }
         this.bin = bin.clone();
         this.vector = new boolean[0];
-        this.value = getInteger(bin);
     }
 
     public boolean[] getBin() {
