@@ -3,7 +3,6 @@ package unibs.asd.project;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Classe che rappresenta un'ipotesi come un array di valori booleani.
@@ -15,11 +14,8 @@ public class Hypothesis {
 
     private final boolean[] bin; // Array immutabile che rappresenta lo stato binario
     private boolean[] vector;
+    private final int value;
 
-    public Hypothesis(boolean[] bin, boolean[] vector) {
-        this.bin = bin.clone();
-        this.vector = vector.clone();
-    }
 
     /**
      * Costruttore che inizializza una nuova ipotesi della dimensione specificata.
@@ -36,6 +32,18 @@ public class Hypothesis {
         Arrays.fill(this.bin, false);
         this.vector = new boolean[n];
         Arrays.fill(this.vector, false);
+        this.value = getInteger(bin);
+
+    }
+
+    public int getInteger(boolean[] bin) {
+        int result = 0;
+        for (int i = bin.length - 1; i >= 0; i--) {
+            if (bin[i]) {
+                result += Math.pow(2, i);
+            }
+        }
+        return result;
     }
 
     public Hypothesis(boolean[] bin) {
@@ -44,6 +52,7 @@ public class Hypothesis {
         }
         this.bin = bin.clone();
         this.vector = new boolean[0];
+        this.value = getInteger(bin);
     }
 
     public boolean[] getBin() {
@@ -66,48 +75,6 @@ public class Hypothesis {
             }
         }
         return count;
-    }
-
-    /**
-     * Genera tutti i successori dell'ipotesi corrente come oggetti Hypothesis.
-     */
-    public List<Hypothesis> leftSuccessors() {
-        return generateSuccessors(0, mostSignificantBit());
-    }
-
-    public List<Hypothesis> rightSuccessors() {
-        return generateSuccessors(mostSignificantBit(), bin.length);
-    }
-
-    public List<Hypothesis> successors() {
-        List<Hypothesis> allSuccessors = new ArrayList<>(numberOfSuccessors());
-        allSuccessors.addAll(leftSuccessors());
-        allSuccessors.addAll(rightSuccessors());
-        return allSuccessors;
-    }
-
-    private List<Hypothesis> generateSuccessors(int start, int end) {
-        List<Hypothesis> successors = new ArrayList<>(end - start + 1);
-        for (int i = start; i < end; i++) {
-            if (!bin[i]) {
-                boolean[] successor = bin.clone();
-                successor[i] = true;
-                successors.add(new Hypothesis(successor));
-            }
-        }
-        return successors;
-    }
-
-    private List<Hypothesis> generatePredecessors() {
-        List<Hypothesis> predecessors = new ArrayList<>();
-        for (int i = 0; i < this.size(); i++) {
-            if (bin[i]) {
-                boolean[] predecessor = bin.clone();
-                predecessor[i] = false;
-                predecessors.add(new Hypothesis(predecessor));
-            }
-        }
-        return predecessors.reversed();
     }
 
     public int mostSignificantBit() {
@@ -179,55 +146,40 @@ public class Hypothesis {
     }
 
     public Hypothesis initial_(Hypothesis hPrime) {
-        if (!isValidSuccessor(hPrime, true)) {
-            throw new IllegalArgumentException("h' deve essere un successore left valido di h");
-        }
 
         if (numberOfPredecessors() == 0) {
             return hPrime;
         }
 
-        List<Hypothesis> predecessors = hPrime.generatePredecessors();
-        return predecessors.getFirst();
-    }
-
-    public Hypothesis final_(Hypothesis hPrime) {
-        if (!isValidSuccessor(hPrime, true)) {
-            throw new IllegalArgumentException("h' deve essere un successore left valido di h");
-        }
-
-        List<Hypothesis> predecessors = hPrime.generatePredecessors();
-        if (predecessors.isEmpty()) {
-            throw new IllegalArgumentException("h' deve essere un successore left valido di h");
-        }
-        if (predecessors.size() < 2) {
-            throw new IllegalArgumentException("Non ci sono abbastanza predecessori per h'");
-        }
-        return predecessors.get( predecessors.size() - 2);
-    }
-
-    private boolean isValidSuccessor(Hypothesis hPrime, boolean left) {
-        if (hPrime == null || hPrime.size() != this.size()) {
-            return false;
-        }
-        int diffCount = 0;
-        int diffIndex = -1;
-        for (int i = 0; i < bin.length; i++) {
-            if (bin[i] != hPrime.bin[i]) {
-                diffCount++;
-                diffIndex = i;
-                if (diffCount > 1) {
-                    return false;
+        for (int i = this.size() - 1; i >= 0; i--) {
+            if (bin[i]) {
+                boolean[] predecessor = hPrime.getBin().clone();
+                predecessor[i] = false;
+                Hypothesis pred = new Hypothesis(predecessor);
+                if (!this.equals(pred)) {
+                    return pred;
                 }
             }
         }
+        return null;
+    }
 
-        if (diffCount != 1 || !hPrime.bin[diffIndex]) {
-            return false;
+    public Hypothesis final_(Hypothesis hPrime) {
+
+        if (numberOfPredecessors() == 0) {
+            return hPrime;
         }
-
-        int msb = this.mostSignificantBit();
-        return left ? diffIndex < msb : diffIndex >= msb;
+        for (int i = 0; i < this.size(); i++) {
+            if (bin[i]) {
+                boolean[] predecessor = hPrime.getBin().clone();
+                predecessor[i] = false;
+                Hypothesis pred = new Hypothesis(predecessor);
+                if (!hPrime.equals(pred)) {
+                    return pred;
+                }
+            }
+        }
+        return null;
     }
 
     public int cardinality() {
@@ -257,20 +209,22 @@ public class Hypothesis {
         this.vector = vector.clone();
     }
 
-@Override
-public boolean equals(Object o) {
-    if (this == o) return true;  // Ottimizzazione per lo stesso oggetto
-    if (o == null || getClass() != o.getClass()) return false;  // Controllo di tipo
-    
-    Hypothesis that = (Hypothesis) o;
-    
-    // Confronta gli array elemento per elemento
-    return Arrays.equals(this.bin, that.bin);
-}
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true; // Ottimizzazione per lo stesso oggetto
+        if (o == null || getClass() != o.getClass())
+            return false; // Controllo di tipo
 
-@Override
-public int hashCode() {
-    return Arrays.hashCode(bin);  // Coerente con Arrays.equals()
-}
+        Hypothesis that = (Hypothesis) o;
+
+        // Confronta gli array elemento per elemento
+        return Arrays.equals(this.bin, that.bin);
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(bin); // Coerente con Arrays.equals()
+    }
 
 }

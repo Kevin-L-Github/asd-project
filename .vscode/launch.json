@@ -3,6 +3,20 @@
   "configurations": [
     {
       "type": "java",
+      "name": "Playground",
+      "request": "launch",
+      "mainClass": "unibs.asd.project.Playground",
+      "projectName": "asd-project"
+    },
+    {
+      "type": "java",
+      "name": "SingleApp",
+      "request": "launch",
+      "mainClass": "unibs.asd.project.SingleApp",
+      "projectName": "asd-project"
+    },
+    {
+      "type": "java",
       "name": "App",
       "request": "launch",
       "mainClass": "unibs.asd.project.App",
