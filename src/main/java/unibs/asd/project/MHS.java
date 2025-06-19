@@ -9,12 +9,72 @@ public class MHS {
     private List<Hypothesis> current;
     private List<Hypothesis> solutions;
     private boolean[][] instance = null;
+    private boolean[][] matrix;
+    private List<Integer> nonEmptyColumns;
+    private int DEPTH;
 
     public MHS(boolean[][] instance) {
         current = new ArrayList<>();
         solutions = new ArrayList<>();
         this.instance = instance;
+        this.cleanMatrix();
         System.out.println("MHS initialized with instance matrix:");
+        DEPTH = 0;
+    }
+
+    private void cleanMatrix() {
+        if (instance == null || instance.length == 0) {
+            matrix = new boolean[0][0];
+            nonEmptyColumns = new ArrayList<>();
+            return;
+        }
+
+        int rows = instance.length;
+        int cols = instance[0].length;
+
+        nonEmptyColumns = new ArrayList<>();
+        for (int j = 0; j < cols; j++) {
+            boolean hasTrue = false;
+            for (int i = 0; i < rows; i++) {
+                if (instance[i][j]) {
+                    hasTrue = true;
+                    break;
+                }
+            }
+            if (hasTrue) {
+                nonEmptyColumns.add(j);
+            }
+        }
+
+        int newCols = nonEmptyColumns.size();
+        matrix = new boolean[rows][newCols];
+
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < newCols; j++) {
+                matrix[i][j] = instance[i][nonEmptyColumns.get(j)];
+            }
+        }
+        
+    }
+
+    public void restoreSolutions() {
+        List<Hypothesis> restored = new ArrayList<>();
+
+        int originalSize = instance[0].length;
+
+        for (Hypothesis h : solutions) {
+            boolean[] compressed = h.getBin();
+            boolean[] full = new boolean[originalSize];
+
+            for (int i = 0; i < nonEmptyColumns.size(); i++) {
+                int originalIndex = nonEmptyColumns.get(i);
+                full[originalIndex] = compressed[i];
+            }
+
+            restored.add(new Hypothesis(full));
+        }
+
+        this.solutions = restored;
     }
 
     public List<Hypothesis> getSolutions() {
@@ -34,14 +94,15 @@ public class MHS {
     }
 
     public List<Hypothesis> run() {
-        if (instance == null || instance.length == 0 || instance[0].length == 0) {
+        if (matrix == null || matrix.length == 0 || matrix[0].length == 0) {
             throw new IllegalArgumentException("Instance must be a non-empty boolean matrix.");
         }
-        int m = instance[0].length;
-        int n = instance.length;
+        int m = matrix[0].length;
+        int n = matrix.length;
 
         Hypothesis emptyHypothesis = new Hypothesis(m, n);
         this.current.addAll(generateChildrenEmHypothesis(emptyHypothesis));
+        DEPTH++;
         System.out.println("Initial hypothesis added: " + current.get(0));
 
         int iteration = 0;
@@ -52,16 +113,12 @@ public class MHS {
             List<Hypothesis> next = new ArrayList<>();
 
             for (int i = 0; i < current.size(); i++) {
-
                 Hypothesis h = current.get(i);
-                System.out.println("Processing hypothesis " + (i + 1) + "/" + current.size() + " - solutions found: "
-                        + solutions.size());
+                printStatusBar(i);
                 if (check(h)) {
-                    System.out.println(">>> SOLUTION FOUND: " + h + " - Adding to results");
                     solutions.add(h);
                     current.remove(i);
                     i--;
-                    System.out.println("Removed hypothesis. New current size: " + current.size());
                 } else if (h.mostSignificantBit() != 0) {
                     Hypothesis h_sec = h.globalInitial();
                     int size = current.size();
@@ -74,12 +131,22 @@ public class MHS {
                     }
                 }
             }
-            current = next;
-
-            System.out.println("End of iteration. Next hypotheses: " + current.size());
+            this.current = next;
+            DEPTH++;
+            System.out.println("\nEnd of iteration. Next hypotheses: " + current.size());
         }
         System.out.println("\nAlgorithm completed. Solutions found: " + solutions.size());
+        this.restoreSolutions();
         return solutions;
+    }
+
+    private void printStatusBar(int i) {
+        int progress = (int) (((i + 1) / (double) current.size()) * 100);
+        System.out.print("\rProcessing: " + (i + 1) + "/" + current.size() +
+                " [" + ">".repeat(progress / 10) +
+                " ".repeat(10 - progress / 10) + "] " +
+                progress + "%" +
+                " - Solutions: " + solutions.size());
     }
 
     public List<Hypothesis> generateChildrenEmHypothesis(Hypothesis h) {
@@ -91,7 +158,6 @@ public class MHS {
             Hypothesis H_new = new Hypothesis(h_new);
             setFields(H_new);
             children.add(H_new);
-            System.out.println("Generated child: " + H_new);
         }
         return children;
     }
@@ -110,29 +176,31 @@ public class MHS {
             propagate(h, h_prime);
 
             Hypothesis h_s_i = h.initial_(h_prime);
-            Hypothesis h_s_f = h.final_(h_prime);
-            int counter = 0;
 
-            while (isGreater(h_p, h_s_i)) {
-                h_p = it.next();
-            }
-
-            while (isLessEqual(h_p, h_s_i) && isGreaterEqual(h_p, h_s_f)) {
-
-                if (distance(h_p, h_prime) == 1 && distance(h_p, h) == 2) {
-                    propagate(h_p, h_prime);
-                    counter++;
+            if (current.contains(h_s_i)) {
+                Hypothesis h_s_f = h.final_(h_prime);
+                int counter = 0;
+                while (!h_p.equals(h_s_i) && it.hasNext()) {
+                    h_p = it.next();
                 }
-                h_p = it.hasNext() ? it.next() : null;
-            }
+                while (isLessEqual(h_p, h_s_i) && isGreaterEqual(h_p, h_s_f) && it.hasNext()) {
 
-            if (counter == h.cardinality()) {
-                children.add(h_prime);
-                // System.out.println("Generated child: " + h_prime);
-            }
+                    if (distance(h_p, h_prime) == 1 && distance(h_p, h) == 2) {
+                        propagate(h_p, h_prime);
+                        counter++;
+                    }
+                    h_p = it.next();
+                }
+                if (counter == DEPTH) {
+                    children.add(h_prime);
+                }
 
+            } else {
+                if (it.hasNext()) {
+                    h_p = it.next();
+                }
+            }
         }
-
         return children;
     }
 
@@ -174,15 +242,15 @@ public class MHS {
     }
 
     public void setFields(Hypothesis h) {
-        int n = instance.length;
-        int m = instance[0].length;
+        int n = matrix.length;
+        int m = matrix[0].length;
         boolean[] vector = new boolean[n];
         if (!h.isEmptyHypothesis()) {
             boolean[] bin = h.getBin();
             for (int i = 0; i < m; i++) {
                 if (bin[i]) {
                     for (int j = 0; j < n; j++) {
-                        if (instance[j][i]) {
+                        if (matrix[j][i]) {
                             vector[j] = true;
                         }
                     }

@@ -3,17 +3,21 @@ package unibs.asd.project;
 /**
  * Playground class to test the MHS algorithm with a benchmark instance.
  * It reads a benchmark matrix from a file, runs the MHS algorithm,
- * and prints the found solutions.
+ * and prints the found solutions. 74182.042
  */
 public class Playground {
 
-    public static final String BENCHMARK_FILE = "src\\benchmarks1\\74283.007.matrix";
+    public static final String BENCHMARK = "src\\benchmarks1\\74L85.026.matrix";
 
     public static void main(String[] args) {
 
         boolean[][] instance;
-        instance = identityMatrix(15);
-        MHS mhs = new MHS(instance);
+        instance = identityMatrix(14);
+        boolean [][] benchmark = BenchmarkReader.readBenchmark(BENCHMARK);
+        MHS mhs;
+        mhs = new MHS(benchmark);
+        //mhs = new MHS(instance);
+
         mhs.run();
 
         System.out.println("Found " + mhs.getSolutions().size() + " solutions.");
