@@ -1,4 +1,4 @@
-package unibs.asd.project;
+package unibs.asd;
 
 public class HeapSort {
     

@@ -30,7 +30,6 @@ public class Hypothesis {
         Arrays.fill(this.bin, false);
         this.vector = new boolean[n];
         Arrays.fill(this.vector, false);
-
     }
 
     public Hypothesis(boolean[] bin) {

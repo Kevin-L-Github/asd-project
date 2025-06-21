@@ -2,7 +2,7 @@ package unibs.asd.project;
 
 import java.io.IOException;
 
-public class App {
+public class BooleanApp {
 
         public static final String DESTINATION = "results";
     public static void main(String[] args) {
