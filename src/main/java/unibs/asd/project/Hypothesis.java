@@ -52,7 +52,7 @@ public class Hypothesis {
         return bin.length - numberOfPredecessors();
     }
 
-    public int numberOfPredecessors() {
+    private int numberOfPredecessors() {
         int count = 0;
         for (boolean b : bin) {
             if (b) {
