@@ -1,0 +1,7 @@
+File	Soluzioni	Tempo(ms)
+--------------------------------
+74181.000.matrix	271	273 s
+74181.001.matrix	95	0 s
+74181.002.matrix	23	3 s
+74181.003.matrix	1	0 s
+74181.004.matrix	14	0 s

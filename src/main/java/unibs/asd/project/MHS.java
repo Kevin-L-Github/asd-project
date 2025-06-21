@@ -13,89 +13,24 @@ public class MHS {
     private List<Integer> nonEmptyColumns;
     private int DEPTH;
 
+    /**
+     * Attributi usati per la scrittura dei benchmark
+     */
+    private double computationTime;
+    private boolean executed;
+    private boolean stopped;
+    private boolean stoppedInsideLoop;
+
     public MHS(boolean[][] instance) {
-        current = new ArrayList<>();
-        solutions = new ArrayList<>();
+        this.current = new ArrayList<>();
+        this.solutions = new ArrayList<>();
         this.instance = instance;
+        this.DEPTH = 0;
+        this.computationTime = 0;
+        this.executed = false;
+        this.stopped = false;
+        this.stoppedInsideLoop = false;
         this.cleanMatrix();
-        System.out.println("MHS initialized with instance matrix:");
-        DEPTH = 0;
-    }
-
-    private void cleanMatrix() {
-        if (instance == null || instance.length == 0) {
-            matrix = new boolean[0][0];
-            nonEmptyColumns = new ArrayList<>();
-            return;
-        }
-
-        int rows = instance.length;
-        int cols = instance[0].length;
-
-        System.out.println("Righe: " + rows);
-        System.out.println("Colonne: " + cols);
-
-        nonEmptyColumns = new ArrayList<>();
-        for (int j = 0; j < cols; j++) {
-            boolean hasTrue = false;
-            for (int i = 0; i < rows; i++) {
-                if (instance[i][j]) {
-                    hasTrue = true;
-                    break;
-                }
-            }
-            if (hasTrue) {
-                nonEmptyColumns.add(j);
-            }
-        }
-
-        int newCols = nonEmptyColumns.size();
-        matrix = new boolean[rows][newCols];
-
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < newCols; j++) {
-                matrix[i][j] = instance[i][nonEmptyColumns.get(j)];
-            }
-        }
-
-        System.out.println("Colonne eliminate: " + (cols - newCols));
-
-    }
-
-    public void restoreSolutions() {
-        List<Hypothesis> restored = new ArrayList<>();
-
-        int originalSize = instance[0].length;
-
-        for (Hypothesis h : solutions) {
-            boolean[] compressed = h.getBin();
-            boolean[] full = new boolean[originalSize];
-
-            for (int i = 0; i < nonEmptyColumns.size(); i++) {
-                int originalIndex = nonEmptyColumns.get(i);
-                full[originalIndex] = compressed[i];
-            }
-
-            restored.add(new Hypothesis(full));
-        }
-
-        this.solutions = restored;
-    }
-
-    public List<Hypothesis> getSolutions() {
-        return solutions;
-    }
-
-    public boolean[][] getInstance() {
-        return instance;
-    }
-
-    public void setInstance(boolean[][] instance) {
-        this.instance = instance;
-    }
-
-    public List<Hypothesis> getCurrent() {
-        return current;
     }
 
     public List<Hypothesis> run() {
@@ -162,12 +97,15 @@ public class MHS {
         while (!current.isEmpty()) {
             if (System.nanoTime() - startTime > timeoutNanos) {
                 System.out.println("\nTimeout reached. Stopping the algorithm.");
+                this.stopped = true;
                 break;
             }
             List<Hypothesis> next = new ArrayList<>();
             for (int i = 0; i < current.size(); i++) {
                 if (System.nanoTime() - startTime > timeoutNanos) {
                     System.out.println("\nTimeout reached inside loop. Stopping.");
+                    this.stopped = true;
+                    this.stoppedInsideLoop = true;
                     break;
                 }
                 Hypothesis h = current.get(i);
@@ -195,9 +133,11 @@ public class MHS {
             DEPTH++;
             System.out.println("\nEnd of iteration. Next hypotheses: " + current.size());
         }
-
+        this.computationTime = (System.nanoTime() - startTime) / 1000000000F;
         System.out.println("\nAlgorithm completed. Solutions found: " + solutions.size());
+        System.out.println("Computation Time: " + this.computationTime);
         this.restoreSolutions();
+        this.executed = true;
         return solutions;
     }
 
@@ -375,4 +315,108 @@ public class MHS {
         boolean result = isLessEqual(h1.getBin(), h2.getBin());
         return result;
     }
+
+    private void cleanMatrix() {
+        if (instance == null || instance.length == 0) {
+            matrix = new boolean[0][0];
+            nonEmptyColumns = new ArrayList<>();
+            return;
+        }
+
+        int rows = instance.length;
+        int cols = instance[0].length;
+
+        System.out.println("Righe: " + rows);
+        System.out.println("Colonne: " + cols);
+
+        nonEmptyColumns = new ArrayList<>();
+        for (int j = 0; j < cols; j++) {
+            boolean hasTrue = false;
+            for (int i = 0; i < rows; i++) {
+                if (instance[i][j]) {
+                    hasTrue = true;
+                    break;
+                }
+            }
+            if (hasTrue) {
+                nonEmptyColumns.add(j);
+            }
+        }
+
+        int newCols = nonEmptyColumns.size();
+        matrix = new boolean[rows][newCols];
+
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < newCols; j++) {
+                matrix[i][j] = instance[i][nonEmptyColumns.get(j)];
+            }
+        }
+
+        System.out.println("Colonne eliminate: " + (cols - newCols));
+    }
+
+    public List<Integer> getNonEmptyColumns() {
+        return nonEmptyColumns;
+    }
+
+    public int getDEPTH() {
+        return DEPTH;
+    }
+
+    public double getComputationTime() {
+        return computationTime;
+    }
+
+    public boolean isExecuted() {
+        return executed;
+    }
+
+    public boolean isStopped() {
+        return stopped;
+    }
+
+    public void restoreSolutions() {
+        List<Hypothesis> restored = new ArrayList<>();
+
+        int originalSize = instance[0].length;
+
+        for (Hypothesis h : solutions) {
+            boolean[] compressed = h.getBin();
+            boolean[] full = new boolean[originalSize];
+
+            for (int i = 0; i < nonEmptyColumns.size(); i++) {
+                int originalIndex = nonEmptyColumns.get(i);
+                full[originalIndex] = compressed[i];
+            }
+
+            restored.add(new Hypothesis(full));
+        }
+
+        this.solutions = restored;
+    }
+
+    public List<Hypothesis> getSolutions() {
+        return solutions;
+    }
+
+    public boolean[][] getInstance() {
+        return instance;
+    }
+
+    public void setInstance(boolean[][] instance) {
+        this.instance = instance;
+    }
+
+    public List<Hypothesis> getCurrent() {
+        return current;
+    }
+
+    public boolean isStoppedInsideLoop() {
+        return stoppedInsideLoop;
+    }
+
+    public boolean[][] getMatrix() {
+        return matrix;
+    }
+
 }

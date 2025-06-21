@@ -12,7 +12,7 @@ public class App {
     public static void main(String[] args) {
         String benchmarkDir = "src/benchmarks1";
         String outputFile = "benchmark_results.txt";
-        int maxFilesToProcess = 1; // Limite di file da processare
+        int maxFilesToProcess = 5; // Limite di file da processare
 
         try {
             processBenchmarkDirectory(benchmarkDir, outputFile, maxFilesToProcess);

@@ -7,22 +7,17 @@ package unibs.asd.project;
  */
 public class Playground {
 
-    public static final String BENCHMARK = "src\\benchmarks1\\74L85.026.matrix";
+    public static final String BENCHMARK = "74L85.000.matrix";
 
     public static void main(String[] args) {
 
         boolean[][] benchmark = null;
-            benchmark = BenchmarkReader.readBenchmark(BENCHMARK);
+            benchmark = BenchmarkReader.readBenchmark("src\\benchmarks1\\"+BENCHMARK);
 
         MHS mhs;
         mhs = new MHS(benchmark);
-        mhs.run();
-
-        System.out.println("Found " + mhs.getSolutions().size() + " solutions.");
-        for (Hypothesis hs : mhs.getSolutions()) {
-            System.out.println(hs);
-        }
-        System.out.println("Done.");
+        mhs.run(30_000);
+        BenchmarkWriter.writeBenchmark(mhs, BENCHMARK);
     }
 
     public static boolean[][] identityMatrix(int size) {
