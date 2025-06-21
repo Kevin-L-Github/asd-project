@@ -9,15 +9,6 @@ import java.util.Comparator;
 import java.util.stream.Stream;
 
 public class Experiment {
-    private final String benchmarkDir;
-    private final String outputFile;
-    private final int maxFiles;
-
-    public Experiment(String benchmarkDir, String outputFile, int maxFiles) {
-        this.benchmarkDir = benchmarkDir;
-        this.outputFile = outputFile;
-        this.maxFiles = maxFiles;
-    }
 
     // Metodo principale che esegue tutto l'esperimento
     public static void runBenchmarks(String benchmarkDir, String outputFile, int maxFiles) throws IOException {
@@ -70,5 +61,4 @@ public class Experiment {
             }
         }
     }
-    
 }
