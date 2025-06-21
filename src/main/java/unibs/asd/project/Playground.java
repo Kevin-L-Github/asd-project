@@ -1,18 +1,17 @@
 package unibs.asd.project;
 
-
 public class Playground {
 
-    public static final String BENCHMARK = "74L85.000.matrix";
-    
+    public static final String BENCHMARK = "c7552.228.matrix";
+
     public static void main(String[] args) {
         boolean[][] benchmark = null;
-            benchmark = BenchmarkReader.readBenchmark("src\\benchmarks1\\"+BENCHMARK);
-        
+        benchmark = BenchmarkReader.readBenchmark("src\\benchmarks1\\" + BENCHMARK);
 
         MHS mhs;
         mhs = new MHS(benchmark);
-        mhs.run(30_000);
+        mhs.run(180_000);
+        System.out.println(mhs.getSolutions());
     }
 
     public static boolean[][] identityMatrix(int size) {

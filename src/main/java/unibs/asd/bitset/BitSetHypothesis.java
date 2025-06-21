@@ -1,10 +1,15 @@
 package unibs.asd.bitset;
 
+import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.List;
 
 public class BitSetHypothesis {
     private BitSet bin; 
     private BitSet vector;
+
+    private int size;
+    private int n;
 
     public BitSetHypothesis(int size, int n) {
         if (size < 0) {
@@ -12,6 +17,8 @@ public class BitSetHypothesis {
         }
         this.bin = new BitSet(size);
         this.vector = new BitSet(n);
+        this.size = size;
+        this.n = n;
     }
 
     public BitSetHypothesis(BitSet bin) {
@@ -27,7 +34,7 @@ public class BitSetHypothesis {
     }
 
     public int length() {
-        return bin.length();
+        return bin.size();
     }
 
     public int mostSignificantBit() {
@@ -89,5 +96,24 @@ public class BitSetHypothesis {
     @Override
     public int hashCode() {
         return bin.hashCode();
+    }
+
+    public List<BitSetHypothesis> predecessors(){
+
+        List<BitSetHypothesis> predecessors = new ArrayList<>();
+
+        for(int i = 0; i < this.size; i++){
+
+            if(bin.get(i)){
+                BitSet h_s = (BitSet) bin.clone();
+                h_s.flip(i);
+                predecessors.add(new BitSetHypothesis(h_s));
+
+            }
+            
+        }
+
+        return predecessors;
+        
     }
 }

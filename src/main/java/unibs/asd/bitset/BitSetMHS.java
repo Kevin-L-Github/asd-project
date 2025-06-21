@@ -144,6 +144,7 @@ public class BitSetMHS {
     private List<BitSetHypothesis> generateChildrenEmptyHypothesis(BitSetHypothesis h) {
         List<BitSetHypothesis> children = new ArrayList<>();
         System.out.println("Generating children for empty hypothesis");
+        System.out.println(h.length());
 
         for (int i = 0; i < h.length(); i++) {
             BitSet newBin = h.getBin();
@@ -157,25 +158,23 @@ public class BitSetMHS {
 
     private List<BitSetHypothesis> generateChildren(BitSetHypothesis h) {
         List<BitSetHypothesis> children = new ArrayList<>();
-        int msb = h.mostSignificantBit();
 
-        if (msb == -1)
-            return children;
-
-        for (int i = 0; i < msb; i++) {
+        for (int i = 0; i < h.mostSignificantBit(); i++) {
             BitSet h_pr = h.getBin();
             h_pr.set(i);
             BitSetHypothesis h_prime = new BitSetHypothesis(h_pr);
 
-            // Implementazione semplificata dei predecessori per BitSet
             int count = 0;
-            for (BitSetHypothesis hyp : current) {
-                BitSet hypBin = hyp.getBin();
-                if (isSubset(h_prime.getBin(), hypBin) && !h_prime.equals(hyp)) {
+            
+            List<BitSetHypothesis> predecessors = h.predecessors();
+
+            predecessors.remove(h);
+
+            for(BitSetHypothesis p: predecessors){
+                if(current.contains(p)){
                     count++;
                 }
             }
-
             if (count == DEPTH) {
                 setFields(h_prime);
                 propagate(h, h_prime);
@@ -183,12 +182,6 @@ public class BitSetMHS {
             }
         }
         return children;
-    }
-
-    private boolean isSubset(BitSet subset, BitSet superset) {
-        BitSet temp = (BitSet) subset.clone();
-        temp.andNot(superset);
-        return temp.isEmpty();
     }
 
     private boolean isGreater(BitSetHypothesis h1, BitSetHypothesis h2) {
@@ -242,8 +235,42 @@ public class BitSetMHS {
     }
 
     private void cleanMatrix() {
-        // Implementazione identica alla versione originale
-        // ...
+        if (instance == null || instance.length == 0) {
+            matrix = new boolean[0][0];
+            nonEmptyColumns = new ArrayList<>();
+            return;
+        }
+
+        int rows = instance.length;
+        int cols = instance[0].length;
+
+        System.out.println("Righe: " + rows);
+        System.out.println("Colonne: " + cols);
+
+        nonEmptyColumns = new ArrayList<>();
+        for (int j = 0; j < cols; j++) {
+            boolean hasTrue = false;
+            for (int i = 0; i < rows; i++) {
+                if (instance[i][j]) {
+                    hasTrue = true;
+                    break;
+                }
+            }
+            if (hasTrue) {
+                nonEmptyColumns.add(j);
+            }
+        }
+
+        int newCols = nonEmptyColumns.size();
+        matrix = new boolean[rows][newCols];
+
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < newCols; j++) {
+                matrix[i][j] = instance[i][nonEmptyColumns.get(j)];
+            }
+        }
+
+        System.out.println("Colonne eliminate: " + (cols - newCols));
     }
 
     private void restoreSolutions() {

@@ -1,19 +1,20 @@
 package unibs.asd.bitset;
 
+import java.util.BitSet;
+
 import unibs.asd.project.BenchmarkReader;
-import unibs.asd.project.MHS;
 
 public class BitSetApp {
 
-    public static final String BENCHMARK = "74L85.000.matrix";
+    public static final String BENCHMARK = "c7552.228.matrix";
 
     public static void main(String[] args) {
+
         boolean[][] benchmark = null;
-        //benchmark = BenchmarkReader.readBenchmark("src\\benchmarks1\\" + BENCHMARK);
         benchmark = identityMatrix(18);
-        MHS mhs;
-        mhs = new MHS(benchmark);
-        mhs.run(60_000);
+        BitSetMHS mhs;
+        mhs = new BitSetMHS(benchmark);
+        mhs.run(180_000);
         System.out.println(mhs.getSolutions());
     }
 
