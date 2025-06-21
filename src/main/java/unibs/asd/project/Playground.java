@@ -11,13 +11,11 @@ public class Playground {
 
     public static void main(String[] args) {
 
-        boolean[][] instance;
-        instance = identityMatrix(14);
-        boolean [][] benchmark = BenchmarkReader.readBenchmark(BENCHMARK);
+        boolean[][] benchmark = null;
+            benchmark = BenchmarkReader.readBenchmark(BENCHMARK);
+
         MHS mhs;
         mhs = new MHS(benchmark);
-        //mhs = new MHS(instance);
-
         mhs.run();
 
         System.out.println("Found " + mhs.getSolutions().size() + " solutions.");

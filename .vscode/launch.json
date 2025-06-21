@@ -3,6 +3,13 @@
   "configurations": [
     {
       "type": "java",
+      "name": "MatrixReader",
+      "request": "launch",
+      "mainClass": "unibs.asd.project.MatrixReader",
+      "projectName": "asd-project"
+    },
+    {
+      "type": "java",
       "name": "Playground",
       "request": "launch",
       "mainClass": "unibs.asd.project.Playground",

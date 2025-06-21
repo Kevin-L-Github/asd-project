@@ -213,4 +213,16 @@ public class Hypothesis {
         return Arrays.hashCode(bin); // Coerente con Arrays.equals()
     }
 
+    public List<Hypothesis> predecessors() {
+        List<Hypothesis> predecessors = new ArrayList<>();
+        for (int i = 0; i < this.bin.length; i++){
+            if(bin[i]){
+                boolean[] h_prime = this.getBin().clone();
+                h_prime[i] =!h_prime[i];
+                predecessors.add(new Hypothesis(h_prime));
+            }
+        }
+        return predecessors;
+    }
+
 }

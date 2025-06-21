@@ -32,6 +32,9 @@ public class MHS {
         int rows = instance.length;
         int cols = instance[0].length;
 
+        System.out.println("Righe: " + rows);
+        System.out.println("Colonne: " + cols);
+
         nonEmptyColumns = new ArrayList<>();
         for (int j = 0; j < cols; j++) {
             boolean hasTrue = false;
@@ -54,7 +57,9 @@ public class MHS {
                 matrix[i][j] = instance[i][nonEmptyColumns.get(j)];
             }
         }
-        
+
+        System.out.println("Colonne eliminate: " + (cols - newCols));
+
     }
 
     public void restoreSolutions() {
@@ -101,9 +106,8 @@ public class MHS {
         int n = matrix.length;
 
         Hypothesis emptyHypothesis = new Hypothesis(m, n);
-        this.current.addAll(generateChildrenEmHypothesis(emptyHypothesis));
+        this.current.addAll(generateChildrenEmptyHypothesis(emptyHypothesis));
         DEPTH++;
-        System.out.println("Initial hypothesis added: " + current.get(0));
 
         int iteration = 0;
         while (!current.isEmpty()) {
@@ -140,6 +144,63 @@ public class MHS {
         return solutions;
     }
 
+    public List<Hypothesis> run(long timeoutMillis) {
+        long startTime = System.nanoTime();
+        long timeoutNanos = timeoutMillis * 1_000_000;
+
+        if (matrix == null || matrix.length == 0 || matrix[0].length == 0) {
+            throw new IllegalArgumentException("Instance must be a non-empty boolean matrix.");
+        }
+
+        int m = matrix[0].length;
+        int n = matrix.length;
+
+        Hypothesis emptyHypothesis = new Hypothesis(m, n);
+        this.current.addAll(generateChildrenEmptyHypothesis(emptyHypothesis));
+        DEPTH++;
+
+        while (!current.isEmpty()) {
+            if (System.nanoTime() - startTime > timeoutNanos) {
+                System.out.println("\nTimeout reached. Stopping the algorithm.");
+                break;
+            }
+            List<Hypothesis> next = new ArrayList<>();
+            for (int i = 0; i < current.size(); i++) {
+                if (System.nanoTime() - startTime > timeoutNanos) {
+                    System.out.println("\nTimeout reached inside loop. Stopping.");
+                    break;
+                }
+                Hypothesis h = current.get(i);
+                printStatusBar(i, DEPTH, startTime, timeoutNanos);
+
+                if (check(h)) {
+                    solutions.add(h);
+                    current.remove(i);
+                    i--;
+                } else if (h.mostSignificantBit() != 0) {
+                    Hypothesis h_sec = h.globalInitial();
+                    int size = current.size();
+                    boolean removed = current.removeIf(hyp -> isGreater(hyp, h_sec));
+                    if (removed) {
+                        int diff = size - current.size();
+                        i -= diff;
+                    }
+                    if (!current.getFirst().equals(h)) {
+                        List<Hypothesis> children = generateChildren(h);
+                        next = merge(next, children);
+                    }
+                }
+            }
+            this.current = next;
+            DEPTH++;
+            System.out.println("\nEnd of iteration. Next hypotheses: " + current.size());
+        }
+
+        System.out.println("\nAlgorithm completed. Solutions found: " + solutions.size());
+        this.restoreSolutions();
+        return solutions;
+    }
+
     private void printStatusBar(int i) {
         int progress = (int) (((i + 1) / (double) current.size()) * 100);
         System.out.print("\rProcessing: " + (i + 1) + "/" + current.size() +
@@ -149,7 +210,27 @@ public class MHS {
                 " - Solutions: " + solutions.size());
     }
 
-    public List<Hypothesis> generateChildrenEmHypothesis(Hypothesis h) {
+    private void printStatusBar(int i, int depth, long startTime, long timeoutNanos) {
+        int progress = (int) (((i + 1) / (double) current.size()) * 100);
+        long elapsedNanos = System.nanoTime() - startTime;
+        long remainingSeconds = Math.max((timeoutNanos - elapsedNanos) / 1_000_000_000, 0);
+
+        String progressBar = String.format("%-10s", ">".repeat(progress / 10)).replace(' ', ' ');
+
+        String output = String.format(
+                "\rProcess: %3d/%-3d [%s] %3d%% | Solutions: %4d | Depth: %3d | Time: %2ds",
+                i + 1,
+                current.size(),
+                progressBar,
+                progress,
+                solutions.size(),
+                depth,
+                remainingSeconds);
+
+        System.out.print(output);
+    }
+
+    public List<Hypothesis> generateChildrenEmptyHypothesis(Hypothesis h) {
         List<Hypothesis> children = new ArrayList<>();
         System.out.println("Generating children for empty hypothesis");
         for (int i = 0; i < h.getBin().length; i++) {
@@ -164,41 +245,24 @@ public class MHS {
 
     public List<Hypothesis> generateChildren(Hypothesis h) {
         List<Hypothesis> children = new ArrayList<>();
-        Iterator<Hypothesis> it = current.iterator();
-        Hypothesis h_p = it.next();
-
         for (int i = 0; i < h.mostSignificantBit(); i++) {
             boolean[] h_pr = h.getBin().clone();
             h_pr[i] = true;
             Hypothesis h_prime = new Hypothesis(h_pr);
 
-            setFields(h_prime);
-            propagate(h, h_prime);
+            List<Hypothesis> predecessors = h_prime.predecessors();
+            predecessors.remove(h);
+            int count = 0;
 
-            Hypothesis h_s_i = h.initial_(h_prime);
-
-            if (current.contains(h_s_i)) {
-                Hypothesis h_s_f = h.final_(h_prime);
-                int counter = 0;
-                while (!h_p.equals(h_s_i) && it.hasNext()) {
-                    h_p = it.next();
+            for (Hypothesis pred : predecessors) {
+                if (current.contains(pred)) {
+                    count++;
                 }
-                while (isLessEqual(h_p, h_s_i) && isGreaterEqual(h_p, h_s_f) && it.hasNext()) {
-
-                    if (distance(h_p, h_prime) == 1 && distance(h_p, h) == 2) {
-                        propagate(h_p, h_prime);
-                        counter++;
-                    }
-                    h_p = it.next();
-                }
-                if (counter == DEPTH) {
-                    children.add(h_prime);
-                }
-
-            } else {
-                if (it.hasNext()) {
-                    h_p = it.next();
-                }
+            }
+            if (count == DEPTH) {
+                setFields(h_prime);
+                propagate(h, h_prime);
+                children.add(h_prime);
             }
         }
         return children;
@@ -226,7 +290,7 @@ public class MHS {
         }
         for (int i = 0; i < bin1.length; i++) {
             if (bin1[i] != bin2[i]) {
-                return bin1[i]; // true > false
+                return bin1[i];
             }
         }
         return true;
@@ -294,16 +358,6 @@ public class MHS {
     public boolean isGreaterEqual(Hypothesis h1, Hypothesis h2) {
         boolean result = isGreaterEqual(h1.getBin(), h2.getBin());
         return result;
-    }
-
-    public int distance(Hypothesis h1, Hypothesis h2) {
-        int distance = 0;
-        for (int i = 0; i < h2.getBin().length; i++) {
-            if (h1.getBin()[i] != h2.getBin()[i]) {
-                distance++;
-            }
-        }
-        return distance;
     }
 
     public static boolean isLessEqual(boolean[] bin1, boolean[] bin2) {
