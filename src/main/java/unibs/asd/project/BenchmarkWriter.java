@@ -3,6 +3,8 @@ package unibs.asd.project;
 import java.util.List;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.DecimalFormat;
 
 public class BenchmarkWriter {
@@ -10,12 +12,16 @@ public class BenchmarkWriter {
     /**
      * 
      * @param mhs      instance of an already executed mhs solver
-     * @param filename name of the output file with .mhs extensions
+     * @param filename name of the input file with .matrix extension
+     * @param destDir  destination directory (in project root)
      */
-    public static void writeBenchmark(MHS mhs, String filename) {
+    public static void writeBenchmark(MHS mhs, String filename, String destDir) {
         if (!mhs.isExecuted()) {
             throw new IllegalArgumentException("L'algoritmo non è stato eseguito!");
         }
+
+        // Convert filename from .matrix to .mhs
+        String outputFilename = filename.replace(".matrix", ".mhs");
 
         List<Hypothesis> solutions = mhs.getSolutions();
         boolean[][] instance = mhs.getInstance();
@@ -25,13 +31,14 @@ public class BenchmarkWriter {
         double computationTime = mhs.getComputationTime(); // in nanoseconds
         boolean stopped = mhs.isStopped();
 
-        try (FileWriter writer = new FileWriter(filename)) {
+        // Create full path including destination directory
+        Path outputPath = Paths.get(destDir, outputFilename);
+
+        try (FileWriter writer = new FileWriter(outputPath.toString())) {
             // Write solutions
             writer.write("Soluzioni:\n");
             for (Hypothesis sol : solutions) {
-                StringBuilder sb = new StringBuilder();
-                sb.append(sol.toString());
-                writer.write(sb.toString() + "\n");
+                writer.write(sol.toString() + "\n");
             }
 
             // Write metadata
