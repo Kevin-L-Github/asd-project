@@ -3,14 +3,14 @@ package unibs.asd.project;
 import java.io.IOException;
 
 public class App {
+
+        public static final String DESTINATION = "results";
     public static void main(String[] args) {
         String benchmarkDir = "src/benchmarks1";
-        String outputFile = "benchmark_results.txt";
-        int maxFilesToProcess = 5; // Limite di file da processare
+        int maxFilesToProcess = 5;
 
         try {
-            Experiment.runBenchmarks(benchmarkDir, outputFile, maxFilesToProcess);
-            System.out.println("Processing completed. Results saved to " + outputFile);
+            Experiment.runBenchmarks(benchmarkDir,  DESTINATION, maxFilesToProcess);
         } catch (IOException e) {
             System.err.println("Error processing benchmark files: " + e.getMessage());
             e.printStackTrace();
