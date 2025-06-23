@@ -3,6 +3,13 @@
   "configurations": [
     {
       "type": "java",
+      "name": "BooleanApp",
+      "request": "launch",
+      "mainClass": "unibs.asd.project.BooleanApp",
+      "projectName": "asd-project"
+    },
+    {
+      "type": "java",
       "name": "BitSetApp",
       "request": "launch",
       "mainClass": "unibs.asd.bitset.BitSetApp",
