@@ -6,10 +6,11 @@ public class Playground {
 
     public static void main(String[] args) {
         boolean[][] benchmark = null;
-        benchmark = BenchmarkReader.readBenchmark("src\\benchmarks1\\" + BENCHMARK);
+        //benchmark = BenchmarkReader.readBenchmark("src\\benchmarks1\\" + BENCHMARK);
 
-        MHS mhs;
-        mhs = new MHS(benchmark);
+        benchmark = identityMatrix(16);
+        MHS_LL mhs;
+        mhs = new MHS_LL(benchmark);
         mhs.run(180_000);
         System.out.println(mhs.getSolutions());
     }
