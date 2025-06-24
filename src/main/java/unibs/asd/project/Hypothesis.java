@@ -14,6 +14,7 @@ public class Hypothesis {
 
     private final boolean[] bin; // Array immutabile che rappresenta lo stato binario
     private boolean[] vector;
+    private int cardinality = -1; // Cache per cardinalità
 
     /**
      * Costruttore che inizializza una nuova ipotesi della dimensione specificata.
@@ -47,7 +48,7 @@ public class Hypothesis {
     public int size() {
         return bin.length;
     }
-
+/* 
     public int numberOfSuccessors() {
         return bin.length - numberOfPredecessors();
     }
@@ -61,6 +62,21 @@ public class Hypothesis {
         }
         return count;
     }
+*/
+
+    public int numberOfPredecessors() {
+        if (cardinality == -1) cardinality = calculateCardinality();
+        return cardinality;
+    }
+
+    private int calculateCardinality() {
+        int count = 0;
+        for (boolean b : bin) if (b) count++;
+        return count;
+    }
+
+
+    
 
     public int mostSignificantBit() {
         for (int i = 0; i < bin.length; i++) {
