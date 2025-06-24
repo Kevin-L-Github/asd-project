@@ -76,7 +76,7 @@ public class Hypothesis {
     }
 
 
-    
+
 
     public int mostSignificantBit() {
         for (int i = 0; i < bin.length; i++) {
@@ -104,6 +104,7 @@ public class Hypothesis {
         }
 
         List<Hypothesis> list = new ArrayList<>();
+        /*
         for (int i = 0; i < msb; i++) {
             boolean[] h_prime = bin.clone();
             h_prime[i] = true;
@@ -114,6 +115,16 @@ public class Hypothesis {
                     list.add(new Hypothesis(h_sec));
                 }
             }
+        }
+        */
+        boolean[] base = bin.clone();
+        base[msb] = false; // Rimuovi MSB una volta sola
+
+        for (int i = 0; i < msb; i++) {
+            if (base[i]) continue; // Salta bit già attivi
+            boolean[] hSec = base.clone();
+            hSec[i] = true;
+            list.add(new Hypothesis(hSec));
         }
         return list;
     }
@@ -212,13 +223,11 @@ public class Hypothesis {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o)
-            return true; // Ottimizzazione per lo stesso oggetto
-        if (o == null || getClass() != o.getClass())
-            return false; // Controllo di tipo
+        if (this == o) return true; // Ottimizzazione per lo stesso oggetto
+        // if (o == null || getClass() != o.getClass())
+        if (!(o instanceof Hypothesis)) return false; // Controllo di tipo
 
         Hypothesis that = (Hypothesis) o;
-
         // Confronta gli array elemento per elemento
         return Arrays.equals(this.bin, that.bin);
     }
