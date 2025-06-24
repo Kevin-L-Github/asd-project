@@ -5,11 +5,13 @@ public class Playground {
     public static final String BENCHMARK = "74L85.000.matrix";
 
     public static void main(String[] args) {
-        boolean[][] benchmark = BenchmarkReader.readBenchmark("src\\benchmarks1\\" + BENCHMARK);
+        boolean[][] benchmark = null;
+        //benchmark = BenchmarkReader.readBenchmark("src\\benchmarks1\\" + BENCHMARK);
 
-        MHS mhs;
-        mhs = new MHS(benchmark);
-        mhs.run(18_000_000);
+        benchmark = identityMatrix(16);
+        MHS_LL mhs;
+        mhs = new MHS_LL(benchmark);
+        mhs.run(180_000);
         System.out.println(mhs.getSolutions());
     }
 
