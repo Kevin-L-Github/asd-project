@@ -3,6 +3,13 @@
   "configurations": [
     {
       "type": "java",
+      "name": "PlaygroundBitSet",
+      "request": "launch",
+      "mainClass": "unibs.asd.bitset.PlaygroundBitSet",
+      "projectName": "asd-project"
+    },
+    {
+      "type": "java",
       "name": "BitSetApp",
       "request": "launch",
       "mainClass": "unibs.asd.bitset.BitSetApp",
