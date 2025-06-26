@@ -8,7 +8,7 @@ public class Playground {
         boolean[][] benchmark = null;
         benchmark = BenchmarkReader.readBenchmark("src\\benchmarks1\\" + BENCHMARK);
 
-        benchmark = identityMatrix(18);
+        benchmark = identityMatrix(17);
         MHS mhs;
         mhs = new MHS(benchmark);
         mhs.run(180_000);

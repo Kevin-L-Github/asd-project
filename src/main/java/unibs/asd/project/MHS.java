@@ -109,7 +109,7 @@ public class MHS {
                     break;
                 }
                 Hypothesis h = current.get(i);
-                printStatusBar(i, DEPTH, startTime, timeoutNanos);
+                //printStatusBar(i, DEPTH, startTime, timeoutNanos);
 
                 if (check(h)) {
                     solutions.add(h);
@@ -131,7 +131,7 @@ public class MHS {
             }
             this.current = next;
             DEPTH++;
-            System.out.println("\nEnd of iteration. Next hypotheses: " + current.size());
+            //System.out.println("\nEnd of iteration. Next hypotheses: " + current.size());
         }
         this.computationTime = (System.nanoTime() - startTime) / 1000000000F;
         System.out.println("\nAlgorithm completed. Solutions found: " + solutions.size());
