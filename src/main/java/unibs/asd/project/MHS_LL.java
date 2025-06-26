@@ -134,7 +134,6 @@ public class MHS_LL {
                 } else if (h.mostSignificantBit() != 0) {
                     Hypothesis h_sec = h.globalInitial();
 
-                    // Rimozione efficiente con iteratore secondario
                     ListIterator<Hypothesis> innerIterator = current.listIterator();
                     int removedCount = 0;
                     while (innerIterator.hasNext()) {
@@ -146,8 +145,8 @@ public class MHS_LL {
                     }
 
                     if (removedCount > 0) {
-                        // Reset dell'iteratore principale dopo rimozioni
                         iterator = current.listIterator(iterator.nextIndex() - removedCount);
+                        processed -= removedCount-1;
                     }
 
                     if (!current.isEmpty() && !current.getFirst().equals(h)) {
