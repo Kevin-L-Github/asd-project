@@ -10,4 +10,4 @@
 # VSCode
 .vscode/
 
-target/
+/target
