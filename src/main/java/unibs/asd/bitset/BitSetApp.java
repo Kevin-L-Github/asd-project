@@ -9,6 +9,7 @@ public class BitSetApp {
     public static void main(String[] args) {
         boolean[][] benchmark = BenchmarkReader.readBenchmark("src\\benchmarks1\\"+BENCHMARK);
         FastMHS mhs;
+
         mhs = new FastMHS(benchmark);
         mhs.run(300_000);
         System.out.println(mhs.getSolutions());

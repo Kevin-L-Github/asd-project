@@ -4,41 +4,31 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.roaringbitmap.RoaringBitmap;
+
 public class PlaygroundBitSet {
 
     public static void main(String[] args) {
 
-        FastBitSet prova = new FastBitSet(8);
+        // Crea due bitmap
+        RoaringBitmap bitmap1 = new RoaringBitmap();
+        RoaringBitmap bitmap2 = new RoaringBitmap();
 
-        prova.set(4);
-        prova.set(5);
+        // Aggiunge alcuni valori
+        bitmap1.add(1);
+        bitmap1.add(2);
+        bitmap1.add(100);
 
-        System.out.println("prova : " + prova.toString());
+        bitmap2.add(2);
+        bitmap2.add(1000);
 
-        FastBitSet prova1 = new FastBitSet(8);
+        // Intersezione tra i due bitmap
+        RoaringBitmap intersection = RoaringBitmap.and(bitmap1, bitmap2);
 
-        prova1.set(4);
-        prova1.set(5);
-
-        System.out.println(prova.equals(prova1));
-
-        System.out.println("prova1: " + prova1.toString());
-
-        prova1.and(prova);
-
-        System.out.println("result: " + prova1);
-
-        List<FastBitSet> children = new ArrayList<>();
-
-        for (int i = 0; i < prova.size(); i++) {
-            FastBitSet c = prova.clone();
-            c.set(i);
-            children.add(c);
-        }
-        children.stream().forEach(c -> System.out.println(toBigInteger(c)));
-
-        System.out.println(children.getLast().previousSetBit(8));
-
+        // Stampa il contenuto
+        System.out.println("Bitmap 1: " + bitmap1);
+        System.out.println("Bitmap 2: " + bitmap2);
+        System.out.println("Intersezione: " + intersection);
     }
 
     public static BigInteger toBigInteger(FastBitSet bitSet) {
