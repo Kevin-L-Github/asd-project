@@ -78,7 +78,7 @@ public class RoaringBitmapAdapter {
     public int leastSignificantBit() {
         if (bitmap.isEmpty())
             return -1;
-        return bitmap.first(); // valore minimo settato
+        return bitmap.getReverseIntIterator().next(); // valore massimo settato
     }
 
     public BigInteger toNaturalValue() {
@@ -98,6 +98,10 @@ public class RoaringBitmapAdapter {
         } else {
             bitmap.remove(index);
         }
+    }
+
+    public boolean isFull(){
+        return this.bitmap.getCardinality() == size;
     }
 
 }

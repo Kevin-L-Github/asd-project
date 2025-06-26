@@ -1,15 +1,23 @@
 package unibs.asd.roaring;
 
+import unibs.asd.project.BenchmarkReader;
+
 public class PgRoaring {
+    public static final String BENCHMARK = "74L85.000.matrix";
+
     public static void main(String[] args) {
+        boolean[][] benchmark = BenchmarkReader.readBenchmark("src\\benchmarks1\\"+ BENCHMARK);
+        RoaringMHS mhs;
 
-        RoaringBitmapAdapter bitmap = new RoaringBitmapAdapter(10);
-        
-        bitmap.set(1, true);
-        bitmap.set(3, true);
-        bitmap.set(5, false); // non cambia nulla
-        System.out.println(bitmap);
-        System.out.println(bitmap.toNaturalValue()); // Output: 10 in decimale (2^1 + 2^3 = 2 + 8 = 10)
+        mhs = new RoaringMHS(benchmark);
+        mhs.run(300_000);
+    }
 
+    public static boolean[][] identityMatrix(int size) {
+        boolean[][] matrix = new boolean[size][size];
+        for (int i = 0; i < size; i++) {
+            matrix[i][i] = true;
+        }
+        return matrix;
     }
 }

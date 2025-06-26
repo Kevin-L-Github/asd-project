@@ -146,6 +146,7 @@ public class RoaringMHS {
             }
             this.current = next;
             DEPTH++;
+            
             System.out.println("\nEnd of iteration. Next hypotheses: " + current.size());
         }
         this.computationTime = (System.nanoTime() - startTime) / 1000000000F;
@@ -254,7 +255,7 @@ public class RoaringMHS {
     }
 
     private boolean check(RoaringHypothesis h) {
-        return h.getVector().cardinality() == matrix[0].length;
+        return h.getVector().isFull();
     }
 
     private void propagate(RoaringHypothesis h, RoaringHypothesis h_prime) {
