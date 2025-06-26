@@ -4,15 +4,13 @@ import unibs.asd.project.BenchmarkReader;
 
 public class BitSetApp {
 
-    public static final String BENCHMARK = "74L85.000.matrix";
+    public static final String BENCHMARK = "c5312.069.matrix";
 
     public static void main(String[] args) {
-
-        boolean[][] benchmark = null;
-        benchmark = BenchmarkReader.readBenchmark("src\\benchmarks1\\"+BENCHMARK);
+        boolean[][] benchmark = BenchmarkReader.readBenchmark("src\\benchmarks1\\"+BENCHMARK);
         FastMHS mhs;
-        mhs = new FastMHS(benchmark);
-        mhs.run(60_000);
+        mhs = new FastMHS(identityMatrix(18));
+        mhs.run(300_000);
         System.out.println(mhs.getSolutions());
     }
 

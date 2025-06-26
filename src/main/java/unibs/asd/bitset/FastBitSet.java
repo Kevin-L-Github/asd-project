@@ -3,8 +3,13 @@ package unibs.asd.bitset;
 import java.util.Arrays;
 
 public class FastBitSet {
+
+    private static final int ADDRESS_BITS_PER_WORD = 6; // 2^6 = 64
+    private static final int BITS_PER_WORD = 1 << ADDRESS_BITS_PER_WORD;
+    private static final int BIT_INDEX_MASK = BITS_PER_WORD - 1;
+
     private final int logicalSize;
-    long[] words; // Ogni long contiene 64 bit
+    private long[] words;
 
     public FastBitSet(int size) {
         if (size < 0) {
@@ -15,33 +20,27 @@ public class FastBitSet {
     }
 
     public void set(int bitIndex) {
-        int wordIndex = bitIndex / 64;
-        int bitPosition = bitIndex % 64;
-        words[wordIndex] |= (1L << bitPosition);
+        words[bitIndex >> ADDRESS_BITS_PER_WORD] |= (1L << (bitIndex & BIT_INDEX_MASK));
     }
 
     public void clear(int bitIndex) {
         if (bitIndex >= logicalSize)
             return;
-        int wordIndex = bitIndex / 64;
+        int wordIndex = bitIndex >> ADDRESS_BITS_PER_WORD;
         if (wordIndex >= words.length)
             return;
-        int bitPosition = bitIndex % 64;
-        words[wordIndex] &= ~(1L << bitPosition);
+        words[wordIndex] &= ~(1L << (bitIndex & BIT_INDEX_MASK));
     }
 
     public boolean get(int bitIndex) {
-        int wordIndex = bitIndex / 64;
+        int wordIndex = bitIndex >> ADDRESS_BITS_PER_WORD;
         if (wordIndex >= words.length)
             return false;
-        int bitPosition = bitIndex % 64;
-        return (words[wordIndex] & (1L << bitPosition)) != 0;
+        return (words[wordIndex] & (1L << (bitIndex & BIT_INDEX_MASK))) != 0;
     }
 
     public void flip(int bitIndex) {
-        int wordIndex = bitIndex / 64;
-        int bitPosition = bitIndex % 64;
-        words[wordIndex] ^= (1L << bitPosition);
+        words[bitIndex >> ADDRESS_BITS_PER_WORD] ^= (1L << (bitIndex & BIT_INDEX_MASK));
     }
 
     public int size() {
@@ -50,7 +49,15 @@ public class FastBitSet {
 
     public int cardinality() {
         int count = 0;
-        for (int i = 0; i < words.length; i++) {
+        int i = 0;
+        int len = words.length;
+        for (; i + 3 < len; i += 4) {
+            count += Long.bitCount(words[i]);
+            count += Long.bitCount(words[i + 1]);
+            count += Long.bitCount(words[i + 2]);
+            count += Long.bitCount(words[i + 3]);
+        }
+        for (; i < len; i++) {
             count += Long.bitCount(words[i]);
         }
         return count;
@@ -91,23 +98,20 @@ public class FastBitSet {
         if (fromIndex >= logicalSize)
             return -1;
 
-        int wordIndex = fromIndex / 64;
+        int wordIndex = fromIndex >> ADDRESS_BITS_PER_WORD;
         if (wordIndex >= words.length)
             return -1;
 
-        long word = words[wordIndex] >>> (fromIndex % 64);
-        if (word != 0) {
-            int result = fromIndex + Long.numberOfTrailingZeros(word);
-            return result < logicalSize ? result : -1;
-        }
-
-        for (int i = wordIndex + 1; i < words.length; i++) {
-            if (words[i] != 0) {
-                int result = i * 64 + Long.numberOfTrailingZeros(words[i]);
-                return result < logicalSize ? result : -1;
+        long word = words[wordIndex] & (~0L << fromIndex);
+        while (true) {
+            if (word != 0) {
+                int bitPos = (wordIndex << ADDRESS_BITS_PER_WORD) + Long.numberOfTrailingZeros(word);
+                return bitPos < logicalSize ? bitPos : -1;
             }
+            if (++wordIndex >= words.length)
+                return -1;
+            word = words[wordIndex];
         }
-        return -1;
     }
 
     public int previousSetBit(int fromIndex) {
@@ -150,13 +154,15 @@ public class FastBitSet {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
+        char[] bits = new char[logicalSize];
+        Arrays.fill(bits, '0');
 
         for (int i = 0; i < logicalSize; i++) {
-            sb.append(get(i) ? '1' : '0');
+            if (get(i)) {
+                bits[i] = '1';
+            }
         }
-
-        return sb.toString();
+        return new String(bits);
     }
 
     @Override
@@ -167,28 +173,31 @@ public class FastBitSet {
             return false;
 
         FastBitSet other = (FastBitSet) obj;
-
-        int thisLast = this.words.length - 1;
-        while (thisLast >= 0 && this.words[thisLast] == 0) {
-            thisLast--;
-        }
-
-        int otherLast = other.words.length - 1;
-        while (otherLast >= 0 && other.words[otherLast] == 0) {
-            otherLast--;
-        }
-
-        if (thisLast != otherLast)
+        if (this.logicalSize != other.logicalSize)
             return false;
 
-        for (int i = 0; i <= thisLast; i++) {
-            if (this.words[i] != other.words[i])
+        // Trova l'ultima parola non zero in entrambi
+        int max = Math.min(this.words.length, other.words.length);
+        for (int i = 0; i < max; i++) {
+            if (this.words[i] != other.words[i]) {
+                return false;
+            }
+        }
+
+        // Controlla le parole extra che potrebbero essere non zero
+        for (int i = max; i < this.words.length; i++) {
+            if (this.words[i] != 0)
+                return false;
+        }
+        for (int i = max; i < other.words.length; i++) {
+            if (other.words[i] != 0)
                 return false;
         }
 
         return true;
     }
 
+    @SuppressWarnings("unused")
     private void checkIndex(int bitIndex) {
         if (bitIndex < 0 || bitIndex >= logicalSize) {
             throw new IndexOutOfBoundsException("Bit index " + bitIndex +

@@ -38,7 +38,6 @@ public class FastMHS {
         if (matrix == null || matrix.length == 0 || matrix[0].length == 0) {
             throw new IllegalArgumentException("Instance must be a non-empty boolean matrix.");
         }
-
         int m = matrix[0].length;
         int n = matrix.length;
 
@@ -173,7 +172,6 @@ public class FastMHS {
         List<FastHypothesis> children = new ArrayList<>();
         FastBitSet hBin = h.getBin();
         int length = hBin.nextSetBit(0);
-
         for (int i = 0; i < length; i++) {
             FastBitSet hPrimeBin = (FastBitSet) hBin.clone(); // Clona invece di modificare direttamente
             hPrimeBin.set(i);
@@ -195,10 +193,14 @@ public class FastMHS {
         return children;
     }
 
+    /**
+     * Cerca l'ipotesi con una logica binary search complessità O(log(n))
+     * @param target
+     * @return
+     */
     private boolean binarySearchContains(FastHypothesis target) {
         int low = 0;
         int high = current.size() - 1;
-
         while (low <= high) {
             int mid = (low + high) / 2;
             FastHypothesis midValue = current.get(mid);
@@ -210,7 +212,6 @@ public class FastMHS {
                 high = mid - 1;
             }
         }
-
         return false;
     }
 
@@ -220,10 +221,16 @@ public class FastMHS {
         return toBigInteger(bs1).compareTo(toBigInteger(bs2)) > 0;
     }
 
+
+    /**
+     * Unisce i due insiemi e li riordina in base al loro valore naturale
+     * @param hypotheses
+     * @param toMerge
+     * @return
+     */
     private List<FastHypothesis> merge(Collection<FastHypothesis> hypotheses,
             Collection<FastHypothesis> toMerge) {
         return Stream.concat(hypotheses.stream(), toMerge.stream())
-                .distinct()
                 .sorted((h1, h2) -> isGreater(h1, h2) ? -1 : 1)
                 .collect(Collectors.toList());
     }
@@ -259,7 +266,6 @@ public class FastMHS {
                 bytes[byteIndex] |= (1 << bitInByte);
             }
         }
-
         return new BigInteger(1, bytes);
     }
 
@@ -302,7 +308,6 @@ public class FastMHS {
 
         int newCols = nonEmptyColumns.size();
         matrix = new boolean[rows][newCols];
-
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < newCols; j++) {
                 matrix[i][j] = instance[i][nonEmptyColumns.get(j)];
@@ -375,7 +380,7 @@ public class FastMHS {
         String progressBar = String.format("%-10s", ">".repeat(progress / 10)).replace(' ', ' ');
 
         String output = String.format(
-                "\rProcess: %3d/%-3d [%s] %3d%% | Solutions: %4d | Depth: %3d | Time: %2ds",
+                "\rProcess: %3d/%-3d [%s] %3d%%, Solutions: %4d, Depth: %3d, Time: %2ds",
                 i + 1,
                 current.size(),
                 progressBar,

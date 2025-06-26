@@ -2,15 +2,15 @@ package unibs.asd.project;
 
 public class Playground {
 
-    public static final String BENCHMARK = "74L85.000.matrix";
+    public static final String BENCHMARK = "c7552.325.matrix";
 
     public static void main(String[] args) {
         boolean[][] benchmark = null;
-        //benchmark = BenchmarkReader.readBenchmark("src\\benchmarks1\\" + BENCHMARK);
+        benchmark = BenchmarkReader.readBenchmark("src\\benchmarks1\\" + BENCHMARK);
 
-        benchmark = identityMatrix(16);
-        MHS_LL mhs;
-        mhs = new MHS_LL(benchmark);
+        benchmark = identityMatrix(18);
+        MHS mhs;
+        mhs = new MHS(benchmark);
         mhs.run(180_000);
         System.out.println(mhs.getSolutions());
     }
