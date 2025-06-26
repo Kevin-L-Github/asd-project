@@ -75,9 +75,6 @@ public class Hypothesis {
         return count;
     }
 
-
-
-
     public int mostSignificantBit() {
         for (int i = 0; i < bin.length; i++) {
             if (bin[i]) {
