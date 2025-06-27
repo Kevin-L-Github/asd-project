@@ -12,9 +12,7 @@ public class FastBitSet {
     private long[] words;
 
     public FastBitSet(int size) {
-        if (size < 0) {
-            throw new IllegalArgumentException("Size must be non-negative");
-        }
+
         this.logicalSize = size;
         this.words = new long[(size + 63) / 64];
     }
@@ -64,18 +62,14 @@ public class FastBitSet {
     }
 
     public void or(FastBitSet other) {
-        if (this.logicalSize != other.logicalSize) {
-            throw new IllegalArgumentException("Bitsets must have the same logical size");
-        }
+
         for (int i = 0; i < words.length && i < other.words.length; i++) {
             words[i] |= other.words[i];
         }
     }
 
     public void and(FastBitSet other) {
-        if (this.logicalSize != other.logicalSize) {
-            throw new IllegalArgumentException("Bitsets must have the same logical size");
-        }
+
         for (int i = 0; i < words.length; i++) {
             if (i < other.words.length) {
                 words[i] &= other.words[i];
@@ -95,8 +89,6 @@ public class FastBitSet {
     }
 
     public int nextSetBit(int fromIndex) {
-        if (fromIndex >= logicalSize)
-            return -1;
 
         int wordIndex = fromIndex >> ADDRESS_BITS_PER_WORD;
         if (wordIndex >= words.length)
@@ -115,10 +107,6 @@ public class FastBitSet {
     }
 
     public int previousSetBit(int fromIndex) {
-        if (fromIndex < 0)
-            return -1;
-        if (fromIndex >= logicalSize)
-            fromIndex = logicalSize - 1;
 
         int wordIndex = fromIndex / 64;
         long word = words[wordIndex] & ((1L << ((fromIndex % 64) + 1)) - 1);

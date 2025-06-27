@@ -6,14 +6,14 @@ import unibs.asd.roaring.RoaringMHS;
 
 public class BitSetApp {
 
-    public static final String BENCHMARK = "74L85.012.matrix";
+    public static final String BENCHMARK = "c7552.325.matrix";
 
     public static void main(String[] args) {
         boolean[][] benchmark = BenchmarkReader.readBenchmark("src\\benchmarks1\\"+BENCHMARK);
         FastMHS mhs;
 
-        mhs = new FastMHS(identityMatrix(10000));
-        mhs.run(60_000);
+        mhs = new FastMHS(identityMatrix(17));
+        mhs.run(420_000);
         System.out.println(mhs.getSolutions());
     }
 

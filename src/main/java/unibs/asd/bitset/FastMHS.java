@@ -37,67 +37,6 @@ public class FastMHS {
         this.cleanMatrix();
     }
 
-    public List<FastHypothesis> run() {
-        if (matrix == null || matrix.length == 0 || matrix[0].length == 0) {
-            throw new IllegalArgumentException("Instance must be a non-empty boolean matrix.");
-        }
-        int m = matrix[0].length;
-        int n = matrix.length;
-
-        FastHypothesis emptyHypothesis = new FastHypothesis(m, n);
-        List<FastHypothesis> initialChildren = generateChildrenEmptyHypothesis(emptyHypothesis);
-        this.current.addAll(initialChildren);
-        this.bucket.addAll(initialChildren.stream().map(FastHypothesis::getBin).collect(Collectors.toList()));
-        DEPTH++;
-
-        int iteration = 0;
-        while (!current.isEmpty()) {
-            iteration++;
-            System.out.println("\n--- Iteration " + iteration + " ---");
-            System.out.println("Current hypotheses count: " + current.size());
-            List<FastHypothesis> next = new ArrayList<>();
-            HashSet<FastBitSet> nextBucket = new HashSet<>();
-
-            for (int i = 0; i < current.size(); i++) {
-                FastHypothesis h = current.get(i);
-
-                if (check(h)) {
-                    solutions.add(h);
-                    current.remove(i);
-                    bucket.remove(h.getBin());
-                    i--;
-                } else if (h.mostSignificantBit() != -1 && h.mostSignificantBit() != 0) {
-                    FastHypothesis h_sec = h.globalInitial();
-                    int size = current.size();
-
-                    Iterator<FastHypothesis> it = current.iterator();
-                    while (it.hasNext()) {
-                        FastHypothesis hyp = it.next();
-                        if (isGreater(hyp, h_sec)) {
-                            it.remove();
-                            bucket.remove(hyp.getBin());
-                        }
-                    }
-
-                    i -= (size - current.size());
-
-                    if (!current.isEmpty() && !current.get(0).equals(h)) {
-                        List<FastHypothesis> children = generateChildren(h);
-                        next = merge(next, children);
-                        children.forEach(child -> nextBucket.add(child.getBin()));
-                    }
-                }
-            }
-            this.current = next;
-            this.bucket = nextBucket;
-            DEPTH++;
-            System.out.println("\nEnd of iteration. Next hypotheses: " + current.size());
-        }
-        System.out.println("\nAlgorithm completed. Solutions found: " + solutions.size());
-        this.restoreSolutions();
-        return solutions;
-    }
-
     public List<FastHypothesis> run(long timeoutMillis) {
         long startTime = System.nanoTime();
         long timeoutNanos = timeoutMillis * 1_000_000;
@@ -385,5 +324,66 @@ public class FastMHS {
                 remainingSeconds);
 
         System.out.print(output);
+    }
+
+    public List<FastHypothesis> run() {
+        if (matrix == null || matrix.length == 0 || matrix[0].length == 0) {
+            throw new IllegalArgumentException("Instance must be a non-empty boolean matrix.");
+        }
+        int m = matrix[0].length;
+        int n = matrix.length;
+
+        FastHypothesis emptyHypothesis = new FastHypothesis(m, n);
+        List<FastHypothesis> initialChildren = generateChildrenEmptyHypothesis(emptyHypothesis);
+        this.current.addAll(initialChildren);
+        this.bucket.addAll(initialChildren.stream().map(FastHypothesis::getBin).collect(Collectors.toList()));
+        DEPTH++;
+
+        int iteration = 0;
+        while (!current.isEmpty()) {
+            iteration++;
+            System.out.println("\n--- Iteration " + iteration + " ---");
+            System.out.println("Current hypotheses count: " + current.size());
+            List<FastHypothesis> next = new ArrayList<>();
+            HashSet<FastBitSet> nextBucket = new HashSet<>();
+
+            for (int i = 0; i < current.size(); i++) {
+                FastHypothesis h = current.get(i);
+
+                if (check(h)) {
+                    solutions.add(h);
+                    current.remove(i);
+                    bucket.remove(h.getBin());
+                    i--;
+                } else if (h.mostSignificantBit() != -1 && h.mostSignificantBit() != 0) {
+                    FastHypothesis h_sec = h.globalInitial();
+                    int size = current.size();
+
+                    Iterator<FastHypothesis> it = current.iterator();
+                    while (it.hasNext()) {
+                        FastHypothesis hyp = it.next();
+                        if (isGreater(hyp, h_sec)) {
+                            it.remove();
+                            bucket.remove(hyp.getBin());
+                        }
+                    }
+
+                    i -= (size - current.size());
+
+                    if (!current.isEmpty() && !current.get(0).equals(h)) {
+                        List<FastHypothesis> children = generateChildren(h);
+                        next = merge(next, children);
+                        children.forEach(child -> nextBucket.add(child.getBin()));
+                    }
+                }
+            }
+            this.current = next;
+            this.bucket = nextBucket;
+            DEPTH++;
+            System.out.println("\nEnd of iteration. Next hypotheses: " + current.size());
+        }
+        System.out.println("\nAlgorithm completed. Solutions found: " + solutions.size());
+        this.restoreSolutions();
+        return solutions;
     }
 }
