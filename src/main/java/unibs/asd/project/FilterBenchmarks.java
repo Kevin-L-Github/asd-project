@@ -11,7 +11,7 @@ import unibs.asd.bitset.FastMHS;
 
 public class FilterBenchmarks {
 
-    private static String SOLVED_FILENAME = "solved_benchmark0.txt";
+    private static String SOLVED_FILENAME = "solved_benchmarks.txt";
     private static int TIMEOUT_MS = 1500; // 2 secondi per benchmark
 
     public static void runBenchmarks(String benchmarkDir, String destDir) throws IOException {
