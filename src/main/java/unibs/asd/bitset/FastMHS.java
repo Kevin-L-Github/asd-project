@@ -3,6 +3,7 @@ package unibs.asd.bitset;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -12,6 +13,7 @@ public class FastMHS {
 
     private List<FastHypothesis> current;
     private List<FastHypothesis> solutions;
+    private HashSet<FastBitSet> bucket;
     private boolean[][] instance = null;
     private boolean[][] matrix;
     private List<Integer> nonEmptyColumns;
@@ -25,6 +27,7 @@ public class FastMHS {
     public FastMHS(boolean[][] instance) {
         this.current = new ArrayList<>();
         this.solutions = new ArrayList<>();
+        this.bucket = new HashSet<>();
         this.instance = instance;
         this.DEPTH = 0;
         this.computationTime = 0;
@@ -42,7 +45,9 @@ public class FastMHS {
         int n = matrix.length;
 
         FastHypothesis emptyHypothesis = new FastHypothesis(m, n);
-        this.current.addAll(generateChildrenEmptyHypothesis(emptyHypothesis));
+        List<FastHypothesis> initialChildren = generateChildrenEmptyHypothesis(emptyHypothesis);
+        this.current.addAll(initialChildren);
+        this.bucket.addAll(initialChildren.stream().map(FastHypothesis::getBin).collect(Collectors.toList()));
         DEPTH++;
 
         int iteration = 0;
@@ -51,6 +56,7 @@ public class FastMHS {
             System.out.println("\n--- Iteration " + iteration + " ---");
             System.out.println("Current hypotheses count: " + current.size());
             List<FastHypothesis> next = new ArrayList<>();
+            HashSet<FastBitSet> nextBucket = new HashSet<>();
 
             for (int i = 0; i < current.size(); i++) {
                 FastHypothesis h = current.get(i);
@@ -58,21 +64,32 @@ public class FastMHS {
                 if (check(h)) {
                     solutions.add(h);
                     current.remove(i);
+                    bucket.remove(h.getBin());
                     i--;
                 } else if (h.mostSignificantBit() != -1 && h.mostSignificantBit() != 0) {
                     FastHypothesis h_sec = h.globalInitial();
                     int size = current.size();
-                    current.removeIf(hyp -> isGreater(hyp, h_sec));
-                    int diff = size - current.size();
-                    i -= diff;
+
+                    Iterator<FastHypothesis> it = current.iterator();
+                    while (it.hasNext()) {
+                        FastHypothesis hyp = it.next();
+                        if (isGreater(hyp, h_sec)) {
+                            it.remove();
+                            bucket.remove(hyp.getBin());
+                        }
+                    }
+
+                    i -= (size - current.size());
 
                     if (!current.isEmpty() && !current.get(0).equals(h)) {
                         List<FastHypothesis> children = generateChildren(h);
                         next = merge(next, children);
+                        children.forEach(child -> nextBucket.add(child.getBin()));
                     }
                 }
             }
             this.current = next;
+            this.bucket = nextBucket;
             DEPTH++;
             System.out.println("\nEnd of iteration. Next hypotheses: " + current.size());
         }
@@ -93,7 +110,9 @@ public class FastMHS {
         int n = matrix.length;
 
         FastHypothesis emptyHypothesis = new FastHypothesis(m, n);
-        this.current.addAll(generateChildrenEmptyHypothesis(emptyHypothesis));
+        List<FastHypothesis> initialChildren = generateChildrenEmptyHypothesis(emptyHypothesis);
+        this.current.addAll(initialChildren);
+        this.bucket.addAll(initialChildren.stream().map(FastHypothesis::getBin).collect(Collectors.toList()));
         DEPTH++;
 
         while (!current.isEmpty()) {
@@ -103,6 +122,7 @@ public class FastMHS {
                 break;
             }
             List<FastHypothesis> next = new ArrayList<>();
+            HashSet<FastBitSet> nextBucket = new HashSet<>();
 
             for (int i = 0; i < current.size(); i++) {
                 if (System.nanoTime() - startTime > timeoutNanos) {
@@ -118,6 +138,7 @@ public class FastMHS {
                 if (check(h)) {
                     solutions.add(h);
                     current.remove(i);
+                    bucket.remove(h.getBin());
                     i--;
                 } else if (h.mostSignificantBit() != 0) {
                     FastHypothesis global_initial = h.globalInitial();
@@ -126,9 +147,11 @@ public class FastMHS {
                     Iterator<FastHypothesis> it = current.iterator();
                     boolean searching = true;
                     while (it.hasNext() && searching) {
-                        if (isGreater(it.next(), global_initial)) {
+                        FastHypothesis hyp = it.next();
+                        if (isGreater(hyp, global_initial)) {
                             r++;
                             it.remove();
+                            bucket.remove(hyp.getBin());
                         } else {
                             searching = false;
                         }
@@ -136,15 +159,16 @@ public class FastMHS {
                     if (r > 0) {
                         i -= r;
                     }
-                    if (!current.isEmpty() && !current.getFirst().equals(h)) {
+                    if (!current.isEmpty() && !current.get(0).equals(h)) {
                         List<FastHypothesis> children = generateChildren(h);
                         next = merge(next, children);
+                        children.forEach(child -> nextBucket.add(child.getBin()));
                     }
                 }
             }
             this.current = next;
+            this.bucket = nextBucket;
             DEPTH++;
-            //System.out.println("\nEnd of iteration. Next hypotheses: " + current.size());
         }
         this.computationTime = (System.nanoTime() - startTime) / 1000000000F;
         System.out.println("\nAlgorithm completed. Solutions found: " + solutions.size());
@@ -173,13 +197,13 @@ public class FastMHS {
         FastBitSet hBin = h.getBin();
         int length = hBin.nextSetBit(0);
         for (int i = 0; i < length; i++) {
-            FastBitSet hPrimeBin = (FastBitSet) hBin.clone(); // Clona invece di modificare direttamente
+            FastBitSet hPrimeBin = (FastBitSet) hBin.clone();
             hPrimeBin.set(i);
             FastHypothesis hPrime = new FastHypothesis(hPrimeBin);
             List<FastHypothesis> predecessors = hPrime.predecessors();
             boolean isValid = true;
             for (FastHypothesis p : predecessors) {
-                if (!binarySearchContains(p)) {
+                if (!bucket.contains(p.getBin())) {
                     isValid = false;
                     break;
                 }
@@ -193,41 +217,12 @@ public class FastMHS {
         return children;
     }
 
-    /**
-     * Cerca l'ipotesi con una logica binary search complessità O(log(n))
-     * @param target
-     * @return
-     */
-    private boolean binarySearchContains(FastHypothesis target) {
-        int low = 0;
-        int high = current.size() - 1;
-        while (low <= high) {
-            int mid = (low + high) / 2;
-            FastHypothesis midValue = current.get(mid);
-            if (midValue.equals(target)) {
-                return true;
-            } else if (toBigInteger(midValue.getBin()).compareTo(toBigInteger(target.getBin())) > 0) {
-                low = mid + 1;
-            } else {
-                high = mid - 1;
-            }
-        }
-        return false;
-    }
-
     private boolean isGreater(FastHypothesis h1, FastHypothesis h2) {
         FastBitSet bs1 = h1.getBin();
         FastBitSet bs2 = h2.getBin();
         return toBigInteger(bs1).compareTo(toBigInteger(bs2)) > 0;
     }
 
-
-    /**
-     * Unisce i due insiemi e li riordina in base al loro valore naturale
-     * @param hypotheses
-     * @param toMerge
-     * @return
-     */
     private List<FastHypothesis> merge(Collection<FastHypothesis> hypotheses,
             Collection<FastHypothesis> toMerge) {
         return Stream.concat(hypotheses.stream(), toMerge.stream())
@@ -262,7 +257,7 @@ public class FastMHS {
         for (int i = 0; i < logicalSize; i++) {
             if (bitSet.get(i)) {
                 int byteIndex = i / 8;
-                int bitInByte = 7 - (i % 8); // Inverti la posizione del bit nel byte
+                int bitInByte = 7 - (i % 8);
                 bytes[byteIndex] |= (1 << bitInByte);
             }
         }
