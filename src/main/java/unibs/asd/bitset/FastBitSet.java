@@ -2,43 +2,34 @@ package unibs.asd.bitset;
 
 import java.util.Arrays;
 
-public class FastBitSet {
+public final class FastBitSet {
+    
+    final int logicalSize;
+    final long[] words;
 
-    private static final int ADDRESS_BITS_PER_WORD = 6; // 2^6 = 64
-    private static final int BITS_PER_WORD = 1 << ADDRESS_BITS_PER_WORD;
-    private static final int BIT_INDEX_MASK = BITS_PER_WORD - 1;
-
-    private final int logicalSize;
-    private long[] words;
+    public long[] words() {
+        return words;
+    }
 
     public FastBitSet(int size) {
-
         this.logicalSize = size;
-        this.words = new long[(size + 63) / 64];
+        this.words = new long[(size + 63) >>> 6];
     }
 
     public void set(int bitIndex) {
-        words[bitIndex >> ADDRESS_BITS_PER_WORD] |= (1L << (bitIndex & BIT_INDEX_MASK));
+        words[bitIndex >>> 6] |= (1L << bitIndex);
     }
 
     public void clear(int bitIndex) {
-        if (bitIndex >= logicalSize)
-            return;
-        int wordIndex = bitIndex >> ADDRESS_BITS_PER_WORD;
-        if (wordIndex >= words.length)
-            return;
-        words[wordIndex] &= ~(1L << (bitIndex & BIT_INDEX_MASK));
-    }
-
-    public boolean get(int bitIndex) {
-        int wordIndex = bitIndex >> ADDRESS_BITS_PER_WORD;
-        if (wordIndex >= words.length)
-            return false;
-        return (words[wordIndex] & (1L << (bitIndex & BIT_INDEX_MASK))) != 0;
+        words[bitIndex >>> 6] &= ~(1L << bitIndex);
     }
 
     public void flip(int bitIndex) {
-        words[bitIndex >> ADDRESS_BITS_PER_WORD] ^= (1L << (bitIndex & BIT_INDEX_MASK));
+        words[bitIndex >>> 6] ^= (1L << bitIndex);
+    }
+
+    public boolean get(int bitIndex) {
+        return (words[bitIndex >>> 6] & (1L << bitIndex)) != 0;
     }
 
     public int size() {
@@ -47,88 +38,91 @@ public class FastBitSet {
 
     public int cardinality() {
         int count = 0;
+        final int len = words.length;
+        
         int i = 0;
-        int len = words.length;
-        for (; i + 3 < len; i += 4) {
-            count += Long.bitCount(words[i]);
-            count += Long.bitCount(words[i + 1]);
-            count += Long.bitCount(words[i + 2]);
-            count += Long.bitCount(words[i + 3]);
+        for (; i + 7 < len; i += 8) {
+            count += Long.bitCount(words[i]) 
+                   + Long.bitCount(words[i+1])
+                   + Long.bitCount(words[i+2])
+                   + Long.bitCount(words[i+3])
+                   + Long.bitCount(words[i+4])
+                   + Long.bitCount(words[i+5])
+                   + Long.bitCount(words[i+6])
+                   + Long.bitCount(words[i+7]);
         }
+        
         for (; i < len; i++) {
             count += Long.bitCount(words[i]);
         }
+        
         return count;
     }
 
     public void or(FastBitSet other) {
-
-        for (int i = 0; i < words.length && i < other.words.length; i++) {
-            words[i] |= other.words[i];
+        final long[] otherWords = other.words;
+        for (int i = 0; i < words.length; i++) {
+            words[i] |= otherWords[i];
         }
     }
 
     public void and(FastBitSet other) {
-
+        final long[] otherWords = other.words;
         for (int i = 0; i < words.length; i++) {
-            if (i < other.words.length) {
-                words[i] &= other.words[i];
-            } else {
-                words[i] = 0;
-            }
+            words[i] &= otherWords[i];
+        }
+    }
+
+    public void andNot(FastBitSet other) {
+        final long[] otherWords = other.words;
+        for (int i = 0; i < words.length; i++) {
+            words[i] &= ~otherWords[i];
         }
     }
 
     public void xor(FastBitSet other) {
-        if (this.logicalSize != other.logicalSize) {
-            throw new IllegalArgumentException("Bitsets must have the same logical size");
-        }
-        for (int i = 0; i < words.length && i < other.words.length; i++) {
-            words[i] ^= other.words[i];
+        final long[] otherWords = other.words;
+        for (int i = 0; i < words.length; i++) {
+            words[i] ^= otherWords[i];
         }
     }
 
     public int nextSetBit(int fromIndex) {
-
-        int wordIndex = fromIndex >> ADDRESS_BITS_PER_WORD;
-        if (wordIndex >= words.length)
-            return -1;
-
+        int wordIndex = fromIndex >>> 6;
+        if (wordIndex >= words.length) return -1;
+        
         long word = words[wordIndex] & (~0L << fromIndex);
+        
         while (true) {
             if (word != 0) {
-                int bitPos = (wordIndex << ADDRESS_BITS_PER_WORD) + Long.numberOfTrailingZeros(word);
-                return bitPos < logicalSize ? bitPos : -1;
+                return (wordIndex << 6) + Long.numberOfTrailingZeros(word);
             }
-            if (++wordIndex >= words.length)
-                return -1;
+            if (++wordIndex == words.length) return -1;
             word = words[wordIndex];
         }
     }
 
     public int previousSetBit(int fromIndex) {
-
-        int wordIndex = fromIndex / 64;
-        long word = words[wordIndex] & ((1L << ((fromIndex % 64) + 1)) - 1);
-        if (word != 0) {
-            int bitPos = 63 - Long.numberOfLeadingZeros(word);
-            return (wordIndex * 64) + bitPos;
-        }
-
-        for (int i = wordIndex - 1; i >= 0; i--) {
-            if (words[i] != 0) {
-                int bitPos = 63 - Long.numberOfLeadingZeros(words[i]);
-                return (i * 64) + bitPos;
+        if (fromIndex < 0) return -1;
+        
+        int wordIndex = fromIndex >>> 6;
+        if (wordIndex >= words.length) wordIndex = words.length - 1;
+        
+        long word = words[wordIndex] & (~0L >>> (63 - fromIndex));
+        
+        while (true) {
+            if (word != 0) {
+                return (wordIndex << 6) + 63 - Long.numberOfLeadingZeros(word);
             }
+            if (wordIndex-- == 0) return -1;
+            word = words[wordIndex];
         }
-
-        return -1;
     }
 
     @Override
     public FastBitSet clone() {
         FastBitSet copy = new FastBitSet(this.logicalSize);
-        copy.words = Arrays.copyOf(this.words, this.words.length);
+        System.arraycopy(this.words, 0, copy.words, 0, this.words.length);
         return copy;
     }
 
@@ -142,9 +136,9 @@ public class FastBitSet {
 
     @Override
     public String toString() {
-        char[] bits = new char[logicalSize];
+        final char[] bits = new char[logicalSize];
         Arrays.fill(bits, '0');
-
+        
         for (int i = 0; i < logicalSize; i++) {
             if (get(i)) {
                 bits[i] = '1';
@@ -155,51 +149,32 @@ public class FastBitSet {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (!(obj instanceof FastBitSet))
-            return false;
+        if (this == obj) return true;
+        if (!(obj instanceof FastBitSet)) return false;
 
         FastBitSet other = (FastBitSet) obj;
-        if (this.logicalSize != other.logicalSize)
-            return false;
+        if (this.logicalSize != other.logicalSize) return false;
 
-        int max = Math.min(this.words.length, other.words.length);
-        for (int i = 0; i < max; i++) {
-            if (this.words[i] != other.words[i]) {
-                return false;
-            }
+        int i = words.length;
+        while (i-- > 0) {
+            if (words[i] != other.words[i]) return false;
         }
-
-        for (int i = max; i < this.words.length; i++) {
-            if (this.words[i] != 0)
-                return false;
-        }
-        for (int i = max; i < other.words.length; i++) {
-            if (other.words[i] != 0)
-                return false;
-        }
-
+        
         return true;
     }
 
     @Override
     public int hashCode() {
-        final int prime = 31;
         int result = 1;
-
-        int len = words.length;
-        while (len > 0 && words[len - 1] == 0) {
-            len--;
+        int i = words.length;
+        
+        while (i > 0 && words[i-1] == 0) i--;
+        
+        for (int j = 0; j < i; j++) {
+            long word = words[j];
+            result = 31 * result + (int)(word ^ (word >>> 32));
         }
-
-        for (int i = 0; i < len; i++) {
-            long word = words[i];
-            result = prime * result + (int) (word ^ (word >>> 32));
-        }
-
-        result = prime * result + logicalSize;
-
-        return result;
+        
+        return 31 * result + logicalSize;
     }
 }

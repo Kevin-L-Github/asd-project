@@ -10,25 +10,14 @@ public class PlaygroundBitSet {
 
     public static void main(String[] args) {
 
-        // Crea due bitmap
-        RoaringBitmap bitmap1 = new RoaringBitmap();
-        RoaringBitmap bitmap2 = new RoaringBitmap();
+        FastBitSet a = new FastBitSet(64);
+        a.set(63); // Imposta il bit più significativo
+        FastBitSet b = new FastBitSet(64);
+        b.set(63); // Imposta il secondo bit più significativo
 
-        // Aggiunge alcuni valori
-        bitmap1.add(1);
-        bitmap1.add(2);
-        bitmap1.add(100);
-
-        bitmap2.add(2);
-        bitmap2.add(1000);
-
-        // Intersezione tra i due bitmap
-        RoaringBitmap intersection = RoaringBitmap.and(bitmap1, bitmap2);
-
-        // Stampa il contenuto
-        System.out.println("Bitmap 1: " + bitmap1);
-        System.out.println("Bitmap 2: " + bitmap2);
-        System.out.println("Intersezione: " + intersection);
+        boolean result = FastMHS.isGreater(a, b);
+        System.out.println(result);
+        // result sarà true perché a > b
     }
 
     public static BigInteger toBigInteger(FastBitSet bitSet) {

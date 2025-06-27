@@ -87,7 +87,7 @@ public class FastMHS {
                     boolean searching = true;
                     while (it.hasNext() && searching) {
                         FastHypothesis hyp = it.next();
-                        if (isGreater(hyp, global_initial)) {
+                        if (isGreater(hyp.getBin(), global_initial.getBin())) {
                             r++;
                             it.remove();
                             bucket.remove(hyp.getBin());
@@ -156,16 +156,29 @@ public class FastMHS {
         return children;
     }
 
-    private boolean isGreater(FastHypothesis h1, FastHypothesis h2) {
-        FastBitSet bs1 = h1.getBin();
-        FastBitSet bs2 = h2.getBin();
-        return toBigInteger(bs1).compareTo(toBigInteger(bs2)) > 0;
+    public static boolean isGreater(FastBitSet a, FastBitSet b) {
+        if (a.logicalSize != b.logicalSize) {
+            throw new IllegalArgumentException("FastBitSets must have the same logical size");
+        }
+
+        // Partiamo dal bit più significativo (indice 0)
+        for (int i = 0; i < a.logicalSize; i++) {
+            boolean aBit = a.get(i);
+            boolean bBit = b.get(i);
+
+            if (aBit != bBit) {
+                return aBit; // Se aBit è true e bBit è false, allora a > b
+            }
+        }
+
+        // Tutti i bit sono uguali → a non è strettamente maggiore
+        return false;
     }
 
     private List<FastHypothesis> merge(Collection<FastHypothesis> hypotheses,
             Collection<FastHypothesis> toMerge) {
         return Stream.concat(hypotheses.stream(), toMerge.stream())
-                .sorted((h1, h2) -> isGreater(h1, h2) ? -1 : 1)
+                .sorted((h1, h2) -> isGreater(h1.getBin(), h2.getBin()) ? -1 : 1)
                 .collect(Collectors.toList());
     }
 
@@ -185,22 +198,6 @@ public class FastMHS {
             }
         }
         h.setVector(vector);
-    }
-
-    public static BigInteger toBigInteger(FastBitSet bitSet) {
-        int logicalSize = bitSet.size();
-
-        int byteLength = (logicalSize + 7) / 8;
-        byte[] bytes = new byte[byteLength];
-
-        for (int i = 0; i < logicalSize; i++) {
-            if (bitSet.get(i)) {
-                int byteIndex = i / 8;
-                int bitInByte = 7 - (i % 8);
-                bytes[byteIndex] |= (1 << bitInByte);
-            }
-        }
-        return new BigInteger(1, bytes);
     }
 
     private boolean check(FastHypothesis h) {
@@ -362,7 +359,7 @@ public class FastMHS {
                     Iterator<FastHypothesis> it = current.iterator();
                     while (it.hasNext()) {
                         FastHypothesis hyp = it.next();
-                        if (isGreater(hyp, h_sec)) {
+                        if (isGreater(hyp.getBin(), h_sec.getBin())) {
                             it.remove();
                             bucket.remove(hyp.getBin());
                         }

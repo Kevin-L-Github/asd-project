@@ -9,19 +9,14 @@ public class FastHypothesis {
     private FastBitSet vector;
 
     public FastHypothesis(int size, int n) {
-        if (size < 0) {
-            throw new IllegalArgumentException("La dimensione non può essere negativa");
-        }
         this.bin = new FastBitSet(size);
         this.vector = new FastBitSet(n);
     }
 
     public FastHypothesis(FastBitSet h) {
-        if (h == null) {
-            throw new IllegalArgumentException("Il BitSet non può essere null");
-        }
-        this.bin = (FastBitSet) h.clone();
+        this.bin = new FastBitSet(h.size());
         this.vector = new FastBitSet(h.size());
+        System.arraycopy(h.words(), 0, this.bin.words(), 0, h.words().length);
     }
 
     public FastBitSet getBin() {
@@ -81,15 +76,21 @@ public class FastHypothesis {
     }
 
     public List<FastHypothesis> predecessors() {
-        List<FastHypothesis> predecessors = new ArrayList<>();
-        int limit = this.bin.size();
-        for (int i = 0; i < limit; i++) {
-            if (bin.get(i)) {
-                FastBitSet h_s = (FastBitSet) bin.clone();
-                h_s.flip(i);
-                predecessors.add(new FastHypothesis(h_s));
+        List<FastHypothesis> list = new ArrayList<>();
+        int size = bin.size();
+        FastBitSet tmp = new FastBitSet(size);
+        long[] tmpWords = tmp.words();
+        for (int i = 0; i < bin.words().length; i++) {
+            tmpWords[i] = bin.words()[i];
+        }
+
+        for (int i = 0; i < size; i++) {
+            if ((bin.words()[i >> 6] & (1L << i)) != 0) {
+                tmp.words()[i >> 6] ^= (1L << i);
+                list.add(new FastHypothesis(tmp));
+                tmp.words()[i >> 6] ^= (1L << i); // ripristino
             }
         }
-        return predecessors;
+        return list;
     }
 }
