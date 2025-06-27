@@ -1,17 +1,19 @@
 package unibs.asd.bitset;
 
 import unibs.asd.project.BenchmarkReader;
+import unibs.asd.project.MHS;
+import unibs.asd.roaring.RoaringMHS;
 
 public class BitSetApp {
 
-    public static final String BENCHMARK = "c7552.325.matrix";
+    public static final String BENCHMARK = "74283.007.matrix";
 
     public static void main(String[] args) {
         boolean[][] benchmark = BenchmarkReader.readBenchmark("src\\benchmarks1\\"+BENCHMARK);
         FastMHS mhs;
 
-        mhs = new FastMHS(benchmark);
-        mhs.run(300_000);
+        mhs = new FastMHS(identityMatrix(16));
+        mhs.run(60_000);
         System.out.println(mhs.getSolutions());
     }
 
