@@ -62,7 +62,7 @@ public class FastMHS {
                 } else if (h.mostSignificantBit() != -1 && h.mostSignificantBit() != 0) {
                     FastHypothesis h_sec = h.globalInitial();
                     int size = current.size();
-                    current.removeIf(hyp -> isGreater(hyp, h_sec));
+                    current.removeIf(hyp -> isGreater(hyp.getBin(), h_sec.getBin()));
                     int diff = size - current.size();
                     i -= diff;
 
@@ -126,7 +126,7 @@ public class FastMHS {
                     Iterator<FastHypothesis> it = current.iterator();
                     boolean searching = true;
                     while (it.hasNext() && searching) {
-                        if (isGreater(it.next(), global_initial)) {
+                        if (isGreater(it.next().getBin(), global_initial.getBin())) {
                             r++;
                             it.remove();
                         } else {
@@ -144,7 +144,7 @@ public class FastMHS {
             }
             this.current = next;
             DEPTH++;
-            //System.out.println("\nEnd of iteration. Next hypotheses: " + current.size());
+            // System.out.println("\nEnd of iteration. Next hypotheses: " + current.size());
         }
         this.computationTime = (System.nanoTime() - startTime) / 1000000000F;
         System.out.println("\nAlgorithm completed. Solutions found: " + solutions.size());
@@ -195,6 +195,7 @@ public class FastMHS {
 
     /**
      * Cerca l'ipotesi con una logica binary search complessità O(log(n))
+     * 
      * @param target
      * @return
      */
@@ -215,15 +216,28 @@ public class FastMHS {
         return false;
     }
 
-    private boolean isGreater(FastHypothesis h1, FastHypothesis h2) {
-        FastBitSet bs1 = h1.getBin();
-        FastBitSet bs2 = h2.getBin();
-        return toBigInteger(bs1).compareTo(toBigInteger(bs2)) > 0;
-    }
+    public static boolean isGreater(FastBitSet a, FastBitSet b) {
+        if (a.logicalSize != b.logicalSize) {
+            throw new IllegalArgumentException("FastBitSets must have the same logical size");
+        }
 
+        // Partiamo dal bit più significativo (indice 0)
+        for (int i = 0; i < a.logicalSize; i++) {
+            boolean aBit = a.get(i);
+            boolean bBit = b.get(i);
+
+            if (aBit != bBit) {
+                return aBit; // Se aBit è true e bBit è false, allora a > b
+            }
+        }
+
+        // Tutti i bit sono uguali → a non è strettamente maggiore
+        return false;
+    }
 
     /**
      * Unisce i due insiemi e li riordina in base al loro valore naturale
+     * 
      * @param hypotheses
      * @param toMerge
      * @return
@@ -231,7 +245,7 @@ public class FastMHS {
     private List<FastHypothesis> merge(Collection<FastHypothesis> hypotheses,
             Collection<FastHypothesis> toMerge) {
         return Stream.concat(hypotheses.stream(), toMerge.stream())
-                .sorted((h1, h2) -> isGreater(h1, h2) ? -1 : 1)
+                .sorted((h1, h2) -> isGreater(h1.getBin(), h2.getBin()) ? -1 : 1)
                 .collect(Collectors.toList());
     }
 

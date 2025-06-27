@@ -8,8 +8,8 @@ public class FastBitSet {
     private static final int BITS_PER_WORD = 1 << ADDRESS_BITS_PER_WORD;
     private static final int BIT_INDEX_MASK = BITS_PER_WORD - 1;
 
-    private final int logicalSize;
-    private long[] words;
+    final int logicalSize;
+    long[] words;
 
     public FastBitSet(int size) {
         if (size < 0) {

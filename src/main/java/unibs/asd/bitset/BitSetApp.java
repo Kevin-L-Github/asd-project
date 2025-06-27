@@ -12,7 +12,7 @@ public class BitSetApp {
         boolean[][] benchmark = BenchmarkReader.readBenchmark("src\\benchmarks1\\"+BENCHMARK);
         FastMHS mhs;
 
-        mhs = new FastMHS(identityMatrix(10000));
+        mhs = new FastMHS(identityMatrix(16));
         mhs.run(60_000);
         System.out.println(mhs.getSolutions());
     }
