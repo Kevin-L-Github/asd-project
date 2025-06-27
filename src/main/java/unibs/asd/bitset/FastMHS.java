@@ -1,6 +1,5 @@
 package unibs.asd.bitset;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
