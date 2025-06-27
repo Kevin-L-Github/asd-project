@@ -28,6 +28,10 @@ public class FastHypothesis {
         return (FastBitSet) bin.clone();
     }
 
+    public FastBitSet getVector() {
+        return (FastBitSet) vector.clone();
+    }
+
     public int length() {
         return bin.size();
     }
@@ -42,12 +46,10 @@ public class FastHypothesis {
     }
 
     public FastHypothesis globalInitial() {
-
         FastBitSet globalInitialBin = (FastBitSet) bin.clone();
         globalInitialBin.flip(0);
         int lsb = bin.previousSetBit(bin.size());
         globalInitialBin.flip(lsb);
-
         return new FastHypothesis(globalInitialBin);
     }
 
@@ -55,11 +57,7 @@ public class FastHypothesis {
         return bin.cardinality();
     }
 
-    public FastBitSet getVector() {
-        return (FastBitSet) vector.clone();
-    }
-
-    public boolean isSolution(){
+    public boolean isSolution() {
         return this.vector.cardinality() == this.vector.size();
     }
 

@@ -176,7 +176,6 @@ public class FastBitSet {
         if (this.logicalSize != other.logicalSize)
             return false;
 
-        // Trova l'ultima parola non zero in entrambi
         int max = Math.min(this.words.length, other.words.length);
         for (int i = 0; i < max; i++) {
             if (this.words[i] != other.words[i]) {
@@ -184,7 +183,6 @@ public class FastBitSet {
             }
         }
 
-        // Controlla le parole extra che potrebbero essere non zero
         for (int i = max; i < this.words.length; i++) {
             if (this.words[i] != 0)
                 return false;
@@ -197,11 +195,23 @@ public class FastBitSet {
         return true;
     }
 
-    @SuppressWarnings("unused")
-    private void checkIndex(int bitIndex) {
-        if (bitIndex < 0 || bitIndex >= logicalSize) {
-            throw new IndexOutOfBoundsException("Bit index " + bitIndex +
-                    " out of bounds for size " + logicalSize);
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+
+        int len = words.length;
+        while (len > 0 && words[len - 1] == 0) {
+            len--;
         }
+
+        for (int i = 0; i < len; i++) {
+            long word = words[i];
+            result = prime * result + (int) (word ^ (word >>> 32));
+        }
+
+        result = prime * result + logicalSize;
+
+        return result;
     }
 }
