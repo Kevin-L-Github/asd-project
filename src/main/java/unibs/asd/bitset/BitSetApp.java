@@ -7,7 +7,7 @@ import unibs.asd.roaring.RoaringMHS;
 @SuppressWarnings("unused")
 public class BitSetApp {
 
-    public static final String BENCHMARK = "74182.042.matrix";
+    public static final String BENCHMARK = "74283.007.matrix";
 
     public static void main(String[] args) {
         boolean[][] benchmark = BenchmarkReader.readBenchmark("src\\benchmarks1\\"+BENCHMARK);

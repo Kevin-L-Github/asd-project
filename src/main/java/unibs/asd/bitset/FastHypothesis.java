@@ -43,7 +43,7 @@ public class FastHypothesis {
     public FastHypothesis globalInitial() {
         FastBitSet globalInitialBin = (FastBitSet) bin.clone();
         globalInitialBin.flip(0);
-        int lsb = bin.previousSetBit(bin.size());
+        int lsb = bin.previousSetBit(bin.size()-1);
         globalInitialBin.flip(lsb);
         return new FastHypothesis(globalInitialBin);
     }
