@@ -170,6 +170,15 @@ public class FastMHS {
         return false;
     }
 
+
+
+    /**
+     * Unisce i due insiemi e li riordina in base al loro valore naturale
+     * 
+     * @param hypotheses
+     * @param toMerge
+     * @return
+     */
     private List<FastHypothesis> merge(Collection<FastHypothesis> hypotheses,
             Collection<FastHypothesis> toMerge) {
         return Stream.concat(hypotheses.stream(), toMerge.stream())
