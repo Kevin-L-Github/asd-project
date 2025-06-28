@@ -159,18 +159,14 @@ public class FastMHS {
         if (a.logicalSize != b.logicalSize) {
             throw new IllegalArgumentException("FastBitSets must have the same logical size");
         }
-
-        // Partiamo dal bit più significativo (indice 0)
         for (int i = 0; i < a.logicalSize; i++) {
             boolean aBit = a.get(i);
             boolean bBit = b.get(i);
 
             if (aBit != bBit) {
-                return aBit; // Se aBit è true e bBit è false, allora a > b
+                return aBit;
             }
         }
-
-        // Tutti i bit sono uguali → a non è strettamente maggiore
         return false;
     }
 

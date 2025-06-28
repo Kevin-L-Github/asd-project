@@ -1,10 +1,6 @@
 package unibs.asd.bitset;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.roaringbitmap.RoaringBitmap;
 
 public class PlaygroundBitSet {
 

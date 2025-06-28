@@ -10,10 +10,10 @@ public class BitSetApp {
     public static final String BENCHMARK = "74283.007.matrix";
 
     public static void main(String[] args) {
-        boolean[][] benchmark = BenchmarkReader.readBenchmark("src\\benchmarks1\\"+BENCHMARK);
+        boolean[][] benchmark;// = BenchmarkReader.readBenchmark("src\\benchmarks1\\"+BENCHMARK);
         FastMHS mhs;
-        mhs = new FastMHS(identityMatrix(17));
-        mhs.run(480_000);
+        mhs = new FastMHS(identityMatrix(16));
+        mhs.run(60_000);
         System.out.println(mhs.getSolutions());
     }
 
