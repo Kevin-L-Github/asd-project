@@ -5,15 +5,18 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import unibs.asd.bitset.BitSetAdapter;
 import unibs.asd.bitset.BitSetHypothesis;
 import unibs.asd.bools.BoolsHypothesis;
 import unibs.asd.enums.BitSetType;
 import unibs.asd.factories.BitSetHypothesisFactory;
 import unibs.asd.factories.BoolsHypothesisFactory;
+import unibs.asd.factories.FastBitSetHypothesisFactory;
+import unibs.asd.factories.RoaringHypothesisFactory;
+import unibs.asd.fastbitset.FastHypothesis;
 import unibs.asd.interfaces.BitVector;
 import unibs.asd.interfaces.Hypothesis;
 import unibs.asd.interfaces.HypothesisFactory;
+import unibs.asd.roaringbitmap.RoaringHypothesis;
 
 public class BaseMHS {
 
@@ -43,12 +46,13 @@ public class BaseMHS {
     }
 
     public List<Hypothesis> run(BitSetType type, long timeoutMillis) {
-        long startTime = System.nanoTime();
-        long timeoutNanos = timeoutMillis * 1_000_000;
 
         if (matrix == null || matrix.length == 0 || matrix[0].length == 0) {
             throw new IllegalArgumentException("Instance must be a non-empty boolean matrix.");
         }
+
+        long startTime = System.nanoTime();
+        long timeoutNanos = timeoutMillis * 1_000_000;
 
         int m = matrix[0].length;
         int n = matrix.length;
@@ -56,16 +60,28 @@ public class BaseMHS {
         Hypothesis emptyHypothesis;
 
         switch (type) {
-            case BITSET:
+            case BitSetType.BITSET:
                 this.factory = new BitSetHypothesisFactory();
                 emptyHypothesis = new BitSetHypothesis(m, n);
+                System.out.println("Bitset implementation");
                 break;
-            case BOOLS_ARRAY:
+            case BitSetType.BOOLS_ARRAY:
                 this.factory = new BoolsHypothesisFactory();
                 emptyHypothesis = new BoolsHypothesis(m, n);
-            default:
-                emptyHypothesis = new BitSetHypothesis(m, n);
+                System.out.println("Boolean Arrays implementation");
                 break;
+            case BitSetType.ROARING_BIT_MAP:
+                this.factory = new RoaringHypothesisFactory();
+                emptyHypothesis = new RoaringHypothesis(m, n);
+                System.out.println("RoaringBitMap implementation");
+                break;
+            case BitSetType.FAST_BITSET:
+                this.factory = new FastBitSetHypothesisFactory();
+                emptyHypothesis = new FastHypothesis(m, n);
+                System.out.println("FastBitSet implementation");
+                break;
+            default:
+                throw new IllegalArgumentException("Scegliere un tipo di implementazione");
         }
 
         this.current.addAll(generateChildrenEmptyHypothesis(emptyHypothesis));
@@ -117,13 +133,11 @@ public class BaseMHS {
                     }
                 }
             }
+            System.out.println("\nEnd of iteration");
             this.current = next;
             DEPTH++;
-            System.out.println("\nEnd of iteration. Next hypotheses: " + current.size());
         }
         this.computationTime = (System.nanoTime() - startTime) / 1000000000F;
-        System.out.println("\nAlgorithm completed. Solutions found: " + solutions.size());
-        System.out.println("Computation Time: " + this.computationTime);
         this.restoreSolutions();
         this.executed = true;
         return solutions;
@@ -134,7 +148,7 @@ public class BaseMHS {
         System.out.println("Generating children for empty hypothesis");
 
         for (int i = 0; i < parent.length(); i++) {
-            Hypothesis child = parent.clone();
+            Hypothesis child = factory.create(parent.getBin());
             child.set(i);
             setFields(child);
             children.add(child);
@@ -153,7 +167,6 @@ public class BaseMHS {
             boolean isValid = true;
             for (Hypothesis predecessor : predecessors) {
                 if (!binarySearchContains(predecessor)) {
-                    System.out.println("Non presente");
                     isValid = false;
                     break;
                 }
@@ -199,14 +212,13 @@ public class BaseMHS {
     private List<Hypothesis> merge(Collection<Hypothesis> hypotheses,
             Collection<Hypothesis> toMerge) {
         return Stream.concat(hypotheses.stream(), toMerge.stream())
-                .distinct()
                 .sorted((h1, h2) -> isGreater(h1, h2) ? -1 : 1)
                 .collect(Collectors.toList());
     }
 
     private void setFields(Hypothesis h) {
         int n = matrix.length;
-        BitVector vector = new BitSetAdapter(n);
+        BitVector vector = this.factory.createVector(n);
         if (h.cardinality() > 0) {
             BitVector bin = h.getBin();
             for (int i = 0; i < matrix[0].length; i++) {
@@ -226,10 +238,8 @@ public class BaseMHS {
         return h.getVector().cardinality() == matrix[0].length;
     }
 
-    private void propagate(Hypothesis h, Hypothesis h_prime) {
-        BitSetAdapter newVector = (BitSetAdapter) h.getVector().clone();
-        newVector.or((BitSetAdapter) h_prime.getVector());
-        h_prime.setVector(newVector);
+    private void propagate(Hypothesis parent, Hypothesis child) {
+        child.or(parent);
     }
 
     private void cleanMatrix() {
@@ -276,12 +286,12 @@ public class BaseMHS {
         int originalSize = instance[0].length;
         for (Hypothesis h : solutions) {
             BitVector compressed = h.getBin();
-            BitSetAdapter full = new BitSetAdapter(originalSize);
+            Hypothesis full = factory.create(originalSize);
             for (int i = 0; i < nonEmptyColumns.size(); i++) {
                 int originalIndex = nonEmptyColumns.get(i);
                 full.set(originalIndex, compressed.get(i));
             }
-            restored.add(factory.create(full));
+            restored.add(full);
         }
         this.solutions = restored;
     }

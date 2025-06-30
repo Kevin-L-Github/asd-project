@@ -1,5 +1,5 @@
 package unibs.asd.interfaces;
 
-public interface MHS {
+public interface iMHS {
     
 }

@@ -1,25 +1,26 @@
 package unibs.asd.factories;
 
-import unibs.asd.bitset.BitSetAdapter;
-import unibs.asd.bitset.BitSetHypothesis;
+import unibs.asd.fastbitset.FastBitSet;
+import unibs.asd.fastbitset.FastHypothesis;
 import unibs.asd.interfaces.BitVector;
 import unibs.asd.interfaces.Hypothesis;
 import unibs.asd.interfaces.HypothesisFactory;
 
-public class BitSetHypothesisFactory implements HypothesisFactory {
+public class FastBitSetHypothesisFactory implements HypothesisFactory {
+
     @Override
     public Hypothesis create(Object bin) {
-        return new BitSetHypothesis((BitSetAdapter) bin);
+        return new FastHypothesis((FastBitSet) bin);
     }
 
     @Override
     public Hypothesis create(int size) {
-        return new BitSetHypothesis(size, 0);
+        return new FastHypothesis(size, 1);
     }
 
-    @Override
+        @Override
     public BitVector createVector(int size) {
-        return new BitSetAdapter(size);
+        return new FastBitSet(size);
     }
 
 }

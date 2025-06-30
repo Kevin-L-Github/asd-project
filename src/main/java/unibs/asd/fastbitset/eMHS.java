@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.PriorityQueue;
 import java.util.stream.Collectors;
 
+import unibs.asd.interfaces.Hypothesis;
+
 public class eMHS {
 
     private PriorityQueue<FastHypothesis> current;
@@ -128,9 +130,9 @@ public class eMHS {
             FastBitSet childBin = (FastBitSet) bin.clone();
             childBin.set(i);
             FastHypothesis child = new FastHypothesis(childBin);
-            List<FastHypothesis> predecessors = child.predecessors();
+            List<Hypothesis> predecessors = child.predecessors();
             boolean isValid = true;
-            for (FastHypothesis p : predecessors) {
+            for (Hypothesis p : predecessors) {
                 if (!bucket.contains(p.getBin())) {
                     isValid = false;
                     break;

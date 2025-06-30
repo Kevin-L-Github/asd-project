@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import unibs.asd.interfaces.Hypothesis;
+
 public class FastMHS {
 
     private List<FastHypothesis> current;
@@ -139,9 +141,9 @@ public class FastMHS {
             FastBitSet hPrimeBin = (FastBitSet) hBin.clone();
             hPrimeBin.set(i);
             FastHypothesis hPrime = new FastHypothesis(hPrimeBin);
-            List<FastHypothesis> predecessors = hPrime.predecessors();
+            List<Hypothesis> predecessors = hPrime.predecessors();
             boolean isValid = true;
-            for (FastHypothesis p : predecessors) {
+            for (Hypothesis p : predecessors) {
                 if (!bucket.contains(p.getBin())) {
                     isValid = false;
                     break;

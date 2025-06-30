@@ -1,8 +1,11 @@
 package unibs.asd.fastbitset;
 
+import java.math.BigInteger;
 import java.util.Arrays;
 
-public final class FastBitSet {
+import unibs.asd.interfaces.BitVector;
+
+public final class FastBitSet implements BitVector{
 
     final int logicalSize;
     final long[] words;
@@ -185,5 +188,35 @@ public final class FastBitSet {
         }
 
         return 31 * result + logicalSize;
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return this.cardinality() == 0;
+    }
+
+    @Override
+    public boolean isFull() {
+        return this.cardinality() == this.logicalSize;
+    }
+
+    @Override
+    public int leastSignificantBit() {
+        return this.previousSetBit(this.logicalSize-1);
+    }
+
+    @Override
+    public int mostSignificantBit() {
+        return this.nextSetBit(0);
+    }
+
+    @Override
+    public BigInteger toNaturalValue() {
+        throw new UnsupportedOperationException("Unimplemented method 'toNaturalValue'");
+    }
+
+    @Override
+    public String toBinaryString() {
+        return toString();
     }
 }

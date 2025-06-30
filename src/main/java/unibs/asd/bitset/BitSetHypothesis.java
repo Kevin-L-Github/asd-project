@@ -110,12 +110,17 @@ public class BitSetHypothesis implements Hypothesis {
 
     @Override
     public void or(Hypothesis other) {
-        this.bin.or((BitSetAdapter) other.getBin());
+        this.vector.or((BitSetAdapter) other.getVector());
     }
 
     @Override
     public void setVector(BitVector vector) {
         this.vector = (BitSetAdapter) vector;
+    }
+
+    @Override
+    public void set(int i, boolean value) {
+        this.bin.set(i, value);
     }
 
 }

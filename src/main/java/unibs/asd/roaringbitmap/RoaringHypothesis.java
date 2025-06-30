@@ -3,7 +3,10 @@ package unibs.asd.roaringbitmap;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RoaringHypothesis {
+import unibs.asd.interfaces.BitVector;
+import unibs.asd.interfaces.Hypothesis;
+
+public class RoaringHypothesis implements Hypothesis {
 
     private RoaringBitmapAdapter bin;
     private RoaringBitmapAdapter vector;
@@ -78,8 +81,8 @@ public class RoaringHypothesis {
         return bin.hashCode();
     }
 
-    public List<RoaringHypothesis> predecessors() {
-        List<RoaringHypothesis> predecessors = new ArrayList<>();
+    public List<Hypothesis> predecessors() {
+        List<Hypothesis> predecessors = new ArrayList<>();
         int limit = this.bin.size();
         for (int i = 0; i < limit; i++) {
             if (bin.get(i)) {
@@ -89,6 +92,36 @@ public class RoaringHypothesis {
             }
         }
         return predecessors;
+    }
+
+    @Override
+    public void setVector(BitVector vector) {
+        this.vector = (RoaringBitmapAdapter) vector.clone();
+    }
+
+    @Override
+    public void set(int i) {
+        this.bin.set(i);
+    }
+
+    @Override
+    public void set(int i, boolean value) {
+        this.bin.set(i, value);
+    }
+
+    @Override
+    public void flip(int i) {
+        this.bin.flip(i);
+    }
+
+    @Override
+    public void or(Hypothesis other) {
+        this.vector.or((RoaringBitmapAdapter) other.getVector());
+    }
+
+    @Override
+    public RoaringHypothesis clone() {
+        return new RoaringHypothesis(this.bin);
     }
 
 }

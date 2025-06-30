@@ -4,13 +4,14 @@ import java.math.BigInteger;
 
 import org.roaringbitmap.RoaringBitmap;
 
-public class RoaringBitmapAdapter {
+import unibs.asd.interfaces.BitVector;
+
+public class RoaringBitmapAdapter implements BitVector {
+
     private final RoaringBitmap bitmap;
     private final int size;
 
     public RoaringBitmapAdapter(int size) {
-        if (size <= 0)
-            throw new IllegalArgumentException("Size must be > 0");
         this.size = size;
         this.bitmap = new RoaringBitmap();
     }
@@ -100,8 +101,13 @@ public class RoaringBitmapAdapter {
         }
     }
 
-    public boolean isFull(){
+    public boolean isFull() {
         return this.bitmap.getCardinality() == size;
+    }
+
+    @Override
+    public String toBinaryString() {
+        return this.toString();
     }
 
 }

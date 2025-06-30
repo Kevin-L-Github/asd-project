@@ -233,12 +233,15 @@ public class BoolsHypothesis implements Hypothesis {
     public void or(Hypothesis other) {
         BooleanSet that = (BooleanSet) other.getVector();
         BooleanSet result = new BooleanSet(that.size());
-
         for (int i = 0; i < vector.size(); i++) {
             result.set(i, vector.get(i) || that.get(i));
         }
-
         this.vector = result;
+    }
+
+    @Override
+    public void set(int i, boolean value) {
+        this.bin.set(i, value);
     }
 
 }

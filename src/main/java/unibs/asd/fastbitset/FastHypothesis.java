@@ -3,7 +3,10 @@ package unibs.asd.fastbitset;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FastHypothesis {
+import unibs.asd.interfaces.BitVector;
+import unibs.asd.interfaces.Hypothesis;
+
+public class FastHypothesis implements Hypothesis {
 
     private FastBitSet bin;
     private FastBitSet vector;
@@ -43,7 +46,7 @@ public class FastHypothesis {
     public FastHypothesis globalInitial() {
         FastBitSet globalInitialBin = (FastBitSet) bin.clone();
         globalInitialBin.flip(0);
-        int lsb = bin.previousSetBit(bin.size()-1);
+        int lsb = bin.previousSetBit(bin.size() - 1);
         globalInitialBin.flip(lsb);
         return new FastHypothesis(globalInitialBin);
     }
@@ -75,8 +78,8 @@ public class FastHypothesis {
         return this.bin.hashCode();
     }
 
-    public List<FastHypothesis> predecessors() {
-        List<FastHypothesis> list = new ArrayList<>();
+    public List<Hypothesis> predecessors() {
+        List<Hypothesis> list = new ArrayList<>();
         int size = bin.size();
         FastBitSet tmp = new FastBitSet(size);
         long[] tmpWords = tmp.words();
@@ -92,5 +95,42 @@ public class FastHypothesis {
             }
         }
         return list;
+    }
+
+    @Override
+    public void setVector(BitVector vector) {
+        this.vector = (FastBitSet) vector;
+    }
+
+    @Override
+    public void set(int i) {
+        this.bin.set(i);
+    }
+
+    @Override
+    public void set(int i, boolean value) {
+        this.bin.set(i, value);
+    }
+
+    @Override
+    public void flip(int i) {
+        this.flip(i);
+    }
+
+    @Override
+    public void or(Hypothesis other) {
+        this.vector.or((FastBitSet) other.getVector());
+    }
+
+    @Override
+    public FastHypothesis clone() {
+        try {
+            FastHypothesis copy = (FastHypothesis) super.clone();
+            copy.bin = (FastBitSet) this.bin.clone();
+            copy.vector = (FastBitSet) this.vector.clone();
+            return copy;
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError(); // Should never happen since we implement Cloneable
+        }
     }
 }
