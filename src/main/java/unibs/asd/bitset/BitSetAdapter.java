@@ -2,16 +2,13 @@ package unibs.asd.bitset;
 
 import java.math.BigInteger;
 import java.util.BitSet;
+
 import unibs.asd.interfaces.BitVector;
 
 public class BitSetAdapter implements BitVector {
 
     private final BitSet bitSet;
     private final int size;
-
-    public BitSet getBitVector() {
-        return bitSet;
-    }
 
     public BitSetAdapter(int size) {
         if (size <= 0) {
@@ -65,32 +62,24 @@ public class BitSetAdapter implements BitVector {
         bitSet.flip(index);
     }
 
-    public void clear() {
-        bitSet.clear();
-    }
-
     public int cardinality() {
         return bitSet.get(0, size).cardinality();
     }
 
-    public void and(BitVector another) {
-        bitSet.and(another.getBitVector());
+    public void and(BitSetAdapter other) {
+        bitSet.and(other.bitSet);
     }
 
-    public void or(BitVector another) {
-        bitSet.or(another.getBitVector());
+    public void or(BitSetAdapter other) {
+        bitSet.or(other.bitSet);
+    }
+
+    public void xor(BitSetAdapter other) {
+        bitSet.xor(other.bitSet);
     }
 
     public int leastSignificantBit() {
         return bitSet.previousSetBit(size);
-    }
-
-    public void xor(BitVector another) {
-        bitSet.xor(another.getBitVector());
-    }
-
-    public void andNot(BitVector another) {
-        bitSet.andNot(another.getBitVector());
     }
 
     public boolean isEmpty() {

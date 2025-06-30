@@ -6,10 +6,10 @@ import java.util.List;
 import unibs.asd.interfaces.BitVector;
 import unibs.asd.interfaces.Hypothesis;
 
-public class BitSetHypothesis implements Hypothesis<BitVector> {
+public class BitSetHypothesis implements Hypothesis {
 
-    private BitVector bin;
-    private BitVector vector;
+    private BitSetAdapter bin;
+    private BitSetAdapter vector;
 
     public BitSetHypothesis(int size, int n) {
         if (size < 0) {
@@ -19,16 +19,16 @@ public class BitSetHypothesis implements Hypothesis<BitVector> {
         this.vector = new BitSetAdapter(n);
     }
 
-    public BitSetHypothesis(BitVector vector) {
+    public BitSetHypothesis(BitSetAdapter vector) {
         if (vector == null) {
             throw new IllegalArgumentException("Il BitSet non può essere null");
         }
-        this.bin = (BitVector) vector.clone();
+        this.bin = (BitSetAdapter) vector.clone();
         this.vector = new BitSetAdapter(vector.size());
     }
 
-    public BitVector getBin() {
-        return (BitVector) bin.clone();
+    public BitSetAdapter getBin() {
+        return (BitSetAdapter) bin.clone();
     }
 
     public int length() {
@@ -45,7 +45,7 @@ public class BitSetHypothesis implements Hypothesis<BitVector> {
     }
 
     public BitSetHypothesis globalInitial() {
-        BitVector globalInitialBin = (BitVector) bin.clone();
+        BitSetAdapter globalInitialBin = (BitSetAdapter) bin.clone();
         globalInitialBin.flip(0);
         int lsb = bin.leastSignificantBit();
         globalInitialBin.flip(lsb);
@@ -56,12 +56,8 @@ public class BitSetHypothesis implements Hypothesis<BitVector> {
         return bin.cardinality();
     }
 
-    public BitVector getVector() {
-        return (BitVector) vector.clone();
-    }
-
-    public void setVector(BitVector vector) {
-        this.vector = (BitVector) vector.clone();
+    public BitSetAdapter getVector() {
+        return (BitSetAdapter) vector.clone();
     }
 
     @Override
@@ -79,16 +75,47 @@ public class BitSetHypothesis implements Hypothesis<BitVector> {
         return bin.hashCode();
     }
 
-    public List<Hypothesis<BitVector>> predecessors() {
-        List<Hypothesis<BitVector>> predecessors = new ArrayList<>();
+    public List<Hypothesis> predecessors() {
+        List<Hypothesis> predecessors = new ArrayList<>();
         int limit = this.bin.size();
         for (int i = 0; i < limit; i++) {
             if (bin.get(i)) {
-                BitVector h_s = (BitVector) bin.clone();
+                BitSetAdapter h_s = (BitSetAdapter) bin.clone();
                 h_s.flip(i);
                 predecessors.add(new BitSetHypothesis(h_s));
             }
         }
         return predecessors;
     }
+
+    public void set(int i) {
+        this.bin.set(i);
+    }
+
+    public void flip(int i) {
+        this.bin.flip(i);
+    }
+
+    @Override
+    public Hypothesis clone() {
+        try {
+            BitSetHypothesis cloned = (BitSetHypothesis) super.clone();
+            cloned.bin = (BitSetAdapter) this.bin.clone();
+            cloned.vector = (BitSetAdapter) this.vector.clone();
+            return cloned;
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError(); // non dovrebbe succedere
+        }
+    }
+
+    @Override
+    public void or(Hypothesis other) {
+        this.bin.or((BitSetAdapter) other.getBin());
+    }
+
+    @Override
+    public void setVector(BitVector vector) {
+        this.vector = (BitSetAdapter) vector;
+    }
+
 }

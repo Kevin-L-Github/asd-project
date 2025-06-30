@@ -72,20 +72,20 @@ public class RoaringBitmapAdapter {
     public int mostSignificantBit() {
         if (bitmap.isEmpty())
             return -1;
-        return bitmap.getIntIterator().next(); // ritorna il valore massimo settato
+        return bitmap.getIntIterator().next();
     }
 
     public int leastSignificantBit() {
         if (bitmap.isEmpty())
             return -1;
-        return bitmap.getReverseIntIterator().next(); // valore massimo settato
+        return bitmap.getReverseIntIterator().next();
     }
 
     public BigInteger toNaturalValue() {
         BigInteger value = BigInteger.ZERO;
         for (int i = 0; i < size; i++) {
             if (bitmap.contains(i)) {
-                int power = size - 1 - i; // inverte la posizione: bit 0 è MSB
+                int power = size - 1 - i;
                 value = value.setBit(power);
             }
         }

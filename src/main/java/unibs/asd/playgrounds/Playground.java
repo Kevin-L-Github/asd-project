@@ -13,6 +13,7 @@ public class Playground {
     public static final long TIMEOUT = 60;
 
     public static void main(String[] args) {
+        @SuppressWarnings("unused")
         boolean[][] benchmark = BenchmarkReader.readBenchmark("src\\mybenchmarks\\" + BENCHMARK);
         BaseMHS mhs;
         mhs = new BaseMHS(IdentityMatrix.create(6));
