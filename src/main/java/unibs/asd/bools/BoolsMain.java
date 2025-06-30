@@ -1,11 +1,11 @@
-package unibs.asd.project;
+package unibs.asd.bools;
 
 import java.io.IOException;
 import java.nio.file.Paths;
 
 import unibs.asd.benchmarks.FilterBenchmarks;
 
-public class BooleanApp {
+public class BoolsMain {
 
     public static final String DESTINATION = "results0";
 

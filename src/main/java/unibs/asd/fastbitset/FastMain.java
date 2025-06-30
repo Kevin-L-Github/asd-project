@@ -7,6 +7,7 @@ public class FastMain {
     public static final String BENCHMARK = "74181.020.matrix";
 
     public static void main(String[] args) {
+        @SuppressWarnings("unused")
         boolean[][] benchmark = BenchmarkReader.readBenchmark("src\\mybenchmarks\\" + BENCHMARK);
         eMHS mhs;
         mhs = new eMHS(identityMatrix(20));

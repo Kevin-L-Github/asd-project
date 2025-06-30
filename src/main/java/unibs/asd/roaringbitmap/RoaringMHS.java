@@ -1,4 +1,4 @@
-package unibs.asd.roaring;
+package unibs.asd.roaringbitmap;
 
 import java.math.BigInteger;
 import java.util.ArrayList;

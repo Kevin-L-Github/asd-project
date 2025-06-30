@@ -2,8 +2,8 @@ package unibs.asd.benchmarks;
 
 import java.util.List;
 
-import unibs.asd.project.Hypothesis;
-import unibs.asd.project.MHS;
+import unibs.asd.bools.BoolsHypothesis;
+import unibs.asd.bools.BoolsMHS;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -19,7 +19,7 @@ public class BenchmarkWriter {
      * @param filename name of the input file with .matrix extension
      * @param destDir  destination directory (in project root)
      */
-    public static void writeBenchmark(MHS mhs, String filename, String destDir) {
+    public static void writeBenchmark(BoolsMHS mhs, String filename, String destDir) {
         if (!mhs.isExecuted()) {
             throw new IllegalArgumentException("L'algoritmo non è stato eseguito!");
         }
@@ -27,7 +27,7 @@ public class BenchmarkWriter {
         // Convert filename from .matrix to .mhs
         String outputFilename = filename.replace(".matrix", ".mhs");
 
-        List<Hypothesis> solutions = mhs.getSolutions();
+        List<BoolsHypothesis> solutions = mhs.getSolutions();
         boolean[][] instance = mhs.getInstance();
         int nonEmptyColumns = mhs.getNonEmptyColumns().size();
         int emptyCols = instance[0].length - nonEmptyColumns;
@@ -41,7 +41,7 @@ public class BenchmarkWriter {
         try (FileWriter writer = new FileWriter(outputPath.toString())) {
             // Write solutions
             writer.write("Soluzioni:\n");
-            for (Hypothesis sol : solutions) {
+            for (BoolsHypothesis sol : solutions) {
                 writer.write(sol.toString() + "\n");
             }
 
@@ -51,7 +51,7 @@ public class BenchmarkWriter {
             // Calculate min and max cardinality
             int minCardinality = Integer.MAX_VALUE;
             int maxCardinality = Integer.MIN_VALUE;
-            for (Hypothesis sol : solutions) {
+            for (BoolsHypothesis sol : solutions) {
                 int card = sol.cardinality();
                 if (card < minCardinality)
                     minCardinality = card;

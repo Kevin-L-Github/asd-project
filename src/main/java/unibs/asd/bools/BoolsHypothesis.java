@@ -1,4 +1,4 @@
-package unibs.asd.project;
+package unibs.asd.bools;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,7 +10,7 @@ import java.util.List;
  * = inattivo).
  * Fornisce metodi per manipolare e analizzare la configurazione binaria.
  */
-public class Hypothesis {
+public class BoolsHypothesis {
 
     private final boolean[] bin; // Array immutabile che rappresenta lo stato binario
     private boolean[] vector;
@@ -23,7 +23,7 @@ public class Hypothesis {
      * @param size dimensione dell'ipotesi
      * @throws IllegalArgumentException se size è negativo
      */
-    public Hypothesis(int size, int n) {
+    public BoolsHypothesis(int size, int n) {
         if (size < 0) {
             throw new IllegalArgumentException("La dimensione non può essere negativa");
         }
@@ -33,7 +33,7 @@ public class Hypothesis {
         Arrays.fill(this.vector, false);
     }
 
-    public Hypothesis(boolean[] bin) {
+    public BoolsHypothesis(boolean[] bin) {
         if (bin == null) {
             throw new IllegalArgumentException("L'array binario non può essere null");
         }
@@ -48,21 +48,6 @@ public class Hypothesis {
     public int size() {
         return bin.length;
     }
-/* 
-    public int numberOfSuccessors() {
-        return bin.length - numberOfPredecessors();
-    }
-
-    private int numberOfPredecessors() {
-        int count = 0;
-        for (boolean b : bin) {
-            if (b) {
-                count++;
-            }
-        }
-        return count;
-    }
-*/
 
     public int numberOfPredecessors() {
         if (cardinality == -1) cardinality = calculateCardinality();
@@ -93,39 +78,6 @@ public class Hypothesis {
         return -1;
     }
 
-    public List<Hypothesis> getHseconds() {
-        int msb = mostSignificantBit();
-        int lsb = leastSignificantBit();
-        if (msb == -1 || msb == 0 || lsb == -1) {
-            throw new IllegalArgumentException("Non è possibile calcolare gli hsecondi per questa ipotesi");
-        }
-
-        List<Hypothesis> list = new ArrayList<>();
-        /*
-        for (int i = 0; i < msb; i++) {
-            boolean[] h_prime = bin.clone();
-            h_prime[i] = true;
-            for (int j = i + 1; j <= lsb; j++) {
-                if (h_prime[j]) {
-                    boolean[] h_sec = h_prime.clone();
-                    h_sec[j] = false;
-                    list.add(new Hypothesis(h_sec));
-                }
-            }
-        }
-        */
-        boolean[] base = bin.clone();
-        base[msb] = false; // Rimuovi MSB una volta sola
-
-        for (int i = 0; i < msb; i++) {
-            if (base[i]) continue; // Salta bit già attivi
-            boolean[] hSec = base.clone();
-            hSec[i] = true;
-            list.add(new Hypothesis(hSec));
-        }
-        return list;
-    }
-
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -135,7 +87,7 @@ public class Hypothesis {
         return sb.toString();
     }
 
-    public Hypothesis globalInitial() {
+    public BoolsHypothesis globalInitial() {
         if (bin.length == 0) {
             throw new IllegalArgumentException("L'ipotesi non può essere vuota");
         }
@@ -151,10 +103,10 @@ public class Hypothesis {
             globalInitialBin[lsb] = !globalInitialBin[lsb];
         }
 
-        return new Hypothesis(globalInitialBin);
+        return new BoolsHypothesis(globalInitialBin);
     }
 
-    public Hypothesis initial_(Hypothesis hPrime) {
+    public BoolsHypothesis initial_(BoolsHypothesis hPrime) {
 
         if (numberOfPredecessors() == 0) {
             return hPrime;
@@ -164,7 +116,7 @@ public class Hypothesis {
             if (bin[i]) {
                 boolean[] predecessor = hPrime.getBin().clone();
                 predecessor[i] = false;
-                Hypothesis pred = new Hypothesis(predecessor);
+                BoolsHypothesis pred = new BoolsHypothesis(predecessor);
                 if (!this.equals(pred)) {
                     return pred;
                 }
@@ -173,7 +125,7 @@ public class Hypothesis {
         return null;
     }
 
-    public Hypothesis final_(Hypothesis hPrime) {
+    public BoolsHypothesis final_(BoolsHypothesis hPrime) {
 
         if (numberOfPredecessors() == 0) {
             return hPrime;
@@ -182,7 +134,7 @@ public class Hypothesis {
             if (bin[i]) {
                 boolean[] predecessor = hPrime.getBin().clone();
                 predecessor[i] = false;
-                Hypothesis pred = new Hypothesis(predecessor);
+                BoolsHypothesis pred = new BoolsHypothesis(predecessor);
                 if (!hPrime.equals(pred)) {
                     return pred;
                 }
@@ -222,9 +174,9 @@ public class Hypothesis {
     public boolean equals(Object o) {
         if (this == o) return true; // Ottimizzazione per lo stesso oggetto
         // if (o == null || getClass() != o.getClass())
-        if (!(o instanceof Hypothesis)) return false; // Controllo di tipo
+        if (!(o instanceof BoolsHypothesis)) return false; // Controllo di tipo
 
-        Hypothesis that = (Hypothesis) o;
+        BoolsHypothesis that = (BoolsHypothesis) o;
         // Confronta gli array elemento per elemento
         return Arrays.equals(this.bin, that.bin);
     }
@@ -234,13 +186,13 @@ public class Hypothesis {
         return Arrays.hashCode(bin); // Coerente con Arrays.equals()
     }
 
-    public List<Hypothesis> predecessors() {
-        List<Hypothesis> predecessors = new ArrayList<>();
+    public List<BoolsHypothesis> predecessors() {
+        List<BoolsHypothesis> predecessors = new ArrayList<>();
         for (int i = 0; i < this.bin.length; i++){
             if(bin[i]){
                 boolean[] h_prime = this.getBin().clone();
                 h_prime[i] =!h_prime[i];
-                predecessors.add(new Hypothesis(h_prime));
+                predecessors.add(new BoolsHypothesis(h_prime));
             }
         }
         return predecessors;

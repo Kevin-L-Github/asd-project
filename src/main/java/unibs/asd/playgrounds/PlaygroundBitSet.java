@@ -1,4 +1,4 @@
-package unibs.asd.bitset;
+package unibs.asd.playgrounds;
 
 import java.math.BigInteger;
 

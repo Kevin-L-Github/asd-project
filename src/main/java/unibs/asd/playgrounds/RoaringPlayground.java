@@ -1,10 +1,10 @@
-package unibs.asd.roaring;
+package unibs.asd.playgrounds;
 
 import unibs.asd.benchmarks.BenchmarkReader;
+import unibs.asd.roaringbitmap.RoaringMHS;
 
-public class MainRoaring {
+public class RoaringPlayground {
     public static final String BENCHMARK = "74L85.000.matrix";
-
     public static void main(String[] args) {
         boolean[][] benchmark = BenchmarkReader.readBenchmark("src\\benchmarks1\\"+ BENCHMARK);
         RoaringMHS mhs;
@@ -13,11 +13,4 @@ public class MainRoaring {
         mhs.run(300_000);
     }
 
-    public static boolean[][] identityMatrix(int size) {
-        boolean[][] matrix = new boolean[size][size];
-        for (int i = 0; i < size; i++) {
-            matrix[i][i] = true;
-        }
-        return matrix;
-    }
 }

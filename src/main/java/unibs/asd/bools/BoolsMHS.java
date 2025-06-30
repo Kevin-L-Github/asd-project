@@ -1,13 +1,13 @@
-package unibs.asd.project;
+package unibs.asd.bools;
 
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class MHS {
+public class BoolsMHS {
 
-    private List<Hypothesis> current;
-    private List<Hypothesis> solutions;
+    private List<BoolsHypothesis> current;
+    private List<BoolsHypothesis> solutions;
     private boolean[][] instance = null;
     private boolean[][] matrix;
     private List<Integer> nonEmptyColumns;
@@ -21,7 +21,7 @@ public class MHS {
     private boolean stopped;
     private boolean stoppedInsideLoop;
 
-    public MHS(boolean[][] instance) {
+    public BoolsMHS(boolean[][] instance) {
         this.current = new ArrayList<>();
         this.solutions = new ArrayList<>();
         this.instance = instance;
@@ -33,14 +33,14 @@ public class MHS {
         this.cleanMatrix();
     }
 
-    public List<Hypothesis> run() {
+    public List<BoolsHypothesis> run() {
         if (matrix == null || matrix.length == 0 || matrix[0].length == 0) {
             throw new IllegalArgumentException("Instance must be a non-empty boolean matrix.");
         }
         int m = matrix[0].length;
         int n = matrix.length;
 
-        Hypothesis emptyHypothesis = new Hypothesis(m, n);
+        BoolsHypothesis emptyHypothesis = new BoolsHypothesis(m, n);
         this.current.addAll(generateChildrenEmptyHypothesis(emptyHypothesis));
         DEPTH++;
 
@@ -49,23 +49,23 @@ public class MHS {
             iteration++;
             System.out.println("\n--- Iteration " + iteration + " ---");
             System.out.println("Current hypotheses count: " + current.size());
-            List<Hypothesis> next = new ArrayList<>();
+            List<BoolsHypothesis> next = new ArrayList<>();
 
             for (int i = 0; i < current.size(); i++) {
-                Hypothesis h = current.get(i);
+                BoolsHypothesis h = current.get(i);
                 printStatusBar(i);
                 if (check(h)) {
                     solutions.add(h);
                     current.remove(i);
                     i--;
                 } else if (h.mostSignificantBit() != 0) {
-                    Hypothesis h_sec = h.globalInitial();
+                    BoolsHypothesis h_sec = h.globalInitial();
                     int size = current.size();
                     current.removeIf(hyp -> isGreater(hyp, h_sec));
                     int diff = size - current.size();
                     i -= diff;
                     if (!current.getFirst().equals(h)) {
-                        List<Hypothesis> children = generateChildren(h);
+                        List<BoolsHypothesis> children = generateChildren(h);
                         next = merge(next, children);
                     }
                 }
@@ -79,7 +79,7 @@ public class MHS {
         return solutions;
     }
 
-    public List<Hypothesis> run(long timeoutMillis) {
+    public List<BoolsHypothesis> run(long timeoutMillis) {
         long startTime = System.nanoTime();
         long timeoutNanos = timeoutMillis * 1_000_000;
 
@@ -90,7 +90,7 @@ public class MHS {
         int m = matrix[0].length;
         int n = matrix.length;
 
-        Hypothesis emptyHypothesis = new Hypothesis(m, n);
+        BoolsHypothesis emptyHypothesis = new BoolsHypothesis(m, n);
         this.current.addAll(generateChildrenEmptyHypothesis(emptyHypothesis));
         DEPTH++;
 
@@ -100,7 +100,7 @@ public class MHS {
                 this.stopped = true;
                 break;
             }
-            List<Hypothesis> next = new ArrayList<>();
+            List<BoolsHypothesis> next = new ArrayList<>();
             for (int i = 0; i < current.size(); i++) {
                 if (System.nanoTime() - startTime > timeoutNanos) {
                     System.out.println("\nTimeout reached inside loop. Stopping.");
@@ -108,7 +108,7 @@ public class MHS {
                     this.stoppedInsideLoop = true;
                     break;
                 }
-                Hypothesis h = current.get(i);
+                BoolsHypothesis h = current.get(i);
                 printStatusBar(i, DEPTH, startTime, timeoutNanos);
 
                 if (check(h)) {
@@ -116,7 +116,7 @@ public class MHS {
                     current.remove(i);
                     i--;
                 } else if (h.mostSignificantBit() != 0) {
-                    Hypothesis h_sec = h.globalInitial();
+                    BoolsHypothesis h_sec = h.globalInitial();
                     int size = current.size();
                     boolean removed = current.removeIf(hyp -> isGreater(hyp, h_sec));
                     if (removed) {
@@ -124,7 +124,7 @@ public class MHS {
                         i -= diff;
                     }
                     if (!current.getFirst().equals(h)) {
-                        List<Hypothesis> children = generateChildren(h);
+                        List<BoolsHypothesis> children = generateChildren(h);
                         next = merge(next, children);
                     }
                 }
@@ -170,31 +170,31 @@ public class MHS {
         System.out.print(output);
     }
 
-    public List<Hypothesis> generateChildrenEmptyHypothesis(Hypothesis h) {
-        List<Hypothesis> children = new ArrayList<>();
+    public List<BoolsHypothesis> generateChildrenEmptyHypothesis(BoolsHypothesis h) {
+        List<BoolsHypothesis> children = new ArrayList<>();
         System.out.println("Generating children for empty hypothesis");
         for (int i = 0; i < h.getBin().length; i++) {
             boolean[] h_new = h.getBin().clone();
             h_new[i] = true;
-            Hypothesis H_new = new Hypothesis(h_new);
+            BoolsHypothesis H_new = new BoolsHypothesis(h_new);
             setFields(H_new);
             children.add(H_new);
         }
         return children;
     }
 
-    public List<Hypothesis> generateChildren(Hypothesis h) {
-        List<Hypothesis> children = new ArrayList<>();
+    public List<BoolsHypothesis> generateChildren(BoolsHypothesis h) {
+        List<BoolsHypothesis> children = new ArrayList<>();
         for (int i = 0; i < h.mostSignificantBit(); i++) {
             boolean[] h_pr = h.getBin().clone();
             h_pr[i] = true;
-            Hypothesis h_prime = new Hypothesis(h_pr);
+            BoolsHypothesis h_prime = new BoolsHypothesis(h_pr);
 
-            List<Hypothesis> predecessors = h_prime.predecessors();
+            List<BoolsHypothesis> predecessors = h_prime.predecessors();
             predecessors.remove(h);
             int count = 0;
 
-            for (Hypothesis pred : predecessors) {
+            for (BoolsHypothesis pred : predecessors) {
                 if (current.contains(pred)) {
                     count++;
                 }
@@ -220,7 +220,7 @@ public class MHS {
         return false;
     }
 
-    public static boolean isGreater(Hypothesis h1, Hypothesis h2) {
+    public static boolean isGreater(BoolsHypothesis h1, BoolsHypothesis h2) {
         return isGreater(h1.getBin(), h2.getBin());
     }
 
@@ -236,16 +236,16 @@ public class MHS {
         return true;
     }
 
-    private static List<Hypothesis> merge(Collection<Hypothesis> hypotheses, Collection<Hypothesis> toMerge) {
+    private static List<BoolsHypothesis> merge(Collection<BoolsHypothesis> hypotheses, Collection<BoolsHypothesis> toMerge) {
         return Stream.concat(hypotheses.stream(), toMerge.stream())
                 .distinct()
                 .sorted(Comparator.comparing(
-                        Hypothesis::getBin,
+                        BoolsHypothesis::getBin,
                         (bin1, bin2) -> isGreater(bin1, bin2) ? -1 : 1))
                 .collect(Collectors.toList());
     }
 
-    public void setFields(Hypothesis h) {
+    public void setFields(BoolsHypothesis h) {
         int n = matrix.length;
         int m = matrix[0].length;
         boolean[] vector = new boolean[n];
@@ -274,7 +274,7 @@ public class MHS {
      * @param h
      * @return true if the hypothesis is a solution, false otherwise
      */
-    public boolean check(Hypothesis h) {
+    public boolean check(BoolsHypothesis h) {
         boolean[] vector = h.getVector();
         for (int i = 0; i < vector.length; i++) {
             if (!vector[i]) {
@@ -284,7 +284,7 @@ public class MHS {
         return true;
     }
 
-    public void propagate(Hypothesis h, Hypothesis h_prime) {
+    public void propagate(BoolsHypothesis h, BoolsHypothesis h_prime) {
         boolean[] vector = h.getVector();
         boolean[] vector_prime = h_prime.getVector();
         boolean[] newVector = new boolean[vector.length];
@@ -295,7 +295,7 @@ public class MHS {
         h_prime.setVector(newVector);
     }
 
-    public boolean isGreaterEqual(Hypothesis h1, Hypothesis h2) {
+    public boolean isGreaterEqual(BoolsHypothesis h1, BoolsHypothesis h2) {
         boolean result = isGreaterEqual(h1.getBin(), h2.getBin());
         return result;
     }
@@ -311,7 +311,7 @@ public class MHS {
         return true;
     }
 
-    public boolean isLessEqual(Hypothesis h1, Hypothesis h2) {
+    public boolean isLessEqual(BoolsHypothesis h1, BoolsHypothesis h2) {
         boolean result = isLessEqual(h1.getBin(), h2.getBin());
         return result;
     }
@@ -376,11 +376,11 @@ public class MHS {
     }
 
     public void restoreSolutions() {
-        List<Hypothesis> restored = new ArrayList<>();
+        List<BoolsHypothesis> restored = new ArrayList<>();
 
         int originalSize = instance[0].length;
 
-        for (Hypothesis h : solutions) {
+        for (BoolsHypothesis h : solutions) {
             boolean[] compressed = h.getBin();
             boolean[] full = new boolean[originalSize];
 
@@ -389,13 +389,13 @@ public class MHS {
                 full[originalIndex] = compressed[i];
             }
 
-            restored.add(new Hypothesis(full));
+            restored.add(new BoolsHypothesis(full));
         }
 
         this.solutions = restored;
     }
 
-    public List<Hypothesis> getSolutions() {
+    public List<BoolsHypothesis> getSolutions() {
         return solutions;
     }
 
@@ -407,7 +407,7 @@ public class MHS {
         this.instance = instance;
     }
 
-    public List<Hypothesis> getCurrent() {
+    public List<BoolsHypothesis> getCurrent() {
         return current;
     }
 

@@ -2,11 +2,16 @@ package unibs.asd.bitset;
 
 import java.math.BigInteger;
 import java.util.BitSet;
+import unibs.asd.interfaces.BitVector;
 
-public class BitSetAdapter implements Cloneable {
+public class BitSetAdapter implements BitVector {
 
     private final BitSet bitSet;
     private final int size;
+
+    public BitSet getBitVector() {
+        return bitSet;
+    }
 
     public BitSetAdapter(int size) {
         if (size <= 0) {
@@ -25,7 +30,7 @@ public class BitSetAdapter implements Cloneable {
         return size;
     }
 
-    public int getLength() {
+    public int mostSignificantBit() {
         return this.bitSet.nextSetBit(0);
     }
 
@@ -68,24 +73,24 @@ public class BitSetAdapter implements Cloneable {
         return bitSet.get(0, size).cardinality();
     }
 
-    public void and(BitSetAdapter another) {
-        bitSet.and(another.bitSet);
+    public void and(BitVector another) {
+        bitSet.and(another.getBitVector());
     }
 
-    public void or(BitSetAdapter another) {
-        bitSet.or(another.bitSet);
+    public void or(BitVector another) {
+        bitSet.or(another.getBitVector());
     }
 
     public int leastSignificantBit() {
         return bitSet.previousSetBit(size);
     }
 
-    public void xor(BitSetAdapter another) {
-        bitSet.xor(another.bitSet);
+    public void xor(BitVector another) {
+        bitSet.xor(another.getBitVector());
     }
 
-    public void andNot(BitSetAdapter another) {
-        bitSet.andNot(another.bitSet);
+    public void andNot(BitVector another) {
+        bitSet.andNot(another.getBitVector());
     }
 
     public boolean isEmpty() {

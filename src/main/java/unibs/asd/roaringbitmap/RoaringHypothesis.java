@@ -1,4 +1,4 @@
-package unibs.asd.roaring;
+package unibs.asd.roaringbitmap;
 
 import java.util.ArrayList;
 import java.util.List;

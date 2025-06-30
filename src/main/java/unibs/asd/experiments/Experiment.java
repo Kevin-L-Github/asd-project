@@ -1,4 +1,4 @@
-package unibs.asd.project;
+package unibs.asd.experiments;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -9,6 +9,7 @@ import java.util.stream.Stream;
 
 import unibs.asd.benchmarks.BenchmarkReader;
 import unibs.asd.benchmarks.BenchmarkWriter;
+import unibs.asd.bools.BoolsMHS;
 
 public class Experiment {
 
@@ -21,7 +22,6 @@ public class Experiment {
                     .limit(maxFiles)
                     .forEach(path -> processBenchmarkFile(path, destDir));
         }
-
     }
 
     private static void processBenchmarkFile(Path filePath, String destDir) {
@@ -30,7 +30,7 @@ public class Experiment {
         System.out.println("Processing file: " + fileName);
 
         boolean[][] instance = BenchmarkReader.readBenchmark(filePath.toString());
-        MHS mhs = new MHS(instance);
+        BoolsMHS mhs = new BoolsMHS(instance);
         mhs.run(10_000);
 
         BenchmarkWriter.writeBenchmark(mhs, fileName, destDir);

@@ -1,6 +1,7 @@
-package unibs.asd.project;
+package unibs.asd.playgrounds;
 
 import unibs.asd.benchmarks.BenchmarkReader;
+import unibs.asd.bools.BoolsMHS;
 
 public class Playground {
 
@@ -11,8 +12,8 @@ public class Playground {
         benchmark = BenchmarkReader.readBenchmark("src\\benchmarks1\\" + BENCHMARK);
 
         benchmark = identityMatrix(17);
-        MHS mhs;
-        mhs = new MHS(benchmark);
+        BoolsMHS mhs;
+        mhs = new BoolsMHS(benchmark);
         mhs.run(180_000);
         System.out.println(mhs.getSolutions());
     }

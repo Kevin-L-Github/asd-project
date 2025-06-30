@@ -106,10 +106,8 @@ public final class FastBitSet {
 
     public int previousSetBit(int fromIndex) {
 
-        int wordIndex = fromIndex >>> 6; // Divisione per 64
-        int bitInWord = fromIndex & 0x3F; // Modulo 64
-
-        // Maschera per isolare i bit <= fromIndex nella parola corrente
+        int wordIndex = fromIndex >>> 6;
+        int bitInWord = fromIndex & 0x3F;
         long mask = (bitInWord == 63) ? ~0L : (1L << (bitInWord + 1)) - 1;
         long word = words[wordIndex] & mask;
 
@@ -117,13 +115,11 @@ public final class FastBitSet {
             return (wordIndex << 6) + (63 - Long.numberOfLeadingZeros(word));
         }
 
-        // Cerca nelle parole precedenti
         for (int i = wordIndex - 1; i >= 0; i--) {
             if (words[i] != 0) {
                 return (i << 6) + (63 - Long.numberOfLeadingZeros(words[i]));
             }
         }
-        // Se nessun bit è settato in tutto il bitset, restituisci -1
         return -1;
     }
 

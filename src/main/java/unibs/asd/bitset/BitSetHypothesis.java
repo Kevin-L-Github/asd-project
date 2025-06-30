@@ -3,10 +3,12 @@ package unibs.asd.bitset;
 import java.util.ArrayList;
 import java.util.List;
 
+import unibs.asd.interfaces.BitVector;
+
 public class BitSetHypothesis {
 
-    private BitSetAdapter bin;
-    private BitSetAdapter vector;
+    private BitVector bin;
+    private BitVector vector;
 
     public BitSetHypothesis(int size, int n) {
         if (size < 0) {
@@ -16,16 +18,16 @@ public class BitSetHypothesis {
         this.vector = new BitSetAdapter(n);
     }
 
-    public BitSetHypothesis(BitSetAdapter h) {
-        if (h == null) {
+    public BitSetHypothesis(BitVector vector) {
+        if (vector == null) {
             throw new IllegalArgumentException("Il BitSet non può essere null");
         }
-        this.bin = (BitSetAdapter) h.clone();
-        this.vector = new BitSetAdapter(h.size());
+        this.bin = (BitVector) vector.clone();
+        this.vector = new BitSetAdapter(vector.size());
     }
 
-    public BitSetAdapter getBin() {
-        return (BitSetAdapter) bin.clone();
+    public BitVector getBin() {
+        return (BitVector) bin.clone();
     }
 
     public int length() {
@@ -33,7 +35,7 @@ public class BitSetHypothesis {
     }
 
     public int mostSignificantBit() {
-        return bin.getLength();
+        return bin.mostSignificantBit();
     }
 
     @Override
@@ -42,12 +44,10 @@ public class BitSetHypothesis {
     }
 
     public BitSetHypothesis globalInitial() {
-
-        BitSetAdapter globalInitialBin = (BitSetAdapter) bin.clone();
+        BitVector globalInitialBin = (BitVector) bin.clone();
         globalInitialBin.flip(0);
         int lsb = bin.leastSignificantBit();
         globalInitialBin.flip(lsb);
-
         return new BitSetHypothesis(globalInitialBin);
     }
 
@@ -55,12 +55,12 @@ public class BitSetHypothesis {
         return bin.cardinality();
     }
 
-    public BitSetAdapter getVector() {
-        return (BitSetAdapter) vector.clone();
+    public BitVector getVector() {
+        return (BitVector) vector.clone();
     }
 
-    public void setVector(BitSetAdapter vector) {
-        this.vector = (BitSetAdapter) vector.clone();
+    public void setVector(BitVector vector) {
+        this.vector = (BitVector) vector.clone();
     }
 
     @Override
@@ -83,7 +83,7 @@ public class BitSetHypothesis {
         int limit = this.bin.size();
         for (int i = 0; i < limit; i++) {
             if (bin.get(i)) {
-                BitSetAdapter h_s = (BitSetAdapter) bin.clone();
+                BitVector h_s = (BitVector) bin.clone();
                 h_s.flip(i);
                 predecessors.add(new BitSetHypothesis(h_s));
             }
