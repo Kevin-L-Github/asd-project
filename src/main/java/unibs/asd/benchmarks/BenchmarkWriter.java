@@ -2,7 +2,6 @@ package unibs.asd.benchmarks;
 
 import java.util.List;
 
-import unibs.asd.bools.BoolsHypothesis;
 import unibs.asd.interfaces.Hypothesis;
 import unibs.asd.mhs.BaseMHS;
 

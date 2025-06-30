@@ -13,7 +13,7 @@ import unibs.asd.interfaces.Hypothesis;
  * = inattivo).
  * Fornisce metodi per manipolare e analizzare la configurazione binaria.
  */
-public class BoolsHypothesis implements Hypothesis, Cloneable {
+public class BoolsHypothesis implements Hypothesis {
 
     private final BooleanSet bin; // Array immutabile che rappresenta lo stato binario
     private BooleanSet vector;
