@@ -17,7 +17,7 @@ public class Playground {
         boolean[][] benchmark = BenchmarkReader.readBenchmark("src\\mybenchmarks\\" + BENCHMARK);
         BaseMHS mhs;
         mhs = new BaseMHS(IdentityMatrix.create(6));
-        mhs.run(BitSetType.BITSET, TIMEOUT * 1000);
+        mhs.run(BitSetType.BOOLS_ARRAY, TIMEOUT * 1000);
         System.out.println("\nAlgorithm completed. Solutions found: " + mhs.getSolutions().size());
         System.out.println("Computation Time: " + mhs.getComputationTime());
         System.out.println(mhs.getSolutions());

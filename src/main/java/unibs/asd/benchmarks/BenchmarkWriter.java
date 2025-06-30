@@ -3,7 +3,8 @@ package unibs.asd.benchmarks;
 import java.util.List;
 
 import unibs.asd.bools.BoolsHypothesis;
-import unibs.asd.bools.BoolsMHS;
+import unibs.asd.interfaces.Hypothesis;
+import unibs.asd.mhs.BaseMHS;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -19,7 +20,7 @@ public class BenchmarkWriter {
      * @param filename name of the input file with .matrix extension
      * @param destDir  destination directory (in project root)
      */
-    public static void writeBenchmark(BoolsMHS mhs, String filename, String destDir) {
+    public static void writeBenchmark(BaseMHS mhs, String filename, String destDir) {
         if (!mhs.isExecuted()) {
             throw new IllegalArgumentException("L'algoritmo non è stato eseguito!");
         }
@@ -27,7 +28,7 @@ public class BenchmarkWriter {
         // Convert filename from .matrix to .mhs
         String outputFilename = filename.replace(".matrix", ".mhs");
 
-        List<BoolsHypothesis> solutions = mhs.getSolutions();
+        List<Hypothesis> solutions = mhs.getSolutions();
         boolean[][] instance = mhs.getInstance();
         int nonEmptyColumns = mhs.getNonEmptyColumns().size();
         int emptyCols = instance[0].length - nonEmptyColumns;
@@ -41,7 +42,7 @@ public class BenchmarkWriter {
         try (FileWriter writer = new FileWriter(outputPath.toString())) {
             // Write solutions
             writer.write("Soluzioni:\n");
-            for (BoolsHypothesis sol : solutions) {
+            for (Hypothesis sol : solutions) {
                 writer.write(sol.toString() + "\n");
             }
 
@@ -51,7 +52,7 @@ public class BenchmarkWriter {
             // Calculate min and max cardinality
             int minCardinality = Integer.MAX_VALUE;
             int maxCardinality = Integer.MIN_VALUE;
-            for (BoolsHypothesis sol : solutions) {
+            for (Hypothesis sol : solutions) {
                 int card = sol.cardinality();
                 if (card < minCardinality)
                     minCardinality = card;

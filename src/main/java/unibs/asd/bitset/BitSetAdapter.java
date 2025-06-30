@@ -11,9 +11,6 @@ public class BitSetAdapter implements BitVector {
     private final int size;
 
     public BitSetAdapter(int size) {
-        if (size <= 0) {
-            throw new IllegalArgumentException("Size deve essere maggiore di zero");
-        }
         this.size = size;
         this.bitSet = new BitSet(size);
     }

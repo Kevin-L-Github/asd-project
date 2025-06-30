@@ -7,13 +7,16 @@ import java.util.stream.Stream;
 
 import unibs.asd.bitset.BitSetAdapter;
 import unibs.asd.bitset.BitSetHypothesis;
+import unibs.asd.bools.BoolsHypothesis;
 import unibs.asd.enums.BitSetType;
 import unibs.asd.factories.BitSetHypothesisFactory;
+import unibs.asd.factories.BoolsHypothesisFactory;
 import unibs.asd.interfaces.BitVector;
 import unibs.asd.interfaces.Hypothesis;
 import unibs.asd.interfaces.HypothesisFactory;
 
 public class BaseMHS {
+
     private HypothesisFactory factory;
     private List<Hypothesis> current;
     private List<Hypothesis> solutions;
@@ -57,6 +60,9 @@ public class BaseMHS {
                 this.factory = new BitSetHypothesisFactory();
                 emptyHypothesis = new BitSetHypothesis(m, n);
                 break;
+            case BOOLS_ARRAY:
+                this.factory = new BoolsHypothesisFactory();
+                emptyHypothesis = new BoolsHypothesis(m, n);
             default:
                 emptyHypothesis = new BitSetHypothesis(m, n);
                 break;
@@ -138,8 +144,7 @@ public class BaseMHS {
 
     private List<Hypothesis> generateChildren(Hypothesis parent) {
         List<Hypothesis> children = new ArrayList<>();
-        BitVector binParent = parent.getBin();
-        int LM1 = binParent.mostSignificantBit();
+        int LM1 = parent.getBin().mostSignificantBit();
 
         for (int i = 0; i < LM1; i++) {
             Hypothesis child = parent.clone();

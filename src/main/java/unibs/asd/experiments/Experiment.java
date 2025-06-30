@@ -9,7 +9,8 @@ import java.util.stream.Stream;
 
 import unibs.asd.benchmarks.BenchmarkReader;
 import unibs.asd.benchmarks.BenchmarkWriter;
-import unibs.asd.bools.BoolsMHS;
+import unibs.asd.enums.BitSetType;
+import unibs.asd.mhs.BaseMHS;
 
 public class Experiment {
 
@@ -30,8 +31,8 @@ public class Experiment {
         System.out.println("Processing file: " + fileName);
 
         boolean[][] instance = BenchmarkReader.readBenchmark(filePath.toString());
-        BoolsMHS mhs = new BoolsMHS(instance);
-        mhs.run(10_000);
+        BaseMHS mhs = new BaseMHS(instance);
+        mhs.run(BitSetType.BITSET,10_000);
 
         BenchmarkWriter.writeBenchmark(mhs, fileName, destDir);
     }
