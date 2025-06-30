@@ -1,4 +1,4 @@
-package unibs.asd.project;
+package unibs.asd.benchmarks;
 
 public class StatisticsApp {
     public static void main(String[] args) {

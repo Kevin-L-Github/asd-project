@@ -1,8 +1,8 @@
 package unibs.asd.roaring;
 
-import unibs.asd.project.BenchmarkReader;
+import unibs.asd.benchmarks.BenchmarkReader;
 
-public class PgRoaring {
+public class MainRoaring {
     public static final String BENCHMARK = "74L85.000.matrix";
 
     public static void main(String[] args) {

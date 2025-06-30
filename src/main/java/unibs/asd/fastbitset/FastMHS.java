@@ -1,4 +1,4 @@
-package unibs.asd.bitset;
+package unibs.asd.fastbitset;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -81,7 +81,6 @@ public class FastMHS {
                 } else if (h.mostSignificantBit() != 0) {
                     FastHypothesis global_initial = h.globalInitial();
                     int r = 0;
-
                     Iterator<FastHypothesis> it = current.iterator();
                     boolean searching = true;
                     while (it.hasNext() && searching) {
@@ -103,6 +102,8 @@ public class FastMHS {
                         children.forEach(child -> nextBucket.add(child.getBin()));
                     }
                 }
+
+
             }
             this.current = next;
             this.bucket = nextBucket;
@@ -169,8 +170,6 @@ public class FastMHS {
         }
         return false;
     }
-
-
 
     /**
      * Unisce i due insiemi e li riordina in base al loro valore naturale

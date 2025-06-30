@@ -1,18 +1,15 @@
-package unibs.asd.bitset;
+package unibs.asd.fastbitset;
 
 import unibs.asd.benchmarks.BenchmarkReader;
-import unibs.asd.fastbitset.eMHS;
-import unibs.asd.project.MHS;
-import unibs.asd.roaring.RoaringMHS;
 
-@SuppressWarnings("unused")
-public class BitSetApp {
+public class FastMain {
 
     public static final String BENCHMARK = "74181.020.matrix";
+
     public static void main(String[] args) {
-        boolean[][] benchmark = BenchmarkReader.readBenchmark("src\\mybenchmarks\\"+BENCHMARK);
-        BitSetMHS mhs;
-        mhs = new BitSetMHS(identityMatrix(20));
+        boolean[][] benchmark = BenchmarkReader.readBenchmark("src\\mybenchmarks\\" + BENCHMARK);
+        eMHS mhs;
+        mhs = new eMHS(identityMatrix(20));
         mhs.run(6000_000);
         System.out.println("\nAlgorithm completed. Solutions found: " + mhs.getSolutions().size());
         System.out.println("Computation Time: " + mhs.getComputationTime());

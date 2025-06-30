@@ -1,4 +1,4 @@
-package unibs.asd.project;
+package unibs.asd.benchmarks;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -7,12 +7,14 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Comparator;
 import java.util.stream.Stream;
-import unibs.asd.bitset.FastMHS;
+
+import unibs.asd.fastbitset.FastMHS;
+import unibs.asd.fastbitset.eMHS;
 
 public class FilterBenchmarks {
 
-    private static String SOLVED_FILENAME = "solved_benchmarks.txt";
-    private static int TIMEOUT_MS = 1500; // 2 secondi per benchmark
+    private static String SOLVED_FILENAME = "solved_benchmarks_e.txt";
+    private static int TIMEOUT_MS = 2000; // 2.5 secondi per benchmark
 
     public static void runBenchmarks(String benchmarkDir, String destDir) throws IOException {
         Path solvedFile = prepareSolvedFile(destDir);
@@ -46,7 +48,7 @@ public class FilterBenchmarks {
 
         // Lettura input e setup MHS
         boolean[][] instance = BenchmarkReader.readBenchmark(inputFile.toString());
-        FastMHS fastMHS = new FastMHS(instance);
+        eMHS fastMHS = new eMHS(instance);
 
         long startTime = System.currentTimeMillis();
         fastMHS.run(TIMEOUT_MS);

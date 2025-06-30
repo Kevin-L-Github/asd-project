@@ -2,6 +2,9 @@ package unibs.asd.bitset;
 
 import java.math.BigInteger;
 
+import unibs.asd.fastbitset.FastBitSet;
+import unibs.asd.fastbitset.FastMHS;
+
 public class PlaygroundBitSet {
 
     public static void main(String[] args) {

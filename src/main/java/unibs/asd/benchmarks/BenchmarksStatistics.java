@@ -1,4 +1,4 @@
-package unibs.asd.project;
+package unibs.asd.benchmarks;
 
 public class BenchmarksStatistics {
     private String benchmarkName;

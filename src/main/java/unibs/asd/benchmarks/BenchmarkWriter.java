@@ -1,6 +1,10 @@
-package unibs.asd.project;
+package unibs.asd.benchmarks;
 
 import java.util.List;
+
+import unibs.asd.project.Hypothesis;
+import unibs.asd.project.MHS;
+
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;

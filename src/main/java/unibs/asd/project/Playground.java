@@ -1,5 +1,7 @@
 package unibs.asd.project;
 
+import unibs.asd.benchmarks.BenchmarkReader;
+
 public class Playground {
 
     public static final String BENCHMARK = "c7552.325.matrix";

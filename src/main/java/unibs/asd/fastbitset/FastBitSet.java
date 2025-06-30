@@ -1,4 +1,4 @@
-package unibs.asd.bitset;
+package unibs.asd.fastbitset;
 
 import java.util.Arrays;
 
@@ -123,7 +123,6 @@ public final class FastBitSet {
                 return (i << 6) + (63 - Long.numberOfLeadingZeros(words[i]));
             }
         }
-
         // Se nessun bit è settato in tutto il bitset, restituisci -1
         return -1;
     }

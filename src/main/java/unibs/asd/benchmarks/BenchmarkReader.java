@@ -1,4 +1,4 @@
-package unibs.asd.project;
+package unibs.asd.benchmarks;
 
 import java.io.IOException;
 import java.nio.file.Files;
