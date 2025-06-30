@@ -1,29 +1,25 @@
 package unibs.asd.playgrounds;
 
 import unibs.asd.benchmarks.BenchmarkReader;
-import unibs.asd.bools.BoolsMHS;
+import unibs.asd.enums.BitSetType;
+import unibs.asd.mhs.BaseMHS;
 
 public class Playground {
 
-    public static final String BENCHMARK = "c7552.325.matrix";
+    /*
+     * Il tempo limite deve essere espresso in secondi
+     */
+    public static final String BENCHMARK = "74181.020.matrix";
+    public static final long TIMEOUT = 60;
 
     public static void main(String[] args) {
-        boolean[][] benchmark = null;
-        benchmark = BenchmarkReader.readBenchmark("src\\benchmarks1\\" + BENCHMARK);
-
-        benchmark = identityMatrix(17);
-        BoolsMHS mhs;
-        mhs = new BoolsMHS(benchmark);
-        mhs.run(180_000);
+        boolean[][] benchmark = BenchmarkReader.readBenchmark("src\\mybenchmarks\\" + BENCHMARK);
+        BaseMHS mhs;
+        mhs = new BaseMHS(IdentityMatrix.create(6));
+        mhs.run(BitSetType.BITSET, TIMEOUT * 1000);
+        System.out.println("\nAlgorithm completed. Solutions found: " + mhs.getSolutions().size());
+        System.out.println("Computation Time: " + mhs.getComputationTime());
         System.out.println(mhs.getSolutions());
-    }
-
-    public static boolean[][] identityMatrix(int size) {
-        boolean[][] matrix = new boolean[size][size];
-        for (int i = 0; i < size; i++) {
-            matrix[i][i] = true;
-        }
-        return matrix;
     }
 
 }

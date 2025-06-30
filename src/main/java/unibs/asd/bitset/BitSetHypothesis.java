@@ -4,8 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import unibs.asd.interfaces.BitVector;
+import unibs.asd.interfaces.Hypothesis;
 
-public class BitSetHypothesis {
+public class BitSetHypothesis implements Hypothesis<BitVector> {
 
     private BitVector bin;
     private BitVector vector;
@@ -78,8 +79,8 @@ public class BitSetHypothesis {
         return bin.hashCode();
     }
 
-    public List<BitSetHypothesis> predecessors() {
-        List<BitSetHypothesis> predecessors = new ArrayList<>();
+    public List<Hypothesis<BitVector>> predecessors() {
+        List<Hypothesis<BitVector>> predecessors = new ArrayList<>();
         int limit = this.bin.size();
         for (int i = 0; i < limit; i++) {
             if (bin.get(i)) {

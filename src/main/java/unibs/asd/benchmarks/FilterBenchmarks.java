@@ -8,7 +8,6 @@ import java.nio.file.StandardOpenOption;
 import java.util.Comparator;
 import java.util.stream.Stream;
 
-import unibs.asd.fastbitset.FastMHS;
 import unibs.asd.fastbitset.eMHS;
 
 public class FilterBenchmarks {

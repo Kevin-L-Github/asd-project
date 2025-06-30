@@ -1,16 +1,22 @@
-package unibs.asd.bitset;
+package unibs.asd.mhs;
 
 import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import unibs.asd.bitset.BitSetAdapter;
+import unibs.asd.bitset.BitSetHypothesis;
 import unibs.asd.enums.BitSetType;
+import unibs.asd.factories.BitSetHypothesisFactory;
 import unibs.asd.interfaces.BitVector;
+import unibs.asd.interfaces.Hypothesis;
+import unibs.asd.interfaces.HypothesisFactory;
 
-public class BitSetMHS {
-    private List<BitSetHypothesis> current;
-    private List<BitSetHypothesis> solutions;
+public class BaseMHS {
+    private HypothesisFactory factory;
+    private List<Hypothesis<BitVector>> current;
+    private List<Hypothesis<BitVector>> solutions;
     private boolean[][] instance = null;
     private boolean[][] matrix;
     private List<Integer> nonEmptyColumns;
@@ -21,7 +27,7 @@ public class BitSetMHS {
     private boolean stopped;
     private boolean stoppedInsideLoop;
 
-    public BitSetMHS(boolean[][] instance) {
+    public BaseMHS(boolean[][] instance) {
         this.current = new ArrayList<>();
         this.solutions = new ArrayList<>();
         this.instance = instance;
@@ -33,7 +39,7 @@ public class BitSetMHS {
         this.cleanMatrix();
     }
 
-    public List<BitSetHypothesis> run(BitSetType type, long timeoutMillis) {
+    public List<Hypothesis<BitVector>> run(BitSetType type, long timeoutMillis) {
         long startTime = System.nanoTime();
         long timeoutNanos = timeoutMillis * 1_000_000;
 
@@ -44,9 +50,18 @@ public class BitSetMHS {
         int m = matrix[0].length;
         int n = matrix.length;
 
-        
+        Hypothesis<BitVector> emptyHypothesis;
 
-        BitSetHypothesis emptyHypothesis = new BitSetHypothesis(m, n);
+        switch (type) {
+            case BITSET:
+                this.factory = new BitSetHypothesisFactory();
+                emptyHypothesis = new BitSetHypothesis(m, n);
+                break;
+            default:
+                emptyHypothesis = new BitSetHypothesis(m, n);
+                break;
+        }
+
         this.current.addAll(generateChildrenEmptyHypothesis(emptyHypothesis));
         DEPTH++;
 
@@ -56,7 +71,7 @@ public class BitSetMHS {
                 this.stopped = true;
                 break;
             }
-            List<BitSetHypothesis> next = new ArrayList<>();
+            List<Hypothesis<BitVector>> next = new ArrayList<>();
 
             for (int i = 0; i < current.size(); i++) {
                 if (System.nanoTime() - startTime > timeoutNanos) {
@@ -66,7 +81,7 @@ public class BitSetMHS {
                     break;
                 }
 
-                BitSetHypothesis h = current.get(i);
+                Hypothesis<BitVector> h = current.get(i);
                 printStatusBar(i, DEPTH, startTime, timeoutNanos);
 
                 if (check(h)) {
@@ -74,10 +89,10 @@ public class BitSetMHS {
                     current.remove(i);
                     i--;
                 } else if (h.mostSignificantBit() != 0) {
-                    BitSetHypothesis global_initial = h.globalInitial();
+                    Hypothesis<BitVector> global_initial = h.globalInitial();
                     int r = 0;
 
-                    Iterator<BitSetHypothesis> it = current.iterator();
+                    Iterator<Hypothesis<BitVector>> it = current.iterator();
                     boolean searching = true;
                     while (it.hasNext() && searching) {
                         if (isGreater(it.next(), global_initial)) {
@@ -91,7 +106,7 @@ public class BitSetMHS {
                         i -= r;
                     }
                     if (!current.isEmpty() && !current.get(0).equals(h)) {
-                        List<BitSetHypothesis> children = generateChildren(h);
+                        List<Hypothesis<BitVector>> children = generateChildren(h);
                         next = merge(next, children);
                     }
                 }
@@ -108,47 +123,48 @@ public class BitSetMHS {
         return solutions;
     }
 
-    private List<BitSetHypothesis> generateChildrenEmptyHypothesis(BitSetHypothesis h) {
-        List<BitSetHypothesis> children = new ArrayList<>();
+    private List<Hypothesis<BitVector>> generateChildrenEmptyHypothesis(Hypothesis<BitVector> h) {
+        List<Hypothesis<BitVector>> children = new ArrayList<>();
         System.out.println("Generating children for empty hypothesis");
 
         for (int i = 0; i < h.length(); i++) {
             BitVector newBin = h.getBin();
             newBin.set(i);
-            BitSetHypothesis H_new = new BitSetHypothesis(newBin);
+            Hypothesis<BitVector> H_new = factory.create(newBin);
             setFields(H_new);
             children.add(H_new);
         }
         return children;
     }
 
-    private List<BitSetHypothesis> generateChildren(BitSetHypothesis h) {
-        List<BitSetHypothesis> children = new ArrayList<>();
-        BitVector hBin = h.getBin();
-        int length = hBin.mostSignificantBit();
+    private List<Hypothesis<BitVector>> generateChildren(Hypothesis<BitVector> parent) {
+        List<Hypothesis<BitVector>> children = new ArrayList<>();
+        BitVector binParent = parent.getBin();
+        int LM1 = binParent.mostSignificantBit();
 
-        for (int i = 0; i < length; i++) {
-            BitSetAdapter hPrimeBin = (BitSetAdapter) hBin.clone(); // Clona invece di modificare direttamente
-            hPrimeBin.set(i);
-            BitSetHypothesis hPrime = new BitSetHypothesis(hPrimeBin);
-            List<BitSetHypothesis> predecessors = hPrime.predecessors();
+        for (int i = 0; i < LM1; i++) {
+            BitVector childBin = binParent.clone();
+            childBin.set(i);
+            Hypothesis<BitVector> child = factory.create(childBin);
+            List<Hypothesis<BitVector>> predecessors = child.predecessors();
             boolean isValid = true;
-            for (BitSetHypothesis p : predecessors) {
-                if (!binarySearchContains(p)) {
+            for (Hypothesis<BitVector> predecessor : predecessors) {
+                if (!binarySearchContains(predecessor)) {
+                    System.out.println("Non presente");
                     isValid = false;
                     break;
                 }
             }
             if (isValid) {
-                setFields(hPrime);
-                propagate(h, hPrime);
-                children.add(hPrime);
+                setFields(child);
+                propagate(parent, child);
+                children.add(child);
             }
         }
         return children;
     }
 
-    private boolean binarySearchContains(BitSetHypothesis target) {
+    private boolean binarySearchContains(Hypothesis<BitVector> target) {
         BigInteger targetValue = target.getBin().toNaturalValue();
         int low = 0;
         int high = current.size() - 1;
@@ -171,23 +187,23 @@ public class BitSetMHS {
         return false;
     }
 
-    private boolean isGreater(BitSetHypothesis h1, BitSetHypothesis h2) {
+    private boolean isGreater(Hypothesis<BitVector> h1, Hypothesis<BitVector> h2) {
         BitVector bs1 = h1.getBin();
         BitVector bs2 = h2.getBin();
         return bs1.toNaturalValue().compareTo(bs2.toNaturalValue()) > 0;
     }
 
-    private List<BitSetHypothesis> merge(Collection<BitSetHypothesis> hypotheses,
-            Collection<BitSetHypothesis> toMerge) {
+    private List<Hypothesis<BitVector>> merge(Collection<Hypothesis<BitVector>> hypotheses,
+            Collection<Hypothesis<BitVector>> toMerge) {
         return Stream.concat(hypotheses.stream(), toMerge.stream())
                 .distinct()
                 .sorted((h1, h2) -> isGreater(h1, h2) ? -1 : 1)
                 .collect(Collectors.toList());
     }
 
-    private void setFields(BitSetHypothesis h) {
+    private void setFields(Hypothesis<BitVector> h) {
         int n = matrix.length;
-        BitSetAdapter vector = new BitSetAdapter(n);
+        BitVector vector = new BitSetAdapter(n);
         if (h.cardinality() > 0) {
             BitVector bin = h.getBin();
             for (int i = 0; i < matrix[0].length; i++) {
@@ -203,11 +219,11 @@ public class BitSetMHS {
         h.setVector(vector);
     }
 
-    private boolean check(BitSetHypothesis h) {
+    private boolean check(Hypothesis<BitVector> h) {
         return h.getVector().cardinality() == matrix[0].length;
     }
 
-    private void propagate(BitSetHypothesis h, BitSetHypothesis h_prime) {
+    private void propagate(Hypothesis<BitVector> h, Hypothesis<BitVector> h_prime) {
         BitSetAdapter newVector = (BitSetAdapter) h.getVector().clone();
         newVector.or(h_prime.getVector());
         h_prime.setVector(newVector);
@@ -253,25 +269,21 @@ public class BitSetMHS {
     }
 
     private void restoreSolutions() {
-        List<BitSetHypothesis> restored = new ArrayList<>();
+        List<Hypothesis<BitVector>> restored = new ArrayList<>();
         int originalSize = instance[0].length;
-
-        for (BitSetHypothesis h : solutions) {
+        for (Hypothesis<BitVector> h : solutions) {
             BitVector compressed = h.getBin();
             BitSetAdapter full = new BitSetAdapter(originalSize);
-
             for (int i = 0; i < nonEmptyColumns.size(); i++) {
                 int originalIndex = nonEmptyColumns.get(i);
                 full.set(originalIndex, compressed.get(i));
             }
-
-            restored.add(new BitSetHypothesis(full));
+            restored.add(factory.create(full));
         }
-
         this.solutions = restored;
     }
 
-    public List<BitSetHypothesis> getSolutions() {
+    public List<Hypothesis<BitVector>> getSolutions() {
         return solutions;
     }
 
