@@ -177,13 +177,10 @@ public class BoolsHypothesis implements Hypothesis {
     @Override
     public boolean equals(Object o) {
         if (this == o)
-            return true; // Ottimizzazione per lo stesso oggetto
-        // if (o == null || getClass() != o.getClass())
+            return true;
         if (!(o instanceof BoolsHypothesis))
-            return false; // Controllo di tipo
-
+            return false;
         BoolsHypothesis that = (BoolsHypothesis) o;
-        // Confronta gli array elemento per elemento
         return Arrays.equals(this.bin.getBools(), that.bin.getBools());
     }
 

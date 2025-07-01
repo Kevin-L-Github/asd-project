@@ -109,17 +109,4 @@ public class BooleanSet implements BitVector {
         return new BooleanSet(bitsCopy);
     }
 
-    public BigInteger toNaturalValue() {
-        BigInteger value = BigInteger.ZERO;
-        for (int i = 0; i < this.size(); i++) {
-            if (this.bits[i]) {
-                int power = this.size() - 1 - i;
-                value = value.add(BigInteger.ONE.shiftLeft(power));
-            }
-        }
-        return value;
-    }
-
-    
-
 }

@@ -1,6 +1,5 @@
 package unibs.asd.bitset;
 
-import java.math.BigInteger;
 import java.util.BitSet;
 
 import unibs.asd.interfaces.BitVector;
@@ -30,17 +29,6 @@ public class BitSetAdapter implements BitVector {
 
     public boolean get(int index) {
         return bitSet.get(index);
-    }
-
-    public BigInteger toNaturalValue() {
-        BigInteger value = BigInteger.ZERO;
-        for (int i = 0; i < size; i++) {
-            if (bitSet.get(i)) {
-                int power = size - 1 - i;
-                value = value.add(BigInteger.ONE.shiftLeft(power));
-            }
-        }
-        return value;
     }
 
     public void set(int index) {

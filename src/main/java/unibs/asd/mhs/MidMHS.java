@@ -1,7 +1,10 @@
 package unibs.asd.mhs;
 
-import java.math.BigInteger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -18,11 +21,12 @@ import unibs.asd.interfaces.Hypothesis;
 import unibs.asd.interfaces.HypothesisFactory;
 import unibs.asd.roaringbitmap.RoaringHypothesis;
 
-public class BaseMHS {
+public class MidMHS {
 
     private HypothesisFactory factory;
     private List<Hypothesis> current;
     private List<Hypothesis> solutions;
+    private HashSet<BitVector> bucket;
     private boolean[][] instance = null;
     private boolean[][] matrix;
     private List<Integer> nonEmptyColumns;
@@ -33,9 +37,10 @@ public class BaseMHS {
     private boolean stopped;
     private boolean stoppedInsideLoop;
 
-    public BaseMHS(boolean[][] instance) {
+    public MidMHS(boolean[][] instance) {
         this.current = new ArrayList<>();
         this.solutions = new ArrayList<>();
+        this.bucket = new HashSet<>();
         this.instance = instance;
         this.DEPTH = 0;
         this.computationTime = 0;
@@ -46,20 +51,21 @@ public class BaseMHS {
     }
 
     public List<Hypothesis> run(BitSetType type, long timeoutMillis) {
+        long startTime = System.nanoTime();
+        long timeoutNanos = timeoutMillis * 1_000_000;
 
         if (matrix == null || matrix.length == 0 || matrix[0].length == 0) {
             throw new IllegalArgumentException("Instance must be a non-empty boolean matrix.");
         }
 
-        long startTime = System.nanoTime();
-        long timeoutNanos = timeoutMillis * 1_000_000;
-
         int m = matrix[0].length;
         int n = matrix.length;
 
         Hypothesis emptyHypothesis = getInitialHypothesis(type, m, n);
+        List<Hypothesis> initialChildren = generateChildrenEmptyHypothesis(emptyHypothesis);
 
-        this.current.addAll(generateChildrenEmptyHypothesis(emptyHypothesis));
+        this.current.addAll(initialChildren);
+        this.bucket.addAll(initialChildren.stream().map(Hypothesis::getBin).collect(Collectors.toList()));
         DEPTH++;
 
         while (!current.isEmpty()) {
@@ -69,7 +75,7 @@ public class BaseMHS {
                 break;
             }
             List<Hypothesis> next = new ArrayList<>();
-
+            HashSet<BitVector> nextBucket = new HashSet<>();
             for (int i = 0; i < current.size(); i++) {
                 if (System.nanoTime() - startTime > timeoutNanos) {
                     System.out.println("\nTimeout reached inside loop. Stopping.");
@@ -77,25 +83,24 @@ public class BaseMHS {
                     this.stoppedInsideLoop = true;
                     break;
                 }
-
                 Hypothesis h = current.get(i);
                 printStatusBar(i, DEPTH, startTime, timeoutNanos);
-
                 if (check(h)) {
                     solutions.add(h);
                     current.remove(i);
+                    bucket.remove(h.getBin());
                     i--;
                 } else if (h.mostSignificantBit() != 0) {
                     Hypothesis global_initial = h.globalInitial();
                     int r = 0;
-
                     Iterator<Hypothesis> it = current.iterator();
                     boolean searching = true;
                     while (it.hasNext() && searching) {
-                        if (isGreater(it.next(), global_initial)) {
-
+                        Hypothesis hyp = it.next();
+                        if (isGreater(hyp, global_initial)) {
                             r++;
                             it.remove();
+                            bucket.remove(hyp.getBin());
                         } else {
                             searching = false;
                         }
@@ -106,13 +111,17 @@ public class BaseMHS {
                     if (!current.isEmpty() && !current.get(0).equals(h)) {
                         List<Hypothesis> children = generateChildren(h);
                         next = merge(next, children);
+                        children.forEach(child -> nextBucket.add(child.getBin()));
                     }
                 }
             }
             this.current = next;
+            this.bucket = nextBucket;
             DEPTH++;
         }
         this.computationTime = (System.nanoTime() - startTime) / 1000000000F;
+        System.out.println("\nAlgorithm completed. Solutions found: " + solutions.size());
+        System.out.println("Computation Time: " + this.computationTime);
         this.restoreSolutions();
         this.executed = true;
         return solutions;
@@ -122,13 +131,13 @@ public class BaseMHS {
         switch (type) {
             case BitSetType.BITSET:
                 this.factory = new BitSetHypothesisFactory();
-                return  new BitSetHypothesis(m, n);
+                return new BitSetHypothesis(m, n);
             case BitSetType.BOOLS_ARRAY:
                 this.factory = new BoolsHypothesisFactory();
-                return  new BoolsHypothesis(m, n);
+                return new BoolsHypothesis(m, n);
             case BitSetType.ROARING_BIT_MAP:
                 this.factory = new RoaringHypothesisFactory();
-                return  new RoaringHypothesis(m, n);
+                return new RoaringHypothesis(m, n);
             case BitSetType.FAST_BITSET:
                 this.factory = new FastBitSetHypothesisFactory();
                 return new FastHypothesis(m, n);
@@ -139,8 +148,6 @@ public class BaseMHS {
 
     private List<Hypothesis> generateChildrenEmptyHypothesis(Hypothesis parent) {
         List<Hypothesis> children = new ArrayList<>();
-        //System.out.println("Generating children for empty hypothesis");
-
         for (int i = 0; i < parent.length(); i++) {
             Hypothesis child = factory.create(parent.getBin());
             child.set(i);
@@ -159,7 +166,7 @@ public class BaseMHS {
             List<Hypothesis> predecessors = child.predecessors();
             boolean isValid = true;
             for (Hypothesis predecessor : predecessors) {
-                if (!binarySearchContains(predecessor)) {
+                if (!bucket.contains(predecessor.getBin())) {
                     isValid = false;
                     break;
                 }
@@ -170,26 +177,6 @@ public class BaseMHS {
             }
         }
         return children;
-    }
-
-    private boolean binarySearchContains(Hypothesis target) {
-        //System.out.println("Is " + target + " in current?");
-        int low = 0;
-        int high = current.size() - 1;
-        while (low <= high) {
-            int mid = (low + high) / 2;
-            Hypothesis middle = current.get(mid);
-            //System.out.println("Middle: " + middle);
-            if (target.equals(middle)) {
-                //System.out.println("Founded!");
-                return true;
-            } else if (isGreater(middle, target)) {
-                low = mid + 1;
-            } else {
-                high = mid - 1;
-            }
-        }
-        return false;
     }
 
     public static boolean isGreater(Hypothesis h1, Hypothesis h2) {
@@ -203,6 +190,13 @@ public class BaseMHS {
         return false;
     }
 
+    /**
+     * Unisce i due insiemi e li riordina in base al loro valore naturale
+     * 
+     * @param hypotheses
+     * @param toMerge
+     * @return
+     */
     private List<Hypothesis> merge(Collection<Hypothesis> hypotheses,
             Collection<Hypothesis> toMerge) {
         return Stream.concat(hypotheses.stream(), toMerge.stream())
@@ -210,11 +204,11 @@ public class BaseMHS {
                 .collect(Collectors.toList());
     }
 
-    private void setFields(Hypothesis hypothesis) {
+    private void setFields(Hypothesis h) {
         int n = matrix.length;
         BitVector vector = this.factory.createVector(n);
-        if (hypothesis.cardinality() > 0) {
-            BitVector bin = hypothesis.getBin();
+        if (h.cardinality() > 0) {
+            BitVector bin = h.getBin();
             for (int i = 0; i < matrix[0].length; i++) {
                 if (bin.get(i)) {
                     for (int j = 0; j < n; j++) {
@@ -225,7 +219,7 @@ public class BaseMHS {
                 }
             }
         }
-        hypothesis.setVector(vector);
+        h.setVector(vector);
     }
 
     private boolean check(Hypothesis h) {
@@ -265,7 +259,6 @@ public class BaseMHS {
 
         int newCols = nonEmptyColumns.size();
         matrix = new boolean[rows][newCols];
-
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < newCols; j++) {
                 matrix[i][j] = instance[i][nonEmptyColumns.get(j)];
@@ -334,7 +327,7 @@ public class BaseMHS {
         String progressBar = String.format("%-10s", ">".repeat(progress / 10)).replace(' ', ' ');
 
         String output = String.format(
-                "\rProcess: %3d/%-3d [%s] %3d%% | Solutions: %4d | Depth: %3d | Time: %2ds",
+                "\rProcess: %3d/%-3d [%s] %3d%%, Solutions: %4d, Depth: %3d, Time: %2ds",
                 i + 1,
                 current.size(),
                 progressBar,
@@ -345,4 +338,5 @@ public class BaseMHS {
 
         System.out.print(output);
     }
+
 }

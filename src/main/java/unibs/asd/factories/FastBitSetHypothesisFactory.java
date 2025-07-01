@@ -18,7 +18,7 @@ public class FastBitSetHypothesisFactory implements HypothesisFactory {
         return new FastHypothesis(size, 1);
     }
 
-        @Override
+    @Override
     public BitVector createVector(int size) {
         return new FastBitSet(size);
     }

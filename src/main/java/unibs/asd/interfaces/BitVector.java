@@ -1,6 +1,5 @@
 package unibs.asd.interfaces;
 
-import java.math.BigInteger;
 
 public interface BitVector extends Cloneable {
     int size();                           // Lunghezza fissa (numero di bit)
@@ -13,7 +12,6 @@ public interface BitVector extends Cloneable {
     boolean isFull();                     // True se tutti i bit sono a 1
     int leastSignificantBit();           // Massimo bit settato (LSB)
     int mostSignificantBit();            // Minimo bit settato (MSB)
-    BigInteger toNaturalValue();         // Rappresentazione numerica
     String toBinaryString();             // Stringa MSB → LSB
     BitVector clone();
 }

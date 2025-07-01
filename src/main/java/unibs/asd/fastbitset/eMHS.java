@@ -64,10 +64,10 @@ public class eMHS {
             PriorityQueue<FastHypothesis> next = new PriorityQueue<>(
                     (a, b) -> isGreater(a.getBin(), b.getBin()) ? -1 : isGreater(b.getBin(), a.getBin()) ? 1 : 0);
             FastHypothesis first = current.peek();
-            //int i = 0;
+            // int i = 0;
             while (!current.isEmpty()) {
-                //i++;
-                //printStatusBar(i, DEPTH, startTime, timeoutNanos);
+                // i++;
+                // printStatusBar(i, DEPTH, startTime, timeoutNanos);
                 if (System.nanoTime() - startTime > timeoutNanos) {
                     System.out.println("\nTimeout reached inside loop. Stopping.");
                     this.stopped = true;
@@ -110,14 +110,14 @@ public class eMHS {
         return solutions;
     }
 
-    private List<FastHypothesis> generateChildrenEmptyHypothesis(FastHypothesis h) {
+    private List<FastHypothesis> generateChildrenEmptyHypothesis(FastHypothesis parent) {
         List<FastHypothesis> children = new ArrayList<>();
-        for (int i = 0; i < h.length(); i++) {
-            FastBitSet newBin = h.getBin();
-            newBin.set(i);
-            FastHypothesis H_new = new FastHypothesis(newBin);
-            setFields(H_new);
-            children.add(H_new);
+        for (int i = 0; i < parent.length(); i++) {
+            FastBitSet childBin = parent.getBin();
+            childBin.set(i);
+            FastHypothesis child = new FastHypothesis(childBin);
+            setFields(child);
+            children.add(child);
         }
         return children;
     }
@@ -139,7 +139,7 @@ public class eMHS {
                 }
             }
             if (isValid) {
-                setFields(child);
+                //setFields(child);
                 propagate(parent, child);
                 children.add(child);
             }

@@ -1,6 +1,5 @@
 package unibs.asd.roaringbitmap;
 
-import java.math.BigInteger;
 
 import org.roaringbitmap.RoaringBitmap;
 
@@ -80,17 +79,6 @@ public class RoaringBitmapAdapter implements BitVector {
         if (bitmap.isEmpty())
             return -1;
         return bitmap.getReverseIntIterator().next();
-    }
-
-    public BigInteger toNaturalValue() {
-        BigInteger value = BigInteger.ZERO;
-        for (int i = 0; i < size; i++) {
-            if (bitmap.contains(i)) {
-                int power = size - 1 - i;
-                value = value.setBit(power);
-            }
-        }
-        return value;
     }
 
     public void set(int index, boolean value) {
