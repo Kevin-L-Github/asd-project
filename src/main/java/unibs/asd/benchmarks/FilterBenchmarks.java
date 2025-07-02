@@ -8,7 +8,9 @@ import java.nio.file.StandardOpenOption;
 import java.util.Comparator;
 import java.util.stream.Stream;
 
-import unibs.asd.fastbitset.eMHS;
+import unibs.asd.enums.BitSetType;
+import unibs.asd.mhs.BaseMHS;
+
 
 public class FilterBenchmarks {
 
@@ -47,10 +49,10 @@ public class FilterBenchmarks {
 
         // Lettura input e setup MHS
         boolean[][] instance = BenchmarkReader.readBenchmark(inputFile.toString());
-        eMHS fastMHS = new eMHS(instance);
+        BaseMHS fastMHS = new BaseMHS(instance);
 
         long startTime = System.currentTimeMillis();
-        fastMHS.run(TIMEOUT_MS);
+        fastMHS.run(BitSetType.BITSET,TIMEOUT_MS);
 
         if(fastMHS.isExecuted() && !fastMHS.isStopped()) {
             writeSolvedBenchmark(filename, solvedFile);
