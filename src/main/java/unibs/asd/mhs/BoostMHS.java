@@ -96,7 +96,7 @@ public class BoostMHS {
                         BitVector element = it.next();
                         if (isGreater(element, globalInitial)) {
                             it.remove();
-                            
+
                         } else {
                             break;
                         }
@@ -136,15 +136,19 @@ public class BoostMHS {
     private Hypothesis getInitialHypothesis(BitSetType type, int m, int n) {
         switch (type) {
             case BitSetType.BITSET:
+                System.out.println("BITSET Implementation");
                 this.factory = new BitSetHypothesisFactory();
                 return new BitSetHypothesis(m, n);
             case BitSetType.BOOLS_ARRAY:
+                System.out.println("BOOLEAN ARRAY Implementation");
                 this.factory = new BoolsHypothesisFactory();
                 return new BoolsHypothesis(m, n);
             case BitSetType.ROARING_BIT_MAP:
+                System.out.println("ROARING BITMAP Implementation");
                 this.factory = new RoaringHypothesisFactory();
                 return new RoaringHypothesis(m, n);
             case BitSetType.FAST_BITSET:
+                System.out.println("FAST BITSET Implementation");
                 this.factory = new FastBitSetHypothesisFactory();
                 return new FastHypothesis(m, n);
             default:

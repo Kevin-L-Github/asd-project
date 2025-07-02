@@ -138,7 +138,6 @@ public class eMHS {
             }
             if (isValid) {
                 setFields(child);
-                //propagate(parent, child);
                 children.add(child);
             }
         }
@@ -175,13 +174,7 @@ public class eMHS {
     private boolean check(FastHypothesis h) {
         return h.isSolution();
     }
-
-    private void propagate(FastHypothesis h, FastHypothesis h_prime) {
-        FastBitSet newVector = (FastBitSet) h.getVector().clone();
-        newVector.or(h_prime.getVector());
-        h_prime.setVector(newVector);
-    }
-
+    
     private void cleanMatrix() {
         if (instance == null || instance.length == 0) {
             matrix = new boolean[0][0];

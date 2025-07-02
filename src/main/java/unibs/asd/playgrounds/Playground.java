@@ -2,7 +2,6 @@ package unibs.asd.playgrounds;
 
 import unibs.asd.benchmarks.BenchmarkReader;
 import unibs.asd.enums.BitSetType;
-import unibs.asd.mhs.BaseMHS;
 import unibs.asd.mhs.BoostMHS;
 
 public class Playground {
