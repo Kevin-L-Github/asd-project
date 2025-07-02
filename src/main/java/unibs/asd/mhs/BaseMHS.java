@@ -78,7 +78,7 @@ public class BaseMHS {
                 }
 
                 Hypothesis h = current.get(i);
-                printStatusBar(i, DEPTH, startTime, timeoutNanos);
+                //printStatusBar(i, DEPTH, startTime, timeoutNanos);
 
                 if (check(h)) {
                     solutions.add(h);
@@ -229,7 +229,7 @@ public class BaseMHS {
     }
 
     private boolean check(Hypothesis h) {
-        return h.getVector().cardinality() == matrix.length;
+        return h.isSolution();
     }
 
     private void propagate(Hypothesis parent, Hypothesis child) {

@@ -1,6 +1,6 @@
 package unibs.asd.roaringbitmap;
 
-
+import org.roaringbitmap.IntIterator;
 import org.roaringbitmap.RoaringBitmap;
 
 import unibs.asd.interfaces.BitVector;
@@ -96,6 +96,38 @@ public class RoaringBitmapAdapter implements BitVector {
     @Override
     public String toBinaryString() {
         return this.toString();
+    }
+
+    @Override
+    public int hashCode() {
+        int result = bitmap.selectRange(0, size).hashCode();
+        result = 31 * result + size;
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (!(o instanceof RoaringBitmapAdapter))
+            return false;
+
+        RoaringBitmapAdapter that = (RoaringBitmapAdapter) o;
+        if (this.size != that.size)
+            return false;
+
+        if (this.bitmap.getCardinality() != that.bitmap.getCardinality())
+            return false;
+
+        IntIterator thisIt = this.bitmap.getIntIterator();
+        IntIterator thatIt = that.bitmap.getIntIterator();
+
+        while (thisIt.hasNext() && thatIt.hasNext()) {
+            if (thisIt.next() != thatIt.next()) {
+                return false;
+            }
+        }
+        return !(thisIt.hasNext() || thatIt.hasNext());
     }
 
 }

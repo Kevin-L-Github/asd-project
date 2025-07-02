@@ -49,7 +49,7 @@ public class BoostMHS {
         this.cleanMatrix();
     }
 
-    public List<Hypothesis> run(BitSetType type,long timeoutMillis) {
+    public List<Hypothesis> run(BitSetType type, long timeoutMillis) {
         long startTime = System.nanoTime();
         long timeoutNanos = timeoutMillis * 1_000_000;
 
@@ -96,6 +96,7 @@ public class BoostMHS {
                         BitVector element = it.next();
                         if (isGreater(element, globalInitial)) {
                             it.remove();
+                            
                         } else {
                             break;
                         }
@@ -157,19 +158,18 @@ public class BoostMHS {
         int length = bin.mostSignificantBit();
         for (int i = 0; i < length; i++) {
             BitVector childBin = (BitVector) bin.clone();
+            childBin.set(i);
             Hypothesis child = this.factory.create(childBin);
-            child.set(i);
             child.setVector(this.factory.createVector(matrix.length));
-
             List<Hypothesis> predecessors = child.predecessors();
             boolean isValid = true;
-            for (Hypothesis p : predecessors) {
-                BitVector match = bucket.get(p.getBin());
+            for (Hypothesis predecessor : predecessors) {
+                BitVector match = bucket.get(predecessor.getBin());
                 if (match == null) {
                     isValid = false;
                     break;
                 } else {
-                    propagate(match, child);
+                    propagate(child, match);
                 }
             }
             if (isValid) {
@@ -191,10 +191,10 @@ public class BoostMHS {
         return false;
     }
 
-    private void setFields(Hypothesis h) {
+    private void setFields(Hypothesis hypothesis) {
         int n = matrix.length;
         BitVector vector = this.factory.createVector(n);
-        BitVector bin = h.getBin();
+        BitVector bin = hypothesis.getBin();
         for (int i = 0; i < matrix[0].length; i++) {
             if (bin.get(i)) {
                 for (int j = 0; j < n; j++) {
@@ -204,7 +204,7 @@ public class BoostMHS {
                 }
             }
         }
-        h.setVector(vector);
+        hypothesis.setVector(vector);
     }
 
     private boolean check(Hypothesis hypothesis) {
@@ -215,7 +215,7 @@ public class BoostMHS {
         successor.or(predecessor);
     }
 
-    private void propagate(BitVector information, Hypothesis successor) {
+    private void propagate(Hypothesis successor, BitVector information) {
         successor.update(information);
     }
 
@@ -261,8 +261,8 @@ public class BoostMHS {
         List<Hypothesis> restored = new ArrayList<>();
         int originalSize = instance[0].length;
 
-        for (Hypothesis h : solutions) {
-            BitVector compressed = h.getBin();
+        for (Hypothesis solution : solutions) {
+            BitVector compressed = solution.getBin();
             BitVector full = this.factory.createVector(originalSize);
             for (int i = 0; i < nonEmptyColumns.size(); i++) {
                 int originalIndex = nonEmptyColumns.get(i);

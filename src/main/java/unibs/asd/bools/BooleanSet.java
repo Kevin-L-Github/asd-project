@@ -1,13 +1,12 @@
 package unibs.asd.bools;
 
-import java.math.BigInteger;
 import java.util.Arrays;
 
 import unibs.asd.interfaces.BitVector;
 
 public class BooleanSet implements BitVector {
 
-    private final boolean[] bits;
+    private boolean[] bits;
 
     public BooleanSet(boolean[] bin) {
         this.bits = bin;
@@ -18,7 +17,7 @@ public class BooleanSet implements BitVector {
         Arrays.fill(this.bits, false);
     }
 
-    public boolean[] getBools(){
+    public boolean[] getBools() {
         return this.bits;
     }
 
@@ -70,7 +69,7 @@ public class BooleanSet implements BitVector {
 
     @Override
     public boolean isFull() {
-        return this.cardinality() == this.size();
+        return this.cardinality() == this.bits.length;
     }
 
     @Override
@@ -107,6 +106,21 @@ public class BooleanSet implements BitVector {
         boolean[] bitsCopy = new boolean[this.bits.length];
         System.arraycopy(this.bits, 0, bitsCopy, 0, this.bits.length);
         return new BooleanSet(bitsCopy);
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(bits); // Potenzialmente OK, ma vedi sotto
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (!(o instanceof BooleanSet))
+            return false;
+        BooleanSet that = (BooleanSet) o;
+        return Arrays.equals(this.bits, that.bits); // OK
     }
 
 }

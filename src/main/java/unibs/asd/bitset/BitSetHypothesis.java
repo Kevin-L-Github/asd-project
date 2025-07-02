@@ -125,8 +125,7 @@ public class BitSetHypothesis implements Hypothesis {
 
     @Override
     public void update(BitVector information) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'update'");
+        this.vector.or((BitSetAdapter) information);
     }
 
     @Override

@@ -65,21 +65,11 @@ public class BoolsHypothesis implements Hypothesis {
     }
 
     public int mostSignificantBit() {
-        for (int i = 0; i < bin.size(); i++) {
-            if (bin.get(i)) {
-                return i;
-            }
-        }
-        return -1;
+        return this.bin.mostSignificantBit();
     }
 
     public int leastSignificantBit() {
-        for (int i = bin.size() - 1; i >= 0; i--) {
-            if (bin.get(i)) {
-                return i;
-            }
-        }
-        return -1;
+        return this.bin.leastSignificantBit();
     }
 
     @Override
@@ -110,43 +100,6 @@ public class BoolsHypothesis implements Hypothesis {
         return new BoolsHypothesis(globalInitialBin);
     }
 
-    public BoolsHypothesis initial_(BoolsHypothesis hPrime) {
-
-        if (numberOfPredecessors() == 0) {
-            return hPrime;
-        }
-
-        for (int i = this.size() - 1; i >= 0; i--) {
-            if (bin.get(i)) {
-                BooleanSet predecessor = hPrime.getBin().clone();
-                predecessor.set(i, false);
-                BoolsHypothesis pred = new BoolsHypothesis(predecessor);
-                if (!this.equals(pred)) {
-                    return pred;
-                }
-            }
-        }
-        return null;
-    }
-
-    public BoolsHypothesis final_(BoolsHypothesis hPrime) {
-
-        if (numberOfPredecessors() == 0) {
-            return hPrime;
-        }
-        for (int i = 0; i < this.size(); i++) {
-            if (bin.get(i)) {
-                BooleanSet predecessor = hPrime.getBin().clone();
-                predecessor.set(i, false);
-                BoolsHypothesis pred = new BoolsHypothesis(predecessor);
-                if (!hPrime.equals(pred)) {
-                    return pred;
-                }
-            }
-        }
-        return null;
-    }
-
     public int cardinality() {
         int cardinality = 0;
         for (boolean b : bin.getBools()) {
@@ -158,16 +111,11 @@ public class BoolsHypothesis implements Hypothesis {
     }
 
     public boolean isEmptyHypothesis() {
-        for (boolean b : bin.getBools()) {
-            if (b) {
-                return false;
-            }
-        }
-        return true;
+        return this.bin.isEmpty();
     }
 
     public BooleanSet getVector() {
-        return vector.clone();
+        return this.vector.clone();
     }
 
     public void setVector(BooleanSet vector) {
@@ -189,11 +137,6 @@ public class BoolsHypothesis implements Hypothesis {
         return new BoolsHypothesis(this.bin.clone());
     }
 
-    @Override
-    public int hashCode() {
-        return Arrays.hashCode(bin.getBools()); // Coerente con Arrays.equals()
-    }
-
     public List<Hypothesis> predecessors() {
         List<Hypothesis> predecessors = new ArrayList<>();
         for (int i = 0; i < this.bin.size(); i++) {
@@ -213,7 +156,7 @@ public class BoolsHypothesis implements Hypothesis {
 
     @Override
     public int length() {
-        return this.size();
+        return this.bin.size();
     }
 
     @Override
@@ -223,17 +166,15 @@ public class BoolsHypothesis implements Hypothesis {
 
     @Override
     public void flip(int i) {
-        this.flip(i);
+        this.bin.flip(i);
     }
 
     @Override
     public void or(Hypothesis other) {
         BooleanSet that = (BooleanSet) other.getVector();
-        BooleanSet result = new BooleanSet(that.size());
         for (int i = 0; i < vector.size(); i++) {
-            result.set(i, vector.get(i) || that.get(i));
+            this.vector.set(i, vector.get(i) || that.get(i));
         }
-        this.vector = result;
     }
 
     @Override
@@ -243,11 +184,12 @@ public class BoolsHypothesis implements Hypothesis {
 
     @Override
     public void update(BitVector information) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'update'");
+        for (int i = 0; i < vector.size(); i++) {
+            this.vector.set(i, vector.get(i) || information.get(i));
+        }
     }
 
-        @Override
+    @Override
     public boolean isSolution() {
         return this.vector.isFull();
     }

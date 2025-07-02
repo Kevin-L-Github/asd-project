@@ -126,14 +126,12 @@ public class RoaringHypothesis implements Hypothesis {
 
     @Override
     public void update(BitVector information) {
-        
+        this.vector.or((RoaringBitmapAdapter) information);   
     }
 
     @Override
     public boolean isSolution() {
         return this.vector.isFull();
     }
-
-    
 
 }
