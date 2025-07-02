@@ -60,7 +60,7 @@ public class FastHypothesis implements Hypothesis {
     }
 
     public void setVector(FastBitSet vector) {
-        this.vector = (FastBitSet) vector.clone();
+        this.vector = vector;
     }
 
     @Override
@@ -132,5 +132,10 @@ public class FastHypothesis implements Hypothesis {
         } catch (CloneNotSupportedException e) {
             throw new AssertionError(); // Should never happen since we implement Cloneable
         }
+    }
+
+    @Override
+    public void update(BitVector information) {
+        this.vector.or((FastBitSet) information);
     }
 }

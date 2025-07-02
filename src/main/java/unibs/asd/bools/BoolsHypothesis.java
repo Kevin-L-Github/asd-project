@@ -241,4 +241,10 @@ public class BoolsHypothesis implements Hypothesis {
         this.bin.set(i, value);
     }
 
+    @Override
+    public void update(BitVector information) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'update'");
+    }
+
 }

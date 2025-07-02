@@ -34,7 +34,7 @@ public class Experiment {
         BaseMHS mhs = new BaseMHS(instance);
         mhs.run(BitSetType.BITSET,10_000);
 
-        BenchmarkWriter.writeBenchmark(mhs, fileName, destDir);
+        //BenchmarkWriter.writeBenchmark(mhs, fileName, destDir);
     }
 
 }

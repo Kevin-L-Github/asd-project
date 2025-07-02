@@ -124,4 +124,11 @@ public class RoaringHypothesis implements Hypothesis {
         return new RoaringHypothesis(this.bin);
     }
 
+    @Override
+    public void update(BitVector information) {
+        
+    }
+
+    
+
 }

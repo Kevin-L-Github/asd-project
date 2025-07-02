@@ -2,6 +2,8 @@ package unibs.asd.benchmarks;
 
 import java.util.List;
 
+import unibs.asd.fastbitset.FastHypothesis;
+import unibs.asd.fastbitset.eMHS;
 import unibs.asd.interfaces.Hypothesis;
 import unibs.asd.mhs.BaseMHS;
 
@@ -19,7 +21,7 @@ public class BenchmarkWriter {
      * @param filename name of the input file with .matrix extension
      * @param destDir  destination directory (in project root)
      */
-    public static void writeBenchmark(BaseMHS mhs, String filename, String destDir) {
+    public static void writeBenchmark(eMHS mhs, String filename, String destDir) {
         if (!mhs.isExecuted()) {
             throw new IllegalArgumentException("L'algoritmo non è stato eseguito!");
         }
@@ -27,7 +29,7 @@ public class BenchmarkWriter {
         // Convert filename from .matrix to .mhs
         String outputFilename = filename.replace(".matrix", ".mhs");
 
-        List<Hypothesis> solutions = mhs.getSolutions();
+        List<FastHypothesis> solutions = mhs.getSolutions();
         boolean[][] instance = mhs.getInstance();
         int nonEmptyColumns = mhs.getNonEmptyColumns().size();
         int emptyCols = instance[0].length - nonEmptyColumns;

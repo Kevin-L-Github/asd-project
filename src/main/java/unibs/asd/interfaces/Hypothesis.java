@@ -32,6 +32,8 @@ public interface Hypothesis extends Cloneable {
 
     void or(Hypothesis other);
 
+    void update(BitVector information);
+
     
 
 }

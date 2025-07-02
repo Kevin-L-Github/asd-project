@@ -1,6 +1,5 @@
 package unibs.asd.mhs;
 
-import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -165,7 +164,8 @@ public class BaseMHS {
                 }
             }
             if (isValid) {
-                propagate(parent, child);
+                setFields(child);
+                //propagate(parent, child);
                 children.add(child);
             }
         }

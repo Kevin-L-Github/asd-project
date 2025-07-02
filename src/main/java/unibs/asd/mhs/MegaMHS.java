@@ -1,19 +1,21 @@
-package unibs.asd.fastbitset;
+package unibs.asd.mhs;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.PriorityQueue;
-import java.util.stream.Collectors;
 
+import unibs.asd.fastbitset.FastBitSet;
+import unibs.asd.fastbitset.FastHypothesis;
+import unibs.asd.interfaces.BitVector;
 import unibs.asd.interfaces.Hypothesis;
 
-public class eMHS {
+public class MegaMHS {
 
     private PriorityQueue<FastHypothesis> current;
     private List<FastHypothesis> solutions;
-    private LinkedHashSet<FastBitSet> bucket;
+    private LinkedHashMap<BitVector, BitVector> bucket;
     private boolean[][] instance = null;
     private boolean[][] matrix;
     private List<Integer> nonEmptyColumns;
@@ -24,11 +26,11 @@ public class eMHS {
     private boolean stopped;
     private boolean stoppedInsideLoop;
 
-    public eMHS(boolean[][] instance) {
+    public MegaMHS(boolean[][] instance) {
         this.current = new PriorityQueue<>(
                 (a, b) -> isGreater(a.getBin(), b.getBin()) ? -1 : isGreater(b.getBin(), a.getBin()) ? 1 : 0);
         this.solutions = new ArrayList<>();
-        this.bucket = new LinkedHashSet<>();
+        this.bucket = new LinkedHashMap<>();
         this.instance = instance;
         this.DEPTH = 0;
         this.computationTime = 0;
@@ -52,7 +54,9 @@ public class eMHS {
         FastHypothesis emptyHypothesis = new FastHypothesis(m, n);
         List<FastHypothesis> initialChildren = generateChildrenEmptyHypothesis(emptyHypothesis);
         this.current.addAll(initialChildren);
-        this.bucket.addAll(initialChildren.stream().map(FastHypothesis::getBin).collect(Collectors.toList()));
+        for (Hypothesis init : initialChildren) {
+            this.bucket.put(init.getBin(), init.getVector());
+        }
         DEPTH++;
         boolean computing = true;
         while (computing) {
@@ -72,16 +76,15 @@ public class eMHS {
                     break;
                 }
                 FastHypothesis hypothesis = current.poll();
-                this.bucket.add(hypothesis.getBin());
+                this.bucket.put(hypothesis.getBin(), hypothesis.getVector());
                 if (check(hypothesis)) {
                     solutions.add(hypothesis);
                     bucket.remove(hypothesis.getBin());
                 } else if (hypothesis.mostSignificantBit() != 0) {
                     FastBitSet globalInitial = hypothesis.globalInitial().getBin();
-                    Iterator<FastBitSet> it = bucket.iterator();
+                    Iterator<BitVector> it = bucket.keySet().iterator();
                     while (it.hasNext()) {
-                        FastBitSet element = it.next();
-                        System.out.println(element);
+                        BitVector element = it.next();
                         if (isGreater(element, globalInitial)) {
                             it.remove();
                         } else {
@@ -126,27 +129,31 @@ public class eMHS {
         int length = bin.nextSetBit(0);
         for (int i = 0; i < length; i++) {
             FastBitSet childBin = (FastBitSet) bin.clone();
-            childBin.set(i);
             FastHypothesis child = new FastHypothesis(childBin);
+            child.set(i);
+            child.setVector(new FastBitSet(matrix.length));
+
             List<Hypothesis> predecessors = child.predecessors();
             boolean isValid = true;
             for (Hypothesis p : predecessors) {
-                if (!bucket.contains(p.getBin())) {
+                BitVector match = bucket.get(p.getBin());
+                if (match == null) {
                     isValid = false;
                     break;
+                } else {
+                    propagate(match, child);
                 }
             }
             if (isValid) {
-                setFields(child);
-                //propagate(parent, child);
+                propagate(parent, child);
                 children.add(child);
             }
         }
         return children;
     }
 
-    public static boolean isGreater(FastBitSet a, FastBitSet b) {
-        for (int i = 0; i < a.logicalSize; i++) {
+    public static boolean isGreater(BitVector a, BitVector b) {
+        for (int i = 0; i < a.size(); i++) {
             boolean aBit = a.get(i);
             boolean bBit = b.get(i);
             if (aBit != bBit) {
@@ -176,10 +183,12 @@ public class eMHS {
         return h.isSolution();
     }
 
-    private void propagate(FastHypothesis h, FastHypothesis h_prime) {
-        FastBitSet newVector = (FastBitSet) h.getVector().clone();
-        newVector.or(h_prime.getVector());
-        h_prime.setVector(newVector);
+    private void propagate(Hypothesis predecessor, Hypothesis successor) {
+        successor.or(predecessor);
+    }
+
+    private void propagate(BitVector information, Hypothesis successor) {
+        successor.update(information);
     }
 
     private void cleanMatrix() {
@@ -303,4 +312,5 @@ public class eMHS {
         System.out.print(status.toString());
         System.out.print("\033[K");
     }
+
 }
