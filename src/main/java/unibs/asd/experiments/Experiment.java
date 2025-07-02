@@ -29,7 +29,6 @@ public class Experiment {
         String fileName = filePath.getFileName().toString();
 
         System.out.println("Processing file: " + fileName);
-
         boolean[][] instance = BenchmarkReader.readBenchmark(filePath.toString());
         BaseMHS mhs = new BaseMHS(instance);
         mhs.run(BitSetType.BITSET,10_000);

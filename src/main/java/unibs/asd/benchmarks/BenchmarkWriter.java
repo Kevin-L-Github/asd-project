@@ -3,7 +3,7 @@ package unibs.asd.benchmarks;
 import java.util.List;
 
 import unibs.asd.interfaces.Hypothesis;
-import unibs.asd.mhs.BaseMHS;
+import unibs.asd.interfaces.MHS;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -19,7 +19,7 @@ public class BenchmarkWriter {
      * @param filename name of the input file with .matrix extension
      * @param destDir  destination directory (in project root)
      */
-    public static void writeBenchmark(BaseMHS mhs, String filename, String destDir) {
+    public static void writeBenchmark(MHS mhs, String filename, String destDir) {
         if (!mhs.isExecuted()) {
             throw new IllegalArgumentException("L'algoritmo non è stato eseguito!");
         }

@@ -19,9 +19,10 @@ import unibs.asd.fastbitset.FastHypothesis;
 import unibs.asd.interfaces.BitVector;
 import unibs.asd.interfaces.Hypothesis;
 import unibs.asd.interfaces.HypothesisFactory;
+import unibs.asd.interfaces.MHS;
 import unibs.asd.roaringbitmap.RoaringHypothesis;
 
-public class MidMHS {
+public class MidMHS implements MHS {
 
     private HypothesisFactory factory;
     private List<Hypothesis> current;
@@ -179,7 +180,7 @@ public class MidMHS {
         return children;
     }
 
-    public static boolean isGreater(Hypothesis h1, Hypothesis h2) {
+    private static boolean isGreater(Hypothesis h1, Hypothesis h2) {
         BitVector bs1 = h1.getBin();
         BitVector bs2 = h2.getBin();
         for (int i = 0; i < h1.length(); i++) {

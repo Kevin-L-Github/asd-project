@@ -9,7 +9,8 @@ import java.util.Comparator;
 import java.util.stream.Stream;
 
 import unibs.asd.enums.BitSetType;
-import unibs.asd.mhs.BaseMHS;
+import unibs.asd.interfaces.MHS;
+import unibs.asd.mhs.BoostMHS;
 
 
 public class FilterBenchmarks {
@@ -49,7 +50,7 @@ public class FilterBenchmarks {
 
         // Lettura input e setup MHS
         boolean[][] instance = BenchmarkReader.readBenchmark(inputFile.toString());
-        BaseMHS fastMHS = new BaseMHS(instance);
+        MHS fastMHS = new BoostMHS(instance);
 
         long startTime = System.currentTimeMillis();
         fastMHS.run(BitSetType.BITSET,TIMEOUT_MS);

@@ -17,9 +17,10 @@ import unibs.asd.fastbitset.FastHypothesis;
 import unibs.asd.interfaces.BitVector;
 import unibs.asd.interfaces.Hypothesis;
 import unibs.asd.interfaces.HypothesisFactory;
+import unibs.asd.interfaces.MHS;
 import unibs.asd.roaringbitmap.RoaringHypothesis;
 
-public class BoostMHS {
+public class BoostMHS implements MHS {
 
     private HypothesisFactory factory;
     private PriorityQueue<Hypothesis> current;
@@ -50,9 +51,6 @@ public class BoostMHS {
     }
 
     public List<Hypothesis> run(BitSetType type, long timeoutMillis) {
-        long startTime = System.nanoTime();
-        long timeoutNanos = timeoutMillis * 1_000_000;
-
         if (matrix == null || matrix.length == 0 || matrix[0].length == 0) {
             throw new IllegalArgumentException("Instance must be a non-empty boolean matrix.");
         }
@@ -61,11 +59,14 @@ public class BoostMHS {
         int n = matrix.length;
 
         Hypothesis emptyHypothesis = getInitialHypothesis(type, m, n);
+        long startTime = System.nanoTime();
+        long timeoutNanos = timeoutMillis * 1_000_000;
         List<Hypothesis> initialChildren = generateChildrenEmptyHypothesis(emptyHypothesis);
         this.current.addAll(initialChildren);
         for (Hypothesis init : initialChildren) {
             this.bucket.put(init.getBin(), init.getVector());
         }
+
         DEPTH++;
         boolean computing = true;
         while (computing) {
@@ -184,7 +185,7 @@ public class BoostMHS {
         return children;
     }
 
-    public static boolean isGreater(BitVector a, BitVector b) {
+    private static boolean isGreater(BitVector a, BitVector b) {
         for (int i = 0; i < a.size(); i++) {
             boolean aBit = a.get(i);
             boolean bBit = b.get(i);

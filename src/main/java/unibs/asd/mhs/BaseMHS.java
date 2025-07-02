@@ -15,9 +15,10 @@ import unibs.asd.fastbitset.FastHypothesis;
 import unibs.asd.interfaces.BitVector;
 import unibs.asd.interfaces.Hypothesis;
 import unibs.asd.interfaces.HypothesisFactory;
+import unibs.asd.interfaces.MHS;
 import unibs.asd.roaringbitmap.RoaringHypothesis;
 
-public class BaseMHS {
+public class BaseMHS implements MHS {
 
     private HypothesisFactory factory;
     private List<Hypothesis> current;
@@ -78,7 +79,7 @@ public class BaseMHS {
                 }
 
                 Hypothesis h = current.get(i);
-                //printStatusBar(i, DEPTH, startTime, timeoutNanos);
+                // printStatusBar(i, DEPTH, startTime, timeoutNanos);
 
                 if (check(h)) {
                     solutions.add(h);
@@ -121,13 +122,13 @@ public class BaseMHS {
         switch (type) {
             case BitSetType.BITSET:
                 this.factory = new BitSetHypothesisFactory();
-                return  new BitSetHypothesis(m, n);
+                return new BitSetHypothesis(m, n);
             case BitSetType.BOOLS_ARRAY:
                 this.factory = new BoolsHypothesisFactory();
-                return  new BoolsHypothesis(m, n);
+                return new BoolsHypothesis(m, n);
             case BitSetType.ROARING_BIT_MAP:
                 this.factory = new RoaringHypothesisFactory();
-                return  new RoaringHypothesis(m, n);
+                return new RoaringHypothesis(m, n);
             case BitSetType.FAST_BITSET:
                 this.factory = new FastBitSetHypothesisFactory();
                 return new FastHypothesis(m, n);
@@ -138,7 +139,7 @@ public class BaseMHS {
 
     private List<Hypothesis> generateChildrenEmptyHypothesis(Hypothesis parent) {
         List<Hypothesis> children = new ArrayList<>();
-        //System.out.println("Generating children for empty hypothesis");
+        // System.out.println("Generating children for empty hypothesis");
 
         for (int i = 0; i < parent.length(); i++) {
             Hypothesis child = factory.create(parent.getBin());
@@ -165,7 +166,7 @@ public class BaseMHS {
             }
             if (isValid) {
                 setFields(child);
-                //propagate(parent, child);
+                // propagate(parent, child);
                 children.add(child);
             }
         }
@@ -173,15 +174,15 @@ public class BaseMHS {
     }
 
     private boolean binarySearchContains(Hypothesis target) {
-        //System.out.println("Is " + target + " in current?");
+        // System.out.println("Is " + target + " in current?");
         int low = 0;
         int high = current.size() - 1;
         while (low <= high) {
             int mid = (low + high) / 2;
             Hypothesis middle = current.get(mid);
-            //System.out.println("Middle: " + middle);
+            // System.out.println("Middle: " + middle);
             if (target.equals(middle)) {
-                //System.out.println("Founded!");
+                // System.out.println("Founded!");
                 return true;
             } else if (isGreater(middle, target)) {
                 low = mid + 1;
@@ -192,7 +193,7 @@ public class BaseMHS {
         return false;
     }
 
-    public static boolean isGreater(Hypothesis h1, Hypothesis h2) {
+    private static boolean isGreater(Hypothesis h1, Hypothesis h2) {
         BitVector bs1 = h1.getBin();
         BitVector bs2 = h2.getBin();
         for (int i = 0; i < h1.length(); i++) {
