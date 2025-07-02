@@ -247,4 +247,9 @@ public class BoolsHypothesis implements Hypothesis {
         throw new UnsupportedOperationException("Unimplemented method 'update'");
     }
 
+        @Override
+    public boolean isSolution() {
+        return this.vector.isFull();
+    }
+
 }

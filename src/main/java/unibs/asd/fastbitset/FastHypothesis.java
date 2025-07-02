@@ -56,7 +56,7 @@ public class FastHypothesis implements Hypothesis {
     }
 
     public boolean isSolution() {
-        return this.vector.cardinality() == this.vector.size();
+        return this.vector.isFull();
     }
 
     public void setVector(FastBitSet vector) {

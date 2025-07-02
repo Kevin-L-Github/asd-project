@@ -6,15 +6,24 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.PriorityQueue;
 
-import unibs.asd.fastbitset.FastBitSet;
+import unibs.asd.bitset.BitSetHypothesis;
+import unibs.asd.bools.BoolsHypothesis;
+import unibs.asd.enums.BitSetType;
+import unibs.asd.factories.BitSetHypothesisFactory;
+import unibs.asd.factories.BoolsHypothesisFactory;
+import unibs.asd.factories.FastBitSetHypothesisFactory;
+import unibs.asd.factories.RoaringHypothesisFactory;
 import unibs.asd.fastbitset.FastHypothesis;
 import unibs.asd.interfaces.BitVector;
 import unibs.asd.interfaces.Hypothesis;
+import unibs.asd.interfaces.HypothesisFactory;
+import unibs.asd.roaringbitmap.RoaringHypothesis;
 
-public class MegaMHS {
+public class BoostMHS {
 
-    private PriorityQueue<FastHypothesis> current;
-    private List<FastHypothesis> solutions;
+    private HypothesisFactory factory;
+    private PriorityQueue<Hypothesis> current;
+    private List<Hypothesis> solutions;
     private LinkedHashMap<BitVector, BitVector> bucket;
     private boolean[][] instance = null;
     private boolean[][] matrix;
@@ -26,7 +35,7 @@ public class MegaMHS {
     private boolean stopped;
     private boolean stoppedInsideLoop;
 
-    public MegaMHS(boolean[][] instance) {
+    public BoostMHS(boolean[][] instance) {
         this.current = new PriorityQueue<>(
                 (a, b) -> isGreater(a.getBin(), b.getBin()) ? -1 : isGreater(b.getBin(), a.getBin()) ? 1 : 0);
         this.solutions = new ArrayList<>();
@@ -40,7 +49,7 @@ public class MegaMHS {
         this.cleanMatrix();
     }
 
-    public List<FastHypothesis> run(long timeoutMillis) {
+    public List<Hypothesis> run(BitSetType type,long timeoutMillis) {
         long startTime = System.nanoTime();
         long timeoutNanos = timeoutMillis * 1_000_000;
 
@@ -51,8 +60,8 @@ public class MegaMHS {
         int m = matrix[0].length;
         int n = matrix.length;
 
-        FastHypothesis emptyHypothesis = new FastHypothesis(m, n);
-        List<FastHypothesis> initialChildren = generateChildrenEmptyHypothesis(emptyHypothesis);
+        Hypothesis emptyHypothesis = getInitialHypothesis(type, m, n);
+        List<Hypothesis> initialChildren = generateChildrenEmptyHypothesis(emptyHypothesis);
         this.current.addAll(initialChildren);
         for (Hypothesis init : initialChildren) {
             this.bucket.put(init.getBin(), init.getVector());
@@ -65,9 +74,9 @@ public class MegaMHS {
                 this.stopped = true;
                 break;
             }
-            PriorityQueue<FastHypothesis> next = new PriorityQueue<>(
+            PriorityQueue<Hypothesis> next = new PriorityQueue<>(
                     (a, b) -> isGreater(a.getBin(), b.getBin()) ? -1 : isGreater(b.getBin(), a.getBin()) ? 1 : 0);
-            FastHypothesis first = current.peek();
+            Hypothesis first = current.peek();
             while (!current.isEmpty()) {
                 if (System.nanoTime() - startTime > timeoutNanos) {
                     System.out.println("\nTimeout reached inside loop. Stopping.");
@@ -75,13 +84,13 @@ public class MegaMHS {
                     this.stoppedInsideLoop = true;
                     break;
                 }
-                FastHypothesis hypothesis = current.poll();
+                Hypothesis hypothesis = current.poll();
                 this.bucket.put(hypothesis.getBin(), hypothesis.getVector());
                 if (check(hypothesis)) {
                     solutions.add(hypothesis);
                     bucket.remove(hypothesis.getBin());
                 } else if (hypothesis.mostSignificantBit() != 0) {
-                    FastBitSet globalInitial = hypothesis.globalInitial().getBin();
+                    BitVector globalInitial = hypothesis.globalInitial().getBin();
                     Iterator<BitVector> it = bucket.keySet().iterator();
                     while (it.hasNext()) {
                         BitVector element = it.next();
@@ -92,7 +101,7 @@ public class MegaMHS {
                         }
                     }
                     if (!first.equals(hypothesis)) {
-                        List<FastHypothesis> children = generateChildren(hypothesis);
+                        List<Hypothesis> children = generateChildren(hypothesis);
                         next.addAll(children);
                     }
                 }
@@ -111,27 +120,46 @@ public class MegaMHS {
         return solutions;
     }
 
-    private List<FastHypothesis> generateChildrenEmptyHypothesis(FastHypothesis parent) {
-        List<FastHypothesis> children = new ArrayList<>();
+    private List<Hypothesis> generateChildrenEmptyHypothesis(Hypothesis parent) {
+        List<Hypothesis> children = new ArrayList<>();
         for (int i = 0; i < parent.length(); i++) {
-            FastBitSet childBin = parent.getBin();
+            BitVector childBin = parent.getBin();
             childBin.set(i);
-            FastHypothesis child = new FastHypothesis(childBin);
+            Hypothesis child = this.factory.create(childBin);
             setFields(child);
             children.add(child);
         }
         return children;
     }
 
-    private List<FastHypothesis> generateChildren(FastHypothesis parent) {
-        List<FastHypothesis> children = new ArrayList<>();
-        FastBitSet bin = parent.getBin();
-        int length = bin.nextSetBit(0);
+    private Hypothesis getInitialHypothesis(BitSetType type, int m, int n) {
+        switch (type) {
+            case BitSetType.BITSET:
+                this.factory = new BitSetHypothesisFactory();
+                return new BitSetHypothesis(m, n);
+            case BitSetType.BOOLS_ARRAY:
+                this.factory = new BoolsHypothesisFactory();
+                return new BoolsHypothesis(m, n);
+            case BitSetType.ROARING_BIT_MAP:
+                this.factory = new RoaringHypothesisFactory();
+                return new RoaringHypothesis(m, n);
+            case BitSetType.FAST_BITSET:
+                this.factory = new FastBitSetHypothesisFactory();
+                return new FastHypothesis(m, n);
+            default:
+                throw new IllegalArgumentException("Scegliere un tipo di implementazione");
+        }
+    }
+
+    private List<Hypothesis> generateChildren(Hypothesis parent) {
+        List<Hypothesis> children = new ArrayList<>();
+        BitVector bin = parent.getBin();
+        int length = bin.mostSignificantBit();
         for (int i = 0; i < length; i++) {
-            FastBitSet childBin = (FastBitSet) bin.clone();
-            FastHypothesis child = new FastHypothesis(childBin);
+            BitVector childBin = (BitVector) bin.clone();
+            Hypothesis child = this.factory.create(childBin);
             child.set(i);
-            child.setVector(new FastBitSet(matrix.length));
+            child.setVector(this.factory.createVector(matrix.length));
 
             List<Hypothesis> predecessors = child.predecessors();
             boolean isValid = true;
@@ -163,10 +191,10 @@ public class MegaMHS {
         return false;
     }
 
-    private void setFields(FastHypothesis h) {
+    private void setFields(Hypothesis h) {
         int n = matrix.length;
-        FastBitSet vector = new FastBitSet(n);
-        FastBitSet bin = h.getBin();
+        BitVector vector = this.factory.createVector(n);
+        BitVector bin = h.getBin();
         for (int i = 0; i < matrix[0].length; i++) {
             if (bin.get(i)) {
                 for (int j = 0; j < n; j++) {
@@ -179,8 +207,8 @@ public class MegaMHS {
         h.setVector(vector);
     }
 
-    private boolean check(FastHypothesis h) {
-        return h.isSolution();
+    private boolean check(Hypothesis hypothesis) {
+        return hypothesis.isSolution();
     }
 
     private void propagate(Hypothesis predecessor, Hypothesis successor) {
@@ -230,25 +258,23 @@ public class MegaMHS {
     }
 
     private void restoreSolutions() {
-        List<FastHypothesis> restored = new ArrayList<>();
+        List<Hypothesis> restored = new ArrayList<>();
         int originalSize = instance[0].length;
 
-        for (FastHypothesis h : solutions) {
-            FastBitSet compressed = h.getBin();
-            FastBitSet full = new FastBitSet(originalSize);
-
+        for (Hypothesis h : solutions) {
+            BitVector compressed = h.getBin();
+            BitVector full = this.factory.createVector(originalSize);
             for (int i = 0; i < nonEmptyColumns.size(); i++) {
                 int originalIndex = nonEmptyColumns.get(i);
                 full.set(originalIndex, compressed.get(i));
             }
-
-            restored.add(new FastHypothesis(full));
+            restored.add(this.factory.create(full));
         }
 
         this.solutions = restored;
     }
 
-    public List<FastHypothesis> getSolutions() {
+    public List<Hypothesis> getSolutions() {
         return solutions;
     }
 

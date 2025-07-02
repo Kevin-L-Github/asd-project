@@ -129,6 +129,11 @@ public class RoaringHypothesis implements Hypothesis {
         
     }
 
+    @Override
+    public boolean isSolution() {
+        return this.vector.isFull();
+    }
+
     
 
 }
