@@ -29,6 +29,7 @@ public class BoostMHS implements MHS {
     private boolean executed;
     private boolean stopped;
     private boolean stoppedInsideLoop;
+    private boolean outOfMemoryError;
 
     public BoostMHS(boolean[][] instance) {
         this.current = new PriorityQueue<>(
@@ -41,80 +42,87 @@ public class BoostMHS implements MHS {
         this.executed = false;
         this.stopped = false;
         this.stoppedInsideLoop = false;
+        this.outOfMemoryError = false;
         this.cleanMatrix();
     }
 
     public List<Hypothesis> run(BitSetType type, long timeoutMillis) {
-        if (matrix == null || matrix.length == 0 || matrix[0].length == 0) {
-            throw new IllegalArgumentException("Instance must be a non-empty boolean matrix.");
-        }
-
-        int m = matrix[0].length;
-        int n = matrix.length;
-
-        Hypothesis emptyHypothesis = getInitialHypothesis(type, m, n);
-        long startTime = System.nanoTime();
-        long timeoutNanos = timeoutMillis * 1_000_000;
-        List<Hypothesis> initialChildren = generateChildrenEmptyHypothesis(emptyHypothesis);
-        this.current.addAll(initialChildren);
-        for (Hypothesis init : initialChildren) {
-            this.bucket.put(init.getBin(), init.getVector());
-        }
-
-        DEPTH++;
-        boolean computing = true;
-        //int i = 0;
-        while (computing) {
-            if (System.nanoTime() - startTime > timeoutNanos) {
-                System.out.println("\nTimeout reached. Stopping the algorithm.");
-                this.stopped = true;
-                break;
+        try {
+            if (matrix == null || matrix.length == 0 || matrix[0].length == 0) {
+                throw new IllegalArgumentException("Instance must be a non-empty boolean matrix.");
             }
-            PriorityQueue<Hypothesis> next = new PriorityQueue<>(
-                    (a, b) -> isGreater(a.getBin(), b.getBin()) ? -1 : isGreater(b.getBin(), a.getBin()) ? 1 : 0);
-            Hypothesis first = current.peek();
-            while (!current.isEmpty()) {
+
+            int m = matrix[0].length;
+            int n = matrix.length;
+
+            Hypothesis emptyHypothesis = getInitialHypothesis(type, m, n);
+            long startTime = System.nanoTime();
+            long timeoutNanos = timeoutMillis * 1_000_000;
+            List<Hypothesis> initialChildren = generateChildrenEmptyHypothesis(emptyHypothesis);
+            this.current.addAll(initialChildren);
+            for (Hypothesis init : initialChildren) {
+                this.bucket.put(init.getBin(), init.getVector());
+            }
+
+            DEPTH++;
+            boolean computing = true;
+            int i = 0;
+            while (computing) {
                 if (System.nanoTime() - startTime > timeoutNanos) {
-                    System.out.println("\nTimeout reached inside loop. Stopping.");
+                    System.out.println("\nTimeout reached. Stopping the algorithm.");
                     this.stopped = true;
-                    this.stoppedInsideLoop = true;
                     break;
                 }
-                Hypothesis hypothesis = current.poll();
-                //printStatusBar(i, DEPTH, startTime, timeoutNanos);
-                //i++;
-                this.bucket.put(hypothesis.getBin(), hypothesis.getVector());
-                if (check(hypothesis)) {
-                    solutions.add(hypothesis);
-                    bucket.remove(hypothesis.getBin());
-                } else if (hypothesis.mostSignificantBit() != 0) {
-                    BitVector globalInitial = hypothesis.globalInitial().getBin();
-                    Iterator<BitVector> it = bucket.keySet().iterator();
-                    while (it.hasNext()) {
-                        BitVector element = it.next();
-                        if (isGreater(element, globalInitial)) {
-                            it.remove();
+                PriorityQueue<Hypothesis> next = new PriorityQueue<>(
+                        (a, b) -> isGreater(a.getBin(), b.getBin()) ? -1 : isGreater(b.getBin(), a.getBin()) ? 1 : 0);
+                Hypothesis first = current.peek();
+                while (!current.isEmpty()) {
+                    if (System.nanoTime() - startTime > timeoutNanos) {
+                        System.out.println("\nTimeout reached inside loop. Stopping.");
+                        this.stopped = true;
+                        this.stoppedInsideLoop = true;
+                        break;
+                    }
+                    Hypothesis hypothesis = current.poll();
+                    printStatusBar(i, DEPTH, startTime, timeoutNanos);
+                    i++;
+                    this.bucket.put(hypothesis.getBin(), hypothesis.getVector());
+                    if (check(hypothesis)) {
+                        solutions.add(hypothesis);
+                        bucket.remove(hypothesis.getBin());
+                    } else if (hypothesis.mostSignificantBit() != 0) {
+                        BitVector globalInitial = hypothesis.globalInitial().getBin();
+                        Iterator<BitVector> it = bucket.keySet().iterator();
+                        while (it.hasNext()) {
+                            BitVector element = it.next();
+                            if (isGreater(element, globalInitial)) {
+                                it.remove();
 
-                        } else {
-                            break;
+                            } else {
+                                break;
+                            }
+                        }
+                        if (!first.equals(hypothesis)) {
+                            List<Hypothesis> children = generateChildren(hypothesis);
+                            next.addAll(children);
                         }
                     }
-                    if (!first.equals(hypothesis)) {
-                        List<Hypothesis> children = generateChildren(hypothesis);
-                        next.addAll(children);
-                    }
-                }
 
+                }
+                DEPTH++;
+                if (next.isEmpty()) {
+                    computing = false;
+                } else {
+                    this.current = next;
+                    this.bucket.clear();
+                }
             }
-            DEPTH++;
-            if (next.isEmpty()) {
-                computing = false;
-            } else {
-                this.current = next;
-                this.bucket.clear();
-            }
+            this.computationTime = (System.nanoTime() - startTime) / 1000000000F;
+        } catch (OutOfMemoryError e) {
+            System.out.println("\nOut of memory error occurred. Stopping the algorithm.");
+            this.outOfMemoryError = true;
+            this.stopped = true;
         }
-        this.computationTime = (System.nanoTime() - startTime) / 1000000000F;
         this.restoreSolutions();
         this.executed = true;
         return solutions;

@@ -130,7 +130,7 @@ public class FastHypothesis implements Hypothesis {
             copy.vector = (FastBitSet) this.vector.clone();
             return copy;
         } catch (CloneNotSupportedException e) {
-            throw new AssertionError(); // Should never happen since we implement Cloneable
+            throw new AssertionError();
         }
     }
 

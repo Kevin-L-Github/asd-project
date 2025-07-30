@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 import unibs.asd.interfaces.BitVector;
 
-public final class FastBitSet implements BitVector{
+public class FastBitSet implements BitVector{
 
     public final int logicalSize;
     final long[] words;

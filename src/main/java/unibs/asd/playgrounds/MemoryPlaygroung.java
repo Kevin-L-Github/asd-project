@@ -18,8 +18,8 @@ public class MemoryPlaygroung {
     }
 
     public static void main(String[] args) {
-        int[] sizes = { 1000, 10000 };
-        int[] densities = { 5, 25, 50, 100 };
+        int[] sizes = { 22, 10000 };
+        int[] densities = { 0, 25, 50, 100 };
 
         Random rnd = new Random(42);
 

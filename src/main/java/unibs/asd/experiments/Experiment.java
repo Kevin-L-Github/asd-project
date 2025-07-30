@@ -30,7 +30,6 @@ public class Experiment {
         boolean[][] instance = BenchmarkReader.readBenchmark(filePath.toString());
         BaseMHS mhs = new BaseMHS(instance);
         mhs.run(BitSetType.BITSET,10_000);
-        //BenchmarkWriter.writeBenchmark(mhs, fileName, destDir);
     }
 
 }
