@@ -60,6 +60,4 @@ public class BenchmarksStatistics {
         return distribution;
     }
 
-    
-
 }

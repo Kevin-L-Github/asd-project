@@ -233,6 +233,7 @@ public class BaseMHS implements MHS {
         return h.isSolution();
     }
 
+    @SuppressWarnings("unused")
     private void propagate(Hypothesis parent, Hypothesis child) {
         child.or(parent);
     }
@@ -327,6 +328,7 @@ public class BaseMHS implements MHS {
         return stoppedInsideLoop;
     }
 
+    @SuppressWarnings("unused")
     private void printStatusBar(int i, int depth, long startTime, long timeoutNanos) {
         int progress = (int) (((i + 1) / (double) current.size()) * 100);
         long elapsedNanos = System.nanoTime() - startTime;

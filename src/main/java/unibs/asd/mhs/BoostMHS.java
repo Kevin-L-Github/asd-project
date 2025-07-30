@@ -5,20 +5,14 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.PriorityQueue;
-
+import unibs.asd.factories.*;
+import unibs.asd.interfaces.*;
 import unibs.asd.bitset.BitSetHypothesis;
 import unibs.asd.bools.BoolsHypothesis;
 import unibs.asd.enums.BitSetType;
-import unibs.asd.factories.BitSetHypothesisFactory;
-import unibs.asd.factories.BoolsHypothesisFactory;
-import unibs.asd.factories.FastBitSetHypothesisFactory;
-import unibs.asd.factories.RoaringHypothesisFactory;
 import unibs.asd.fastbitset.FastHypothesis;
-import unibs.asd.interfaces.BitVector;
-import unibs.asd.interfaces.Hypothesis;
-import unibs.asd.interfaces.HypothesisFactory;
-import unibs.asd.interfaces.MHS;
 import unibs.asd.roaringbitmap.RoaringHypothesis;
+import unibs.asd.sparse.SparseHypothesis;
 
 public class BoostMHS implements MHS {
 
@@ -69,6 +63,7 @@ public class BoostMHS implements MHS {
 
         DEPTH++;
         boolean computing = true;
+        //int i = 0;
         while (computing) {
             if (System.nanoTime() - startTime > timeoutNanos) {
                 System.out.println("\nTimeout reached. Stopping the algorithm.");
@@ -86,6 +81,8 @@ public class BoostMHS implements MHS {
                     break;
                 }
                 Hypothesis hypothesis = current.poll();
+                //printStatusBar(i, DEPTH, startTime, timeoutNanos);
+                //i++;
                 this.bucket.put(hypothesis.getBin(), hypothesis.getVector());
                 if (check(hypothesis)) {
                     solutions.add(hypothesis);
@@ -107,6 +104,7 @@ public class BoostMHS implements MHS {
                         next.addAll(children);
                     }
                 }
+
             }
             DEPTH++;
             if (next.isEmpty()) {
@@ -152,6 +150,10 @@ public class BoostMHS implements MHS {
                 System.out.println("FAST BITSET Implementation");
                 this.factory = new FastBitSetHypothesisFactory();
                 return new FastHypothesis(m, n);
+            case BitSetType.SPARSE:
+                System.out.println("SPARSE Implementation");
+                this.factory = new SparseHypothesisFactory();
+                return new SparseHypothesis(m, n);
             default:
                 throw new IllegalArgumentException("Scegliere un tipo di implementazione");
         }

@@ -1,84 +1,72 @@
 package unibs.asd.benchmarks;
 
-import java.util.List;
-
-import unibs.asd.interfaces.Hypothesis;
-import unibs.asd.interfaces.MHS;
-
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.DecimalFormat;
+import java.util.List;
+
+import unibs.asd.interfaces.Hypothesis;
+import unibs.asd.interfaces.MHS;
 
 public class BenchmarkWriter {
 
-    /**
-     * 
-     * @param mhs      instance of an already executed mhs solver
-     * @param filename name of the input file with .matrix extension
-     * @param destDir  destination directory (in project root)
-     */
-    public static void writeBenchmark(MHS mhs, String filename, String destDir) {
+    public static void writeBenchmark(MHS mhs, String filename, String destDir) throws IOException {
         if (!mhs.isExecuted()) {
             throw new IllegalArgumentException("L'algoritmo non è stato eseguito!");
         }
 
-        // Convert filename from .matrix to .mhs
-        String outputFilename = filename.replace(".matrix", ".mhs");
+        String outputFilename = filename.replaceAll("\\.matrix$", ".mhs");
 
         List<Hypothesis> solutions = mhs.getSolutions();
         boolean[][] instance = mhs.getInstance();
         int nonEmptyColumns = mhs.getNonEmptyColumns().size();
         int emptyCols = instance[0].length - nonEmptyColumns;
         int numSolutions = solutions.size();
-        double computationTime = mhs.getComputationTime(); // in nanoseconds
+        double computationTimeNs = mhs.getComputationTime();
         boolean stopped = mhs.isStopped();
 
-        // Create full path including destination directory
         Path outputPath = Paths.get(destDir, outputFilename);
 
-        try (FileWriter writer = new FileWriter(outputPath.toString())) {
-            // Write solutions
+        int minCardinality = solutions.stream()
+            .mapToInt(Hypothesis::cardinality)
+            .min()
+            .orElse(0);
+
+        int maxCardinality = solutions.stream()
+            .mapToInt(Hypothesis::cardinality)
+            .max()
+            .orElse(0);
+
+        try (FileWriter writer = new FileWriter(outputPath.toFile())) {
             writer.write("Soluzioni:\n");
             for (Hypothesis sol : solutions) {
-                writer.write(sol.toString() + "\n");
+                writer.write(sol.toString());
+                writer.write("\n");
             }
 
-            // Write metadata
             writer.write(";;; Number of solutions: " + numSolutions + "\n");
-
-            // Calculate min and max cardinality
-            int minCardinality = Integer.MAX_VALUE;
-            int maxCardinality = Integer.MIN_VALUE;
-            for (Hypothesis sol : solutions) {
-                int card = sol.cardinality();
-                if (card < minCardinality)
-                    minCardinality = card;
-                if (card > maxCardinality)
-                    maxCardinality = card;
-            }
             writer.write(";;; Min Cardinality: " + minCardinality + "\n");
             writer.write(";;; Max Cardinality: " + maxCardinality + "\n");
-
-            // Matrix dimensions
             writer.write(";;; Matrix dimensions (N x M): " + instance.length + " x " + instance[0].length + "\n");
-
-            // Empty columns
             writer.write(";;; Empty columns: " + emptyCols + "\n");
+            writer.write(";;; Time Taken: " + formatTime(computationTimeNs) + "\n");
+            writer.write(";;; Status: " + (stopped ? "Stopped within time" : "Algorithm completed") + "\n");
+        }
+    }
 
-            // Format time
-            DecimalFormat df = new DecimalFormat("0.###");
-            String timeNs = df.format(computationTime) + "ns";
-            String timeMs = df.format(computationTime / 1_000_000) + "ms";
-            String timeS = df.format(computationTime / 1_000_000_000) + "s";
-            writer.write(";;; Time Taken: " + timeNs + " / " + timeMs + " / " + timeS + "\n");
+    private static String formatTime(double timeNs) {
+        DecimalFormat df = new DecimalFormat("0.###");
 
-            // Completion status
-            writer.write(";;; " + (stopped ? "Stopped within time" : "The algorithm was completed") + "\n");
-
-        } catch (IOException e) {
-            System.err.println("Errore durante la scrittura del file: " + e.getMessage());
+        if (timeNs < 1_000) {
+            return df.format(timeNs) + " ns";
+        } else if (timeNs < 1_000_000) {
+            return df.format(timeNs / 1_000) + " µs";
+        } else if (timeNs < 1_000_000_000) {
+            return df.format(timeNs / 1_000_000) + " ms";
+        } else {
+            return df.format(timeNs / 1_000_000_000) + " s";
         }
     }
 }

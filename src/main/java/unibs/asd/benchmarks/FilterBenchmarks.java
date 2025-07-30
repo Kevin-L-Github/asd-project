@@ -16,7 +16,7 @@ import unibs.asd.mhs.BoostMHS;
 public class FilterBenchmarks {
 
     private static String SOLVED_FILENAME = "solved_benchmarks_e.txt";
-    private static int TIMEOUT_MS = 2000; // 2.5 secondi per benchmark
+    private static int TIMEOUT_MS = 60000; // 2.5 secondi per benchmark
 
     public static void runBenchmarks(String benchmarkDir, String destDir) throws IOException {
         Path solvedFile = prepareSolvedFile(destDir);
