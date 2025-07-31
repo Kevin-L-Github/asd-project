@@ -1,4 +1,4 @@
-package unibs.asd.bools;
+package unibs.asd.structures.bools;
 
 import java.util.ArrayList;
 import java.util.Arrays;

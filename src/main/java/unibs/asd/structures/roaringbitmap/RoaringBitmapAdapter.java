@@ -1,4 +1,4 @@
-package unibs.asd.roaringbitmap;
+package unibs.asd.structures.roaringbitmap;
 
 import org.roaringbitmap.IntIterator;
 import org.roaringbitmap.RoaringBitmap;

@@ -1,10 +1,10 @@
 package unibs.asd.factories;
 
-import unibs.asd.bitset.BitSetAdapter;
-import unibs.asd.bitset.BitSetHypothesis;
 import unibs.asd.interfaces.BitVector;
 import unibs.asd.interfaces.Hypothesis;
 import unibs.asd.interfaces.HypothesisFactory;
+import unibs.asd.structures.bitset.BitSetAdapter;
+import unibs.asd.structures.bitset.BitSetHypothesis;
 
 public class BitSetHypothesisFactory implements HypothesisFactory {
     @Override

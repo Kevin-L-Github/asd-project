@@ -1,4 +1,5 @@
-Soluzioni:
+=== SOLUTIONS ===
+
 000100100000000000000000000000100
 000100000000000000000000000010100
 000100000000000000000000000000110
@@ -209,10 +210,17 @@ Soluzioni:
 000000000000001001100001000000100
 000000000000000101100001000000100
 000000000000000001110001000000100
+
+=================
+
+;;; Execution Report
+;;; ================
 ;;; Number of solutions: 210
 ;;; Min Cardinality: 3
 ;;; Max Cardinality: 5
 ;;; Matrix dimensions (N x M): 9 x 33
+;;; Non-empty columns: 25
 ;;; Empty columns: 8
-;;; Time Taken: 94,785ns / 0ms / 0s
-;;; The algorithm was completed
+;;; Computation time: 89,682 ns
+;;; Execution status: Completed successfully
+;;; Search depth: 25

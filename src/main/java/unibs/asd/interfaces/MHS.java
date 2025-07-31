@@ -16,5 +16,6 @@ public interface MHS {
     boolean isExecuted();
     boolean isStopped();
     boolean isStoppedInsideLoop();
+    boolean isOutOfMemoryError();
     
 }

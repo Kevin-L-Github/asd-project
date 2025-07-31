@@ -5,6 +5,8 @@ import java.nio.file.*;
 import java.util.*;
 import java.util.stream.Stream;
 
+import unibs.asd.fileio.BenchmarkReader;
+
 public class BenchmarksSelection {
 
     private static final String SELECTED_FILENAME = "selected_benchmark.txt";

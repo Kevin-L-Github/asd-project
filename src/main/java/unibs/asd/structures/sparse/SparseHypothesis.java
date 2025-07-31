@@ -1,4 +1,4 @@
-package unibs.asd.sparse;
+package unibs.asd.structures.sparse;
 
 import java.util.ArrayList;
 import java.util.List;

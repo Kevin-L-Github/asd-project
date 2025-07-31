@@ -7,12 +7,12 @@ import java.util.List;
 import java.util.PriorityQueue;
 import unibs.asd.factories.*;
 import unibs.asd.interfaces.*;
-import unibs.asd.bitset.BitSetHypothesis;
-import unibs.asd.bools.BoolsHypothesis;
 import unibs.asd.enums.BitSetType;
-import unibs.asd.fastbitset.FastHypothesis;
-import unibs.asd.roaringbitmap.RoaringHypothesis;
-import unibs.asd.sparse.SparseHypothesis;
+import unibs.asd.structures.bitset.BitSetHypothesis;
+import unibs.asd.structures.bools.BoolsHypothesis;
+import unibs.asd.structures.fastbitset.FastHypothesis;
+import unibs.asd.structures.roaringbitmap.RoaringHypothesis;
+import unibs.asd.structures.sparse.SparseHypothesis;
 
 public class BoostMHS implements MHS {
 
@@ -24,6 +24,7 @@ public class BoostMHS implements MHS {
     private boolean[][] matrix;
     private List<Integer> nonEmptyColumns;
     private int DEPTH;
+    private long startTime;
 
     private double computationTime;
     private boolean executed;
@@ -47,6 +48,7 @@ public class BoostMHS implements MHS {
     }
 
     public List<Hypothesis> run(BitSetType type, long timeoutMillis) {
+        
         try {
             if (matrix == null || matrix.length == 0 || matrix[0].length == 0) {
                 throw new IllegalArgumentException("Instance must be a non-empty boolean matrix.");
@@ -56,7 +58,12 @@ public class BoostMHS implements MHS {
             int n = matrix.length;
 
             Hypothesis emptyHypothesis = getInitialHypothesis(type, m, n);
-            long startTime = System.nanoTime();
+            startTime = System.nanoTime();
+            System.out.println("Starting BoostMHS with " + type + " implementation.");
+            System.out.println("Matrix size: " + m + "x" + n);
+            System.out.println("Timeout set to " + timeoutMillis + " milliseconds.");
+            System.out.println("The algorithm will run until it finds all solutions or the timeout is reached.");
+            System.out.println("The algorithm is running, please wait...");
             long timeoutNanos = timeoutMillis * 1_000_000;
             List<Hypothesis> initialChildren = generateChildrenEmptyHypothesis(emptyHypothesis);
             this.current.addAll(initialChildren);
@@ -66,7 +73,7 @@ public class BoostMHS implements MHS {
 
             DEPTH++;
             boolean computing = true;
-            int i = 0;
+            //int i = 0;
             while (computing) {
                 if (System.nanoTime() - startTime > timeoutNanos) {
                     System.out.println("\nTimeout reached. Stopping the algorithm.");
@@ -84,8 +91,8 @@ public class BoostMHS implements MHS {
                         break;
                     }
                     Hypothesis hypothesis = current.poll();
-                    printStatusBar(i, DEPTH, startTime, timeoutNanos);
-                    i++;
+                    //printStatusBar(i, DEPTH, startTime, timeoutNanos);
+                    //i++;
                     this.bucket.put(hypothesis.getBin(), hypothesis.getVector());
                     if (check(hypothesis)) {
                         solutions.add(hypothesis);
@@ -117,12 +124,15 @@ public class BoostMHS implements MHS {
                     this.bucket.clear();
                 }
             }
-            this.computationTime = (System.nanoTime() - startTime) / 1000000000F;
         } catch (OutOfMemoryError e) {
             System.out.println("\nOut of memory error occurred. Stopping the algorithm.");
             this.outOfMemoryError = true;
             this.stopped = true;
+            this.stoppedInsideLoop = true;
         }
+        this.computationTime = (System.nanoTime() - startTime) / 1000000000F;
+        System.out.println("\nAlgorithm completed. Solutions found: " + solutions.size());
+        System.out.println("Computation Time: " + this.computationTime + " seconds");
         this.restoreSolutions();
         this.executed = true;
         return solutions;
@@ -325,6 +335,10 @@ public class BoostMHS implements MHS {
         return stoppedInsideLoop;
     }
 
+    public boolean isOutOfMemoryError() {
+        return outOfMemoryError;
+    }
+
     @SuppressWarnings("unused")
     private void printStatusBar(int processedCount, int depth, long startTime, long timeoutNanos) {
         long elapsedMillis = (System.nanoTime() - startTime) / 1_000_000;
@@ -333,8 +347,8 @@ public class BoostMHS implements MHS {
         int remainingItems = current.size() + processedCount; // Total items at start
         int itemsLeft = remainingItems - processedCount;
 
-        String elapsedStr = String.format("%d:%02d.%03d",
-                elapsedMillis / 60000, (elapsedMillis % 60000) / 1000, elapsedMillis % 1000);
+        String elapsedStr = String.format("%d:%02d",
+                elapsedMillis / 60000, (elapsedMillis % 60000) / 1000);
         String remainingStr = String.format("%d:%02d",
                 remainingMillis / 60000, (remainingMillis % 60000) / 1000);
 
@@ -344,7 +358,7 @@ public class BoostMHS implements MHS {
         status.append(String.format("Sol %-4d | ", solutions.size()));
         status.append(String.format("Processed: %-5d | ", processedCount));
         status.append(String.format("Time: %s | ", elapsedStr));
-        status.append(String.format("Remaining: %s", remainingStr));
+        status.append(String.format("Timer: %s", remainingStr));
 
         if (remainingMillis < 10000) {
             status.append(" [WARNING: Timeout soon!]");

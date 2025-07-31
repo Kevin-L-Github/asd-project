@@ -1,4 +1,4 @@
-package unibs.asd.fastbitset;
+package unibs.asd.structures.fastbitset;
 
 import java.util.ArrayList;
 import java.util.List;

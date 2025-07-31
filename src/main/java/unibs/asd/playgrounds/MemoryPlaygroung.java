@@ -1,10 +1,10 @@
 package unibs.asd.playgrounds;
 
-import unibs.asd.bitset.BitSetHypothesis;
-import unibs.asd.bools.BoolsHypothesis;
-import unibs.asd.fastbitset.FastHypothesis;
-import unibs.asd.roaringbitmap.RoaringHypothesis;
-import unibs.asd.sparse.SparseHypothesis;
+import unibs.asd.structures.bitset.BitSetHypothesis;
+import unibs.asd.structures.bools.BoolsHypothesis;
+import unibs.asd.structures.fastbitset.FastHypothesis;
+import unibs.asd.structures.roaringbitmap.RoaringHypothesis;
+import unibs.asd.structures.sparse.SparseHypothesis;
 
 import org.openjdk.jol.info.GraphLayout;
 

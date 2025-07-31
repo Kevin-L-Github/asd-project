@@ -1,10 +1,10 @@
 package unibs.asd.factories;
 
-import unibs.asd.fastbitset.FastBitSet;
-import unibs.asd.fastbitset.FastHypothesis;
 import unibs.asd.interfaces.BitVector;
 import unibs.asd.interfaces.Hypothesis;
 import unibs.asd.interfaces.HypothesisFactory;
+import unibs.asd.structures.fastbitset.FastBitSet;
+import unibs.asd.structures.fastbitset.FastHypothesis;
 
 public class FastBitSetHypothesisFactory implements HypothesisFactory {
 

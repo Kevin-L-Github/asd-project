@@ -3,8 +3,8 @@ package unibs.asd.factories;
 import unibs.asd.interfaces.BitVector;
 import unibs.asd.interfaces.Hypothesis;
 import unibs.asd.interfaces.HypothesisFactory;
-import unibs.asd.roaringbitmap.RoaringBitmapAdapter;
-import unibs.asd.roaringbitmap.RoaringHypothesis;
+import unibs.asd.structures.roaringbitmap.RoaringBitmapAdapter;
+import unibs.asd.structures.roaringbitmap.RoaringHypothesis;
 
 public class RoaringHypothesisFactory implements HypothesisFactory {
 

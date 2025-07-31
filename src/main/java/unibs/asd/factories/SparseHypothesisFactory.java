@@ -3,8 +3,8 @@ package unibs.asd.factories;
 import unibs.asd.interfaces.BitVector;
 import unibs.asd.interfaces.Hypothesis;
 import unibs.asd.interfaces.HypothesisFactory;
-import unibs.asd.sparse.SparseHypothesis;
-import unibs.asd.sparse.SparseVector;
+import unibs.asd.structures.sparse.SparseHypothesis;
+import unibs.asd.structures.sparse.SparseVector;
 
 public class SparseHypothesisFactory implements HypothesisFactory {
 

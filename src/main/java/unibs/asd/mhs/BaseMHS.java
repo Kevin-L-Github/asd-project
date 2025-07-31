@@ -4,19 +4,19 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import unibs.asd.bitset.BitSetHypothesis;
-import unibs.asd.bools.BoolsHypothesis;
 import unibs.asd.enums.BitSetType;
 import unibs.asd.factories.BitSetHypothesisFactory;
 import unibs.asd.factories.BoolsHypothesisFactory;
 import unibs.asd.factories.FastBitSetHypothesisFactory;
 import unibs.asd.factories.RoaringHypothesisFactory;
-import unibs.asd.fastbitset.FastHypothesis;
 import unibs.asd.interfaces.BitVector;
 import unibs.asd.interfaces.Hypothesis;
 import unibs.asd.interfaces.HypothesisFactory;
 import unibs.asd.interfaces.MHS;
-import unibs.asd.roaringbitmap.RoaringHypothesis;
+import unibs.asd.structures.bitset.BitSetHypothesis;
+import unibs.asd.structures.bools.BoolsHypothesis;
+import unibs.asd.structures.fastbitset.FastHypothesis;
+import unibs.asd.structures.roaringbitmap.RoaringHypothesis;
 
 public class BaseMHS implements MHS {
 
@@ -326,6 +326,10 @@ public class BaseMHS implements MHS {
 
     public boolean isStoppedInsideLoop() {
         return stoppedInsideLoop;
+    }
+
+    public boolean isOutOfMemoryError() {
+        return false; // This method is not implemented in BaseMHS, override in subclasses if needed
     }
 
     @SuppressWarnings("unused")

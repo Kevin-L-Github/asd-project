@@ -9,6 +9,7 @@ import java.util.Comparator;
 import java.util.stream.Stream;
 
 import unibs.asd.enums.BitSetType;
+import unibs.asd.fileio.BenchmarkReader;
 import unibs.asd.interfaces.MHS;
 import unibs.asd.mhs.BoostMHS;
 

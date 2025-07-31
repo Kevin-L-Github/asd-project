@@ -1,10 +1,10 @@
 package unibs.asd.factories;
 
-import unibs.asd.bools.BooleanSet;
-import unibs.asd.bools.BoolsHypothesis;
 import unibs.asd.interfaces.BitVector;
 import unibs.asd.interfaces.Hypothesis;
 import unibs.asd.interfaces.HypothesisFactory;
+import unibs.asd.structures.bools.BooleanSet;
+import unibs.asd.structures.bools.BoolsHypothesis;
 
 public class BoolsHypothesisFactory implements HypothesisFactory {
 
