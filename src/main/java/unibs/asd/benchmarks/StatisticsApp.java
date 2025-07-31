@@ -5,7 +5,7 @@ import java.io.IOException;
 public class StatisticsApp {
     public static void main(String[] args) {
         String benchmarkDirectory = "src\\mybenchmarks";
-        String outputDirectory = "results\\results.csv";
+        String outputDirectory = "analysis\\results.csv";
 
         Analyzer analyzer = new Analyzer();
         try {

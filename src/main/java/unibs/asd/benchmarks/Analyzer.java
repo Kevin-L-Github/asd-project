@@ -10,124 +10,146 @@ import unibs.asd.fileio.BenchmarkReader;
 /**
  * Analyzes benchmark matrices, removes empty columns, and outputs results in
  * CSV format.
+ * The analyzer processes boolean matrices, computes various statistics, and
+ * generates
+ * a comprehensive report about matrix characteristics.
  */
 public class Analyzer {
 
-    private final List<Statistics> benchmarks = new ArrayList<>();
-    private int totalFiles = 0;
-    private int processedFiles = 0;
+    // List to store statistics for all processed benchmarks
+    private final List<Statistics> benchmarksStatistics = new ArrayList<>();
+
+    // Progress tracking variables
+    private int totalFilesToProcess = 0;
+    private int processedFilesCount = 0;
 
     /**
-     * Runs benchmark analysis on all files in the directory
+     * Main method to analyze benchmarks in a directory and write results to CSV
      * 
-     * @param benchmarkDir Input directory containing benchmark files
-     * @param outputPath   Full output path for CSV results (e.g.,
-     *                     "results/analysis.csv")
+     * @param benchmarkDirectory Path to directory containing benchmark files
+     * @param outputFilePath     Full path for output CSV file (e.g.,
+     *                           "results/analysis.csv")
      * @throws IOException If file operations fail
      */
-    public void analyzeBenchmarks(String benchmarkDir, String outputPath) throws IOException {
-        Path outputFile = prepareOutputFile(outputPath);
-        countTotalFiles(benchmarkDir); // Conta prima i file totali
-        processBenchmarks(benchmarkDir, outputFile);
-        writeCSVResults(outputFile);
-        System.out.println("\nCompleted, All benchmarks processed!");
+    public void analyzeBenchmarks(String benchmarkDirectory, String outputFilePath) throws IOException {
+        Path outputFile = prepareOutputFile(outputFilePath);
+        countTotalBenchmarkFiles(benchmarkDirectory);
+        processAllBenchmarks(benchmarkDirectory, outputFile);
+        writeStatisticsToCSV(outputFile);
+        System.out.println("\nAnalysis completed! Processed " + processedFilesCount + " benchmark files.");
     }
 
     /**
-     * Counts total files to process for progress tracking
+     * Counts total benchmark files in directory for progress tracking
+     * 
+     * @param benchmarkDirectory Path to directory containing benchmark files
+     * @throws IOException If directory access fails
      */
-    private void countTotalFiles(String benchmarkDir) throws IOException {
-        try (Stream<Path> files = Files.list(Paths.get(benchmarkDir))) {
-            totalFiles = (int) files.filter(Files::isRegularFile).count();
+    private void countTotalBenchmarkFiles(String benchmarkDirectory) throws IOException {
+        try (Stream<Path> files = Files.list(Paths.get(benchmarkDirectory))) {
+            totalFilesToProcess = (int) files.filter(Files::isRegularFile).count();
         }
     }
 
     /**
-     * Prepares the output file, creating parent directories if needed
+     * Prepares the output file by creating necessary directories
+     * 
+     * @param outputPath Desired output file path
+     * @return Path object for the output file
+     * @throws IOException If file creation fails
      */
     private Path prepareOutputFile(String outputPath) throws IOException {
-        Path file = Paths.get(outputPath);
-        Files.createDirectories(file.getParent());
-        Files.deleteIfExists(file);
-        return Files.createFile(file);
+        Path outputFile = Paths.get(outputPath);
+        Files.createDirectories(outputFile.getParent());
+        Files.deleteIfExists(outputFile);
+        return Files.createFile(outputFile);
     }
 
     /**
      * Processes all benchmark files in the directory
+     * 
+     * @param benchmarkDirectory Directory containing benchmark files
+     * @param outputFile         Path to output file for results
+     * @throws IOException If file processing fails
      */
-    private void processBenchmarks(String benchmarkDir, Path outputFile) throws IOException {
-        try (Stream<Path> files = Files.list(Paths.get(benchmarkDir))) {
+    private void processAllBenchmarks(String benchmarkDirectory, Path outputFile) throws IOException {
+        try (Stream<Path> files = Files.list(Paths.get(benchmarkDirectory))) {
             files.filter(Files::isRegularFile)
                     .sorted(Comparator.comparing(Path::getFileName))
-                    .forEach(path -> {
-                        processBenchmarkFile(path);
-                        updateProgress();
+                    .forEach(filePath -> {
+                        processSingleBenchmarkFile(filePath);
+                        updateProgressIndicator();
                     });
         }
     }
 
     /**
-     * Updates the progress animation with a longer bar
+     * Updates the progress indicator with a visual progress bar
      */
-    private void updateProgress() {
-        processedFiles++;
-        int progress = (int) (((double) processedFiles / totalFiles) * 100);
+    private void updateProgressIndicator() {
+        processedFilesCount++;
+        int progressPercentage = (int) (((double) processedFilesCount / totalFilesToProcess) * 100);
 
-        // Larghezza della barra di progresso
-        final int barLength = 25;
-        int filledLength = (int) ((double) processedFiles / totalFiles * barLength);
+        // Progress bar visualization parameters
+        final int progressBarWidth = 25;
+        int filledSegments = (int) ((double) processedFilesCount / totalFilesToProcess * progressBarWidth);
 
-        // Creazione della barra tipo [=======> ]
-        String bar = ">".repeat(Math.max(0, filledLength - 1)) +
-                (filledLength > 0 ? ">" : "") +
-                " ".repeat(Math.max(0, barLength - filledLength));
+        // Create progress bar string: [=====> ]
+        String progressBar = "=".repeat(Math.max(0, filledSegments - 1)) +
+                (filledSegments > 0 ? ">" : "") +
+                " ".repeat(Math.max(0, progressBarWidth - filledSegments));
 
-        String output = String.format(
+        String progressOutput = String.format(
                 "\rProcessing: %4d/%-4d [%s] %3d%%",
-                processedFiles,
-                totalFiles,
-                bar,
-                progress);
+                processedFilesCount,
+                totalFilesToProcess,
+                progressBar,
+                progressPercentage);
 
-        System.out.print(output);
+        System.out.print(progressOutput);
     }
 
     /**
-     * Processes a single benchmark file and collects statistics
+     * Processes a single benchmark file and collects its statistics
+     * 
+     * @param benchmarkFile Path to the benchmark file to process
      */
-    private void processBenchmarkFile(Path inputFile) {
-        String filename = inputFile.getFileName().toString();
+    private void processSingleBenchmarkFile(Path benchmarkFile) {
+        String fileName = benchmarkFile.getFileName().toString();
 
-        boolean[][] originalMatrix = BenchmarkReader.readBenchmark(inputFile.toString());
+        // Read and preprocess the matrix
+        boolean[][] originalMatrix = BenchmarkReader.readBenchmark(benchmarkFile.toString());
         boolean[][] processedMatrix = removeEmptyColumns(originalMatrix);
 
+        // Calculate all statistics for this benchmark
         Statistics stats = new Statistics(
-                filename,
-                processedMatrix.length,
-                processedMatrix[0].length,
-                computeSparsity(processedMatrix),
-                averageOnesPerRow(processedMatrix),
-                maxOnesPerRow(processedMatrix),
-                minOnesPerRow(processedMatrix),
-                stdDevOnesPerRow(processedMatrix));
+                fileName,
+                processedMatrix.length, // row count
+                processedMatrix[0].length, // column count
+                calculateMatrixSparsity(processedMatrix), // sparsity ratio
+                calculateAverageOnesPerRow(processedMatrix), // mean ones per row
+                findMaxOnesInAnyRow(processedMatrix), // max ones in a row
+                findMinOnesInAnyRow(processedMatrix), // min ones in a row
+                calculateStdDevOfOnesPerRow(processedMatrix) // standard deviation
+        );
 
-        benchmarks.add(stats);
+        benchmarksStatistics.add(stats);
     }
 
     /**
-     * Writes analysis results in CSV format
+     * Writes collected statistics to CSV file
      * 
      * @param outputFile Path to output CSV file
      * @throws IOException If writing fails
      */
-    private void writeCSVResults(Path outputFile) throws IOException {
-        // CSV header
+    private void writeStatisticsToCSV(Path outputFile) throws IOException {
+        // Write CSV header
         String header = "Filename,Rows,Columns,Sparsity,Avg Ones/Row,Max Ones/Row,Min Ones/Row,StdDev\n";
         Files.writeString(outputFile, header);
 
-        // CSV data rows
-        for (Statistics stats : benchmarks) {
-            String row = String.format(Locale.US, "%s,%d,%d,%.4f,%.2f,%.2f,%.2f,%.2f%n",
+        // Write each benchmark's statistics as a CSV row
+        for (Statistics stats : benchmarksStatistics) {
+            String csvRow = String.format(Locale.US, "%s,%d,%d,%.4f,%.2f,%.2f,%.2f,%.2f%n",
                     stats.filename(),
                     stats.rows(),
                     stats.columns(),
@@ -137,156 +159,175 @@ public class Analyzer {
                     stats.minOnesPerRow(),
                     stats.stdDev());
 
-            Files.writeString(outputFile, row, StandardOpenOption.APPEND);
+            Files.writeString(outputFile, csvRow, StandardOpenOption.APPEND);
         }
     }
 
     // ========== MATRIX PROCESSING METHODS ==========
 
     /**
-     * Removes empty columns from the matrix
+     * Removes empty columns (columns with all false values) from the matrix
      * 
+     * @param inputMatrix Original boolean matrix to process
      * @return New matrix with empty columns removed
      */
-    private boolean[][] removeEmptyColumns(boolean[][] matrix) {
-        if (matrix.length == 0 || matrix[0].length == 0)
-            return matrix;
+    private boolean[][] removeEmptyColumns(boolean[][] inputMatrix) {
+        if (inputMatrix.length == 0 || inputMatrix[0].length == 0) {
+            return inputMatrix;
+        }
 
-        List<Integer> nonEmptyCols = new ArrayList<>();
-        for (int j = 0; j < matrix[0].length; j++) {
-            if (!isColumnEmpty(matrix, j)) {
-                nonEmptyCols.add(j);
+        // Identify indices of non-empty columns
+        List<Integer> columnsToKeep = new ArrayList<>();
+        for (int colIndex = 0; colIndex < inputMatrix[0].length; colIndex++) {
+            if (!isColumnEmpty(inputMatrix, colIndex)) {
+                columnsToKeep.add(colIndex);
             }
         }
 
-        boolean[][] result = new boolean[matrix.length][nonEmptyCols.size()];
-        for (int i = 0; i < matrix.length; i++) {
-            for (int k = 0; k < nonEmptyCols.size(); k++) {
-                result[i][k] = matrix[i][nonEmptyCols.get(k)];
+        // Create new matrix with only non-empty columns
+        boolean[][] filteredMatrix = new boolean[inputMatrix.length][columnsToKeep.size()];
+        for (int rowIndex = 0; rowIndex < inputMatrix.length; rowIndex++) {
+            for (int newColIndex = 0; newColIndex < columnsToKeep.size(); newColIndex++) {
+                int originalColIndex = columnsToKeep.get(newColIndex);
+                filteredMatrix[rowIndex][newColIndex] = inputMatrix[rowIndex][originalColIndex];
             }
         }
-        return result;
+
+        return filteredMatrix;
     }
 
     /**
-     * Checks if a column is completely empty
+     * Checks if a matrix column contains only false values
      * 
-     * @param matrix   Input matrix
-     * @param colIndex Column index to check
-     * @return True if column contains no true values
+     * @param matrix      The matrix to check
+     * @param columnIndex Index of the column to examine
+     * @return True if the column is empty (all false), false otherwise
      */
-    private boolean isColumnEmpty(boolean[][] matrix, int colIndex) {
+    private boolean isColumnEmpty(boolean[][] matrix, int columnIndex) {
         for (boolean[] row : matrix) {
-            if (row[colIndex]) {
+            if (row[columnIndex]) {
                 return false;
             }
         }
         return true;
     }
 
-    // ========== MATRIX ANALYSIS METHODS ==========
+    // ========== MATRIX STATISTICS CALCULATION METHODS ==========
 
     /**
-     * Computes matrix sparsity (percentage of false values)
+     * Computes the sparsity ratio of the matrix (percentage of false values)
      * 
-     * @param matrix Input matrix
-     * @return Sparsity value between 0 and 1
+     * @param matrix The matrix to analyze
+     * @return Sparsity value between 0.0 (no false values) and 1.0 (all false)
      */
-    private float computeSparsity(boolean[][] matrix) {
-        int ones = countTotalOnes(matrix);
-        int total = matrix.length * matrix[0].length;
-        return 1.0f - ((float) ones / total);
+    private float calculateMatrixSparsity(boolean[][] matrix) {
+        int trueValuesCount = countTrueValuesInMatrix(matrix);
+        int totalCells = matrix.length * matrix[0].length;
+        return 1.0f - ((float) trueValuesCount / totalCells);
     }
 
     /**
-     * Counts total true values in matrix
+     * Counts all true values in the entire matrix
      * 
-     * @param matrix Input matrix
+     * @param matrix The matrix to analyze
      * @return Total count of true values
      */
-    private int countTotalOnes(boolean[][] matrix) {
+    private int countTrueValuesInMatrix(boolean[][] matrix) {
         int count = 0;
         for (boolean[] row : matrix) {
-            for (boolean val : row) {
-                if (val)
+            for (boolean value : row) {
+                if (value) {
                     count++;
+                }
             }
         }
         return count;
     }
 
     /**
-     * Calculates average true values per row
+     * Calculates the average number of true values per row
      * 
-     * @param matrix Input matrix
-     * @return Average value
+     * @param matrix The matrix to analyze
+     * @return Average number of true values per row
      */
-    private float averageOnesPerRow(boolean[][] matrix) {
-        return (float) countTotalOnes(matrix) / matrix.length;
+    private float calculateAverageOnesPerRow(boolean[][] matrix) {
+        return (float) countTrueValuesInMatrix(matrix) / matrix.length;
     }
 
     /**
-     * Finds maximum true values in any row
+     * Finds the maximum number of true values in any single row
      * 
-     * @param matrix Input matrix
-     * @return Maximum count
+     * @param matrix The matrix to analyze
+     * @return Maximum count of true values found in any row
      */
-    private float maxOnesPerRow(boolean[][] matrix) {
-        int max = 0;
+    private float findMaxOnesInAnyRow(boolean[][] matrix) {
+        int maxCount = 0;
         for (boolean[] row : matrix) {
-            max = Math.max(max, countOnesInRow(row));
+            maxCount = Math.max(maxCount, countTrueValuesInRow(row));
         }
-        return max;
+        return maxCount;
     }
 
     /**
-     * Finds minimum true values in any row
+     * Finds the minimum number of true values in any single row
      * 
-     * @param matrix Input matrix
-     * @return Minimum count
+     * @param matrix The matrix to analyze
+     * @return Minimum count of true values found in any row
      */
-    private float minOnesPerRow(boolean[][] matrix) {
-        int min = Integer.MAX_VALUE;
+    private float findMinOnesInAnyRow(boolean[][] matrix) {
+        int minCount = Integer.MAX_VALUE;
         for (boolean[] row : matrix) {
-            min = Math.min(min, countOnesInRow(row));
+            minCount = Math.min(minCount, countTrueValuesInRow(row));
         }
-        return min == Integer.MAX_VALUE ? 0 : min;
+        return minCount == Integer.MAX_VALUE ? 0 : minCount;
     }
 
     /**
-     * Calculates standard deviation of true values per row
+     * Calculates the standard deviation of true values counts per row
      * 
-     * @param matrix Input matrix
-     * @return Standard deviation value
+     * @param matrix The matrix to analyze
+     * @return Standard deviation of true values counts across rows
      */
-    private float stdDevOnesPerRow(boolean[][] matrix) {
-        float mean = averageOnesPerRow(matrix);
-        float varianceSum = 0;
+    private float calculateStdDevOfOnesPerRow(boolean[][] matrix) {
+        float mean = calculateAverageOnesPerRow(matrix);
+        float sumOfSquaredDifferences = 0;
+
         for (boolean[] row : matrix) {
-            float diff = countOnesInRow(row) - mean;
-            varianceSum += diff * diff;
+            float difference = countTrueValuesInRow(row) - mean;
+            sumOfSquaredDifferences += difference * difference;
         }
-        return (float) Math.sqrt(varianceSum / matrix.length);
+
+        return (float) Math.sqrt(sumOfSquaredDifferences / matrix.length);
     }
 
     /**
-     * Helper method to count true values in a single row
+     * Counts true values in a single matrix row
      * 
-     * @param row Matrix row
-     * @return Count of true values
+     * @param row A single row from the matrix
+     * @return Count of true values in the row
      */
-    private int countOnesInRow(boolean[] row) {
+    private int countTrueValuesInRow(boolean[] row) {
         int count = 0;
-        for (boolean val : row) {
-            if (val)
+        for (boolean value : row) {
+            if (value) {
                 count++;
+            }
         }
         return count;
     }
 }
 
 /**
- * Record to hold benchmark statistics
+ * Immutable record to hold benchmark statistics
+ * 
+ * @param filename      Name of the benchmark file
+ * @param rows          Number of rows in the processed matrix
+ * @param columns       Number of columns in the processed matrix
+ * @param sparsity      Sparsity ratio (0-1) of the matrix
+ * @param avgOnesPerRow Average true values per row
+ * @param maxOnesPerRow Maximum true values in any row
+ * @param minOnesPerRow Minimum true values in any row
+ * @param stdDev        Standard deviation of true values per row
  */
 record Statistics(
         String filename,
