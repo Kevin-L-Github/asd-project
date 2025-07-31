@@ -14,5 +14,7 @@ public class StatisticsApp {
             System.out.println("Error during benchmark analysis: " + e.getMessage());
         }
 
+        
+
     }
 }
