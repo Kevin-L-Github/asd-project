@@ -22,6 +22,10 @@ public class Analyzer {
     private int totalFilesToProcess = 0;
     private int processedFilesCount = 0;
 
+    public List<Statistics> getBenchmarksStatistics() {
+        return Collections.unmodifiableList(benchmarksStatistics);
+    }
+
     /**
      * Main method to analyze benchmarks in a directory and write results to CSV
      * 
@@ -126,6 +130,7 @@ public class Analyzer {
                 originalMatrix[0].length, // column count
                 processedMatrix.length, // non empty row count
                 processedMatrix[0].length, // non empty column count
+                computeMatrixDensity(processedMatrix), // density ratio
                 calculateMatrixSparsity(processedMatrix), // sparsity ratio
                 calculateAverageOnesPerRow(processedMatrix), // mean ones per row
                 findMaxOnesInAnyRow(processedMatrix), // max ones in a row
@@ -144,17 +149,18 @@ public class Analyzer {
      */
     private void writeStatisticsToCSV(Path outputFile) throws IOException {
         // Write CSV header
-        String header = "Filename,Rows,Columns,NonEmptyRows,NonEmptyCols,Sparsity,Avg Ones/Row,Max Ones/Row,Min Ones/Row,StdDev\n";
+        String header = "Filename,Rows,Columns,NonEmptyRows,NonEmptyCols,Density,Sparsity,Avg Ones/Row,Max Ones/Row,Min Ones/Row,StdDev\n";
         Files.writeString(outputFile, header);
 
         // Write each benchmark's statistics as a CSV row
         for (Statistics stats : benchmarksStatistics) {
-            String csvRow = String.format(Locale.US, "%s,%d,%d,%d,%d,%.4f,%.2f,%.2f,%.2f,%.2f%n",
+            String csvRow = String.format(Locale.US, "%s,%d,%d,%d,%d,%.4f,%.4f,%.2f,%.2f,%.2f,%.2f%n",
                     stats.filename(),
                     stats.rows(),
                     stats.columns(),
                     stats.nonEmptyRows(),
                     stats.nonEmptyColumns(),
+                    stats.density(),
                     stats.sparsity(),
                     stats.avgOnesPerRow(),
                     stats.maxOnesPerRow(),
@@ -226,6 +232,18 @@ public class Analyzer {
         int trueValuesCount = countTrueValuesInMatrix(matrix);
         int totalCells = matrix.length * matrix[0].length;
         return 1.0f - ((float) trueValuesCount / totalCells);
+    }
+
+    /**
+     * Computes the density of the matrix (percentage of true values)
+     * 
+     * @param matrix The matrix to analyze
+     * @return Density value between 0.0 (all false) and 1.0 (no false values)
+     */
+    private float computeMatrixDensity(boolean[][] matrix) {
+        int trueValuesCount = countTrueValuesInMatrix(matrix);
+        int totalCells = matrix.length * matrix[0].length;
+        return (float) trueValuesCount / totalCells;
     }
 
     /**
@@ -325,6 +343,9 @@ public class Analyzer {
  * @param filename      Name of the benchmark file
  * @param rows          Number of rows in the processed matrix
  * @param columns       Number of columns in the processed matrix
+ * @param nonEmptyRows  Count of rows with at least one true value
+ * @param nonEmptyColumns Count of columns with at least one true value
+ * @param density       Density ratio (0-1) of the matrix
  * @param sparsity      Sparsity ratio (0-1) of the matrix
  * @param avgOnesPerRow Average true values per row
  * @param maxOnesPerRow Maximum true values in any row
@@ -337,6 +358,7 @@ record Statistics(
         int columns,
         int nonEmptyRows,
         int nonEmptyColumns,
+        float density,
         float sparsity,
         float avgOnesPerRow,
         float maxOnesPerRow,

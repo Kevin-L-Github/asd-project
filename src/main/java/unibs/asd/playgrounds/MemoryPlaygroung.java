@@ -7,8 +7,6 @@ import unibs.asd.structures.roaringbitmap.RoaringHypothesis;
 import unibs.asd.structures.sparse.SparseHypothesis;
 
 import org.openjdk.jol.info.GraphLayout;
-
-
 import java.util.Random;
 
 public class MemoryPlaygroung {
@@ -18,7 +16,7 @@ public class MemoryPlaygroung {
     }
 
     public static void main(String[] args) {
-        int[] sizes = { 22, 10000 };
+        int[] sizes = { 22, 1100 };
         int[] densities = { 0, 25, 50, 100 };
 
         Random rnd = new Random(42);

@@ -33,7 +33,6 @@ public class FilterBenchmarks {
         Path solvedFile = dirPath.resolve(SOLVED_FILENAME);
         Files.deleteIfExists(solvedFile);
         return Files.createFile(solvedFile);
-
     }
 
     private static void processBenchmarksSequentially(String benchmarkDir, Path solvedFile) throws IOException {
