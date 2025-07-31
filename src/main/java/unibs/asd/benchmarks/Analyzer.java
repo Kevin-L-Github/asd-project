@@ -11,8 +11,7 @@ import unibs.asd.fileio.BenchmarkReader;
  * Analyzes benchmark matrices, removes empty columns, and outputs results in
  * CSV format.
  * The analyzer processes boolean matrices, computes various statistics, and
- * generates
- * a comprehensive report about matrix characteristics.
+ * generates a comprehensive report about matrix characteristics.
  */
 public class Analyzer {
 
@@ -27,8 +26,7 @@ public class Analyzer {
      * Main method to analyze benchmarks in a directory and write results to CSV
      * 
      * @param benchmarkDirectory Path to directory containing benchmark files
-     * @param outputFilePath     Full path for output CSV file (e.g.,
-     *                           "results/analysis.csv")
+     * @param outputFilePath     Full path for output CSV file (e.g. "results/analysis.csv")
      * @throws IOException If file operations fail
      */
     public void analyzeBenchmarks(String benchmarkDirectory, String outputFilePath) throws IOException {
@@ -124,8 +122,10 @@ public class Analyzer {
         // Calculate all statistics for this benchmark
         Statistics stats = new Statistics(
                 fileName,
-                processedMatrix.length, // row count
-                processedMatrix[0].length, // column count
+                originalMatrix.length, // row count
+                originalMatrix[0].length, // column count
+                processedMatrix.length, // non empty row count
+                processedMatrix[0].length, // non empty column count
                 calculateMatrixSparsity(processedMatrix), // sparsity ratio
                 calculateAverageOnesPerRow(processedMatrix), // mean ones per row
                 findMaxOnesInAnyRow(processedMatrix), // max ones in a row
@@ -144,15 +144,17 @@ public class Analyzer {
      */
     private void writeStatisticsToCSV(Path outputFile) throws IOException {
         // Write CSV header
-        String header = "Filename,Rows,Columns,Sparsity,Avg Ones/Row,Max Ones/Row,Min Ones/Row,StdDev\n";
+        String header = "Filename,Rows,Columns,NonEmptyRows,NonEmptyCols,Sparsity,Avg Ones/Row,Max Ones/Row,Min Ones/Row,StdDev\n";
         Files.writeString(outputFile, header);
 
         // Write each benchmark's statistics as a CSV row
         for (Statistics stats : benchmarksStatistics) {
-            String csvRow = String.format(Locale.US, "%s,%d,%d,%.4f,%.2f,%.2f,%.2f,%.2f%n",
+            String csvRow = String.format(Locale.US, "%s,%d,%d,%d,%d,%.4f,%.2f,%.2f,%.2f,%.2f%n",
                     stats.filename(),
                     stats.rows(),
                     stats.columns(),
+                    stats.nonEmptyRows(),
+                    stats.nonEmptyColumns(),
                     stats.sparsity(),
                     stats.avgOnesPerRow(),
                     stats.maxOnesPerRow(),
@@ -333,6 +335,8 @@ record Statistics(
         String filename,
         int rows,
         int columns,
+        int nonEmptyRows,
+        int nonEmptyColumns,
         float sparsity,
         float avgOnesPerRow,
         float maxOnesPerRow,
