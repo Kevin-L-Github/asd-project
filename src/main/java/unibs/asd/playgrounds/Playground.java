@@ -14,7 +14,7 @@ public class Playground {
      * Il tempo limite deve essere espresso in secondi
      */
     public static final String BENCHMARK = "74L85.026.matrix";
-    public static final long TIMEOUT = 600;
+    public static final long TIMEOUT = 300;
 
     public static void main(String[] args) throws IOException {
         boolean[][] benchmark = BenchmarkReader.readBenchmark("src\\mybenchmarks\\" + BENCHMARK);

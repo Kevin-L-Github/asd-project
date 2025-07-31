@@ -29,7 +29,7 @@ public class BenchmarkReader {
      *         invalid
      */
     public static boolean[][] readBenchmark(String filePath) {
-        System.out.printf("Reading benchmark %s%n", filePath);
+        //System.out.printf("Reading benchmark %s%n", filePath);
 
         List<String> lines = readAndFilterFile(filePath);
         if (lines.isEmpty()) {

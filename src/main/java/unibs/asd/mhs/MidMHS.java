@@ -173,6 +173,7 @@ public class MidMHS implements MHS {
                 }
             }
             if (isValid) {
+                setFields(child);
                 propagate(parent, child);
                 children.add(child);
             }
@@ -224,7 +225,7 @@ public class MidMHS implements MHS {
     }
 
     private boolean check(Hypothesis h) {
-        return h.getVector().cardinality() == matrix.length;
+        return h.isSolution();
     }
 
     private void propagate(Hypothesis parent, Hypothesis child) {

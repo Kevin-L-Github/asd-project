@@ -1,17 +1,18 @@
 package unibs.asd.benchmarks;
 
+import java.io.IOException;
+
 public class StatisticsApp {
     public static void main(String[] args) {
-        String benchmarkDirectory = "src/mybenchmarks";         // ← metti qui il path corretto della cartella con i file .txt
-        String outputDirectory = "results";      // ← cartella dove scrivere selected_benchmark.txt
+        String benchmarkDirectory = "src\\mybenchmarks";
+        String outputDirectory = "results\\results.csv";
 
-        BenchmarksSelection selector = new BenchmarksSelection();
-
+        Analyzer analyzer = new Analyzer();
         try {
-            selector.runBenchmarks(benchmarkDirectory, outputDirectory);
-        } catch (Exception e) {
-            System.err.println("[Fatal Error] " + e.getMessage());
-            e.printStackTrace();
+            analyzer.analyzeBenchmarks(benchmarkDirectory, outputDirectory);
+        } catch (IOException e) {
+            System.out.println("Error during benchmark analysis: " + e.getMessage());
         }
+
     }
 }

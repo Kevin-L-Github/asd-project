@@ -9,12 +9,12 @@ import java.util.stream.Stream;
 
 import unibs.asd.enums.BitSetType;
 import unibs.asd.fileio.BenchmarkReader;
-import unibs.asd.mhs.BaseMHS;
+import unibs.asd.interfaces.MHS;
+import unibs.asd.mhs.BoostMHS;
 
 public class Experiment {
 
     public static void runBenchmarks(String benchmarkDir, String destDir, int maxFiles) throws IOException {
-
         try (Stream<Path> filesStream = Files.list(Paths.get(benchmarkDir))) {
             filesStream
                     .filter(Files::isRegularFile)
@@ -28,7 +28,7 @@ public class Experiment {
         String fileName = filePath.getFileName().toString();
         System.out.println("Processing file: " + fileName);
         boolean[][] instance = BenchmarkReader.readBenchmark(filePath.toString());
-        BaseMHS mhs = new BaseMHS(instance);
+        MHS mhs = new BoostMHS(instance);
         mhs.run(BitSetType.BITSET,10_000);
     }
 
