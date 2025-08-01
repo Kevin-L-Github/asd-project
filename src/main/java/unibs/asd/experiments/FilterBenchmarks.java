@@ -44,6 +44,7 @@ public class FilterBenchmarks {
         this.solvedFilename = solvedFilename;
         this.timeoutMs = timeoutMs;
         this.alreadySolvedBenchmarks = loadAlreadySolvedBenchmarks(alreadySolvedFiles);
+        // remember that alreadySolvedFiles is the list of txt files, in which the benchmarks solved in tot time are listed in each one
     }
 
     /**
@@ -55,15 +56,16 @@ public class FilterBenchmarks {
      */
     private Set<String> loadAlreadySolvedBenchmarks(List<String> filePaths) throws IOException {
         Set<String> solved = new HashSet<>();
+        // If we have an empty list in input, we return solved empty to output
         if (filePaths == null || filePaths.isEmpty()) {
             return solved;
         }
 
-        for (String filePath : filePaths) {
+        for (String filePath : filePaths) { // For each resolved benchmark txt file
             Path path = Paths.get(filePath);
             if (Files.exists(path)) {
                 try (Stream<String> lines = Files.lines(path)) {
-                    lines.forEach(solved::add);
+                    lines.forEach(solved::add); // We add each line of the txt file to the solved set
                 }
             }
         }
@@ -81,7 +83,8 @@ public class FilterBenchmarks {
     }
 
     /**
-     * Prepares the output file for storing solved benchmarks.
+     * Prepares the empty output file for storing benchmarks that 
+     * will be resolved during the current execution
      * 
      * @return Path to the created solved benchmarks file
      * @throws IOException If directory creation or file operations fail
