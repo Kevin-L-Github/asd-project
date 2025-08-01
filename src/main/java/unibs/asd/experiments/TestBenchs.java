@@ -1,17 +1,23 @@
 package unibs.asd.experiments;
 
-import unibs.asd.enums.BitSetType;
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class TestBenchs {
     public static void main(String[] args) {
         String benchmarkDir = "src\\mybenchmarks";
-        String destDir = "results\\5000ms";
-        String solvedFilename = "solved_benchmarks_5000ms.txt";
-        int timeoutMs = 30_000; // 10 seconds
+        String destDir = "results\\30_000ms";
+        String solvedFilename = "solved_benchmarks_30_000ms.txt";
+        int timeoutMs = 30_000; // milliseconds
+
+        List<String> alreadySolvedFiles = new ArrayList<>();
+        alreadySolvedFiles.add("results\\1000ms\\solved_benchmarks_1000ms.txt");
+
 
         try {
             FilterBenchmarks filterBenchmarks = new FilterBenchmarks(
-                benchmarkDir, destDir, solvedFilename, timeoutMs, BitSetType.FAST_BITSET);
+                benchmarkDir, destDir, solvedFilename, timeoutMs, alreadySolvedFiles);
             filterBenchmarks.runBenchmarks();
             System.out.println("Benchmarks processed successfully.");
         } catch (Exception e) {

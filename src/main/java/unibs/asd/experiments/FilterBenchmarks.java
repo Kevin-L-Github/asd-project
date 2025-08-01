@@ -2,7 +2,7 @@ package unibs.asd.experiments;
 
 import java.io.IOException;
 import java.nio.file.*;
-import java.util.Comparator;
+import java.util.*;
 import java.util.stream.Stream;
 
 import unibs.asd.enums.BitSetType;
@@ -12,19 +12,21 @@ import unibs.asd.interfaces.MHS;
 import unibs.asd.mhs.BoostMHS;
 
 /**
- * A class for running and filtering benchmarks for Minimal Hitting Set (MHS) problems.
- * Processes benchmark files sequentially, records solved benchmarks, and handles timeouts.
+ * A class for running and filtering benchmarks for Minimal Hitting Set (MHS)
+ * problems.
+ * Processes benchmark files sequentially, records solved benchmarks, and
+ * handles timeouts.
  * Includes memory management between benchmark executions.
  */
 public class FilterBenchmarks {
-    
+
     // Class attributes for configuration
     private final String benchmarkDir;
     private final String destDir;
     private final String solvedFilename;
     private final int timeoutMs;
-    private final BitSetType bitSetType;
-    
+    private final Set<String> alreadySolvedBenchmarks;
+
     /**
      * Constructor for FilterBenchmarks
      * 
@@ -32,18 +34,42 @@ public class FilterBenchmarks {
      * @param destDir        Directory where results will be stored
      * @param solvedFilename Name of the file to store solved benchmarks
      * @param timeoutMs      Timeout in milliseconds for each benchmark
-     * @param bitSetType     Type of BitSet to use for the MHS algorithm
+     * @param alreadySolvedFiles List of files containing already solved benchmarks (one per line)
+     * @throws IOException If there are issues reading the already solved files
      */
     public FilterBenchmarks(String benchmarkDir, String destDir,
-                          String solvedFilename, int timeoutMs,
-                          BitSetType bitSetType) {
+            String solvedFilename, int timeoutMs, List<String> alreadySolvedFiles) throws IOException {
         this.benchmarkDir = benchmarkDir;
         this.destDir = destDir;
         this.solvedFilename = solvedFilename;
         this.timeoutMs = timeoutMs;
-        this.bitSetType = bitSetType;
+        this.alreadySolvedBenchmarks = loadAlreadySolvedBenchmarks(alreadySolvedFiles);
     }
-    
+
+    /**
+     * Loads already solved benchmarks from the given files
+     * 
+     * @param filePaths List of file paths containing solved benchmarks
+     * @return Set of benchmark names that have already been solved
+     * @throws IOException If there are issues reading the files
+     */
+    private Set<String> loadAlreadySolvedBenchmarks(List<String> filePaths) throws IOException {
+        Set<String> solved = new HashSet<>();
+        if (filePaths == null || filePaths.isEmpty()) {
+            return solved;
+        }
+
+        for (String filePath : filePaths) {
+            Path path = Paths.get(filePath);
+            if (Files.exists(path)) {
+                try (Stream<String> lines = Files.lines(path)) {
+                    lines.forEach(solved::add);
+                }
+            }
+        }
+        return solved;
+    }
+
     /**
      * Main entry point for running benchmarks.
      * 
@@ -84,6 +110,7 @@ public class FilterBenchmarks {
         try (Stream<Path> filesStream = Files.list(Paths.get(benchmarkDir))) {
             filesStream
                     .filter(Files::isRegularFile) // Only process regular files
+                    .filter(path -> !alreadySolvedBenchmarks.contains(path.getFileName().toString())) // Skip already solved
                     .sorted(Comparator.comparing(Path::getFileName)) // Sort files by name
                     .forEach(path -> {
                         clearMemoryBeforeExecution();
@@ -107,7 +134,7 @@ public class FilterBenchmarks {
         boolean[][] instance = BenchmarkReader.readBenchmark(inputFile.toString());
         MHS mhsSolver = new BoostMHS(instance);
 
-        mhsSolver.run(bitSetType, timeoutMs);
+        mhsSolver.run(BitSetType.FAST_BITSET, timeoutMs);
 
         // Check if the benchmark was solved within the timeout period
         if (mhsSolver.isExecuted() && !mhsSolver.isStopped()) {
@@ -134,7 +161,6 @@ public class FilterBenchmarks {
     private void writeSolvedBenchmark(String filename, Path solvedFile) {
         try {
             Files.writeString(solvedFile, filename + "\n", StandardOpenOption.APPEND);
-            
         } catch (IOException e) {
             System.err.println("[Error] Failed to write " + filename + " to solved benchmarks file");
         }
