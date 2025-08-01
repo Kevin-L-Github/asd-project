@@ -14,7 +14,6 @@ public class TestBenchs {
         List<String> alreadySolvedFiles = new ArrayList<>();
         alreadySolvedFiles.add("results\\1000ms\\solved_benchmarks_1000ms.txt");
 
-
         try {
             FilterBenchmarks filterBenchmarks = new FilterBenchmarks(
                 benchmarkDir, destDir, solvedFilename, timeoutMs, alreadySolvedFiles);

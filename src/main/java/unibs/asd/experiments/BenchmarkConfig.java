@@ -54,7 +54,6 @@ public class BenchmarkConfig {
         try (FileInputStream fis = new FileInputStream(configPath)) {
             props.load(fis);
         }
-        
         BenchmarkConfig config = new BenchmarkConfig();
         
         // Load thresholds

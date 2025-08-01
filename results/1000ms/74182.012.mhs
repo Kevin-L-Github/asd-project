@@ -1,0 +1,21 @@
+=== SOLUTIONS ===
+
+00100000100000000000
+00100000010000000000
+00100000001000000000
+00100000000100000000
+00100000000010000000
+
+=================
+
+;;; Execution Report
+;;; ================
+;;; Number of solutions: 5
+;;; Min Cardinality: 2
+;;; Max Cardinality: 2
+;;; Matrix dimensions (N x M): 2 x 20
+;;; Non-empty columns: 6
+;;; Empty columns: 14
+;;; Computation time: 0,002 ns
+;;; Execution status: Completed successfully
+;;; Search depth: 6
