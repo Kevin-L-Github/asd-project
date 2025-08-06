@@ -25,6 +25,6 @@
 ;;; Matrix dimensions (N x M): 7 x 20
 ;;; Non-empty columns: 11
 ;;; Empty columns: 9
-;;; Computation time: 0,005 ns
+;;; Computation time: 0,004 ns
 ;;; Execution status: Completed successfully
 ;;; Search depth: 11
