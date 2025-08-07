@@ -59,11 +59,13 @@ public class BoostMHS implements MHS {
 
             Hypothesis emptyHypothesis = getInitialHypothesis(type, m, n);
             startTime = System.nanoTime();
+            /* 
             System.out.println("Starting BoostMHS with " + type + " implementation.");
             System.out.println("Matrix size: " + m + "x" + n);
             System.out.println("Timeout set to " + timeoutMillis + " milliseconds.");
             System.out.println("The algorithm will run until it finds all solutions or the timeout is reached.");
             System.out.println("The algorithm is running, please wait...");
+            */
             long timeoutNanos = timeoutMillis * 1_000_000;
             List<Hypothesis> initialChildren = generateChildrenEmptyHypothesis(emptyHypothesis);
             this.current.addAll(initialChildren);
@@ -76,7 +78,7 @@ public class BoostMHS implements MHS {
             //int i = 0;
             while (computing) {
                 if (System.nanoTime() - startTime > timeoutNanos) {
-                    System.out.println("\nTimeout reached. Stopping the algorithm.");
+                    //System.out.println("\nTimeout reached. Stopping the algorithm.");
                     this.stopped = true;
                     break;
                 }
@@ -85,7 +87,7 @@ public class BoostMHS implements MHS {
                 Hypothesis first = current.peek();
                 while (!current.isEmpty()) {
                     if (System.nanoTime() - startTime > timeoutNanos) {
-                        System.out.println("\nTimeout reached inside loop. Stopping.");
+                        //System.out.println("\nTimeout reached inside loop. Stopping.");
                         this.stopped = true;
                         this.stoppedInsideLoop = true;
                         break;
@@ -125,14 +127,14 @@ public class BoostMHS implements MHS {
                 }
             }
         } catch (OutOfMemoryError e) {
-            System.out.println("\nOut of memory error occurred. Stopping the algorithm.");
+            //System.out.println("\nOut of memory error occurred. Stopping the algorithm.");
             this.outOfMemoryError = true;
             this.stopped = true;
             this.stoppedInsideLoop = true;
         }
-        this.computationTime = (System.nanoTime() - startTime) / 1000000000F;
-        System.out.println("\nAlgorithm completed. Solutions found: " + solutions.size());
-        System.out.println("Computation Time: " + this.computationTime + " seconds");
+        this.computationTime = (System.nanoTime() - startTime);
+        //System.out.println("\nAlgorithm completed. Solutions found: " + solutions.size());
+        //System.out.println("Computation Time: " + (this.computationTime/1_000_000_000F) + " seconds");
         this.restoreSolutions();
         this.executed = true;
         return solutions;
@@ -165,7 +167,7 @@ public class BoostMHS implements MHS {
                 this.factory = new RoaringHypothesisFactory();
                 return new RoaringHypothesis(m, n);
             case BitSetType.FAST_BITSET:
-                System.out.println("FAST BITSET Implementation");
+                //System.out.println("FAST BITSET Implementation");
                 this.factory = new FastBitSetHypothesisFactory();
                 return new FastHypothesis(m, n);
             case BitSetType.SPARSE:
@@ -254,8 +256,8 @@ public class BoostMHS implements MHS {
         int rows = instance.length;
         int cols = instance[0].length;
 
-        System.out.println("Righe: " + rows);
-        System.out.println("Colonne: " + cols);
+        //System.out.println("Righe: " + rows);
+        //System.out.println("Colonne: " + cols);
 
         nonEmptyColumns = new ArrayList<>();
         for (int j = 0; j < cols; j++) {
@@ -279,7 +281,7 @@ public class BoostMHS implements MHS {
             }
         }
 
-        System.out.println("Colonne eliminate: " + (cols - newCols));
+        //System.out.println("Colonne eliminate: " + (cols - newCols));
     }
 
     private void restoreSolutions() {

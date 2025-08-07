@@ -13,7 +13,7 @@ public class Playground {
     /*
      * Il tempo limite deve essere espresso in secondi
      */
-    public static final String BENCHMARK = "c3540.003.matrix";
+    public static final String BENCHMARK = "74182.034.matrix";
     public static final long TIMEOUT = 300;
 
     public static void main(String[] args) throws IOException {
@@ -22,10 +22,6 @@ public class Playground {
         //benchmark = IdentityMatrix.create(25000);
         mhs = new BoostMHS(benchmark);
         mhs.run(BitSetType.FAST_BITSET, TIMEOUT * 1000);
-        System.out.println("Computation Time: " + mhs.getComputationTime());
-        System.out.println("Out of Memory Error: " + mhs.isOutOfMemoryError());
-        System.out.println("Executed: " + mhs.isExecuted());
-        System.out.println("Stopped: " + mhs.isStopped());
         BenchmarkWriter.writeBenchmark(mhs, BENCHMARK, "results");
     }
 
