@@ -127,6 +127,6 @@
 ;;; Matrix dimensions (N x M): 2 x 203
 ;;; Non-empty columns: 27
 ;;; Empty columns: 176
-;;; Computation time: 12,529 ms (12528,9 µs, 12528900 ns)
+;;; Computation time: 10,49 ms (10489,6 µs, 10489600 ns)
 ;;; Execution status: Completed successfully
 ;;; Search depth: 12
