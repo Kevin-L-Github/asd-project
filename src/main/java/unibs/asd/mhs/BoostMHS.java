@@ -48,7 +48,7 @@ public class BoostMHS implements MHS {
     }
 
     public List<Hypothesis> run(BitSetType type, long timeoutMillis) {
-        
+
         try {
             if (matrix == null || matrix.length == 0 || matrix[0].length == 0) {
                 throw new IllegalArgumentException("Instance must be a non-empty boolean matrix.");
@@ -59,13 +59,6 @@ public class BoostMHS implements MHS {
 
             Hypothesis emptyHypothesis = getInitialHypothesis(type, m, n);
             startTime = System.nanoTime();
-            /* 
-            System.out.println("Starting BoostMHS with " + type + " implementation.");
-            System.out.println("Matrix size: " + m + "x" + n);
-            System.out.println("Timeout set to " + timeoutMillis + " milliseconds.");
-            System.out.println("The algorithm will run until it finds all solutions or the timeout is reached.");
-            System.out.println("The algorithm is running, please wait...");
-            */
             long timeoutNanos = timeoutMillis * 1_000_000;
             List<Hypothesis> initialChildren = generateChildrenEmptyHypothesis(emptyHypothesis);
             this.current.addAll(initialChildren);
@@ -78,7 +71,6 @@ public class BoostMHS implements MHS {
             //int i = 0;
             while (computing) {
                 if (System.nanoTime() - startTime > timeoutNanos) {
-                    //System.out.println("\nTimeout reached. Stopping the algorithm.");
                     this.stopped = true;
                     break;
                 }
@@ -87,14 +79,14 @@ public class BoostMHS implements MHS {
                 Hypothesis first = current.peek();
                 while (!current.isEmpty()) {
                     if (System.nanoTime() - startTime > timeoutNanos) {
-                        //System.out.println("\nTimeout reached inside loop. Stopping.");
+                        // System.out.println("\nTimeout reached inside loop. Stopping.");
                         this.stopped = true;
                         this.stoppedInsideLoop = true;
                         break;
                     }
                     Hypothesis hypothesis = current.poll();
-                    //printStatusBar(i, DEPTH, startTime, timeoutNanos);
                     //i++;
+                    //printStatusBar(i, DEPTH, startTime, timeoutNanos);
                     this.bucket.put(hypothesis.getBin(), hypothesis.getVector());
                     if (check(hypothesis)) {
                         solutions.add(hypothesis);
@@ -127,14 +119,11 @@ public class BoostMHS implements MHS {
                 }
             }
         } catch (OutOfMemoryError e) {
-            //System.out.println("\nOut of memory error occurred. Stopping the algorithm.");
             this.outOfMemoryError = true;
             this.stopped = true;
             this.stoppedInsideLoop = true;
         }
         this.computationTime = (System.nanoTime() - startTime);
-        //System.out.println("\nAlgorithm completed. Solutions found: " + solutions.size());
-        //System.out.println("Computation Time: " + (this.computationTime/1_000_000_000F) + " seconds");
         this.restoreSolutions();
         this.executed = true;
         return solutions;
@@ -167,7 +156,7 @@ public class BoostMHS implements MHS {
                 this.factory = new RoaringHypothesisFactory();
                 return new RoaringHypothesis(m, n);
             case BitSetType.FAST_BITSET:
-                //System.out.println("FAST BITSET Implementation");
+                // System.out.println("FAST BITSET Implementation");
                 this.factory = new FastBitSetHypothesisFactory();
                 return new FastHypothesis(m, n);
             case BitSetType.SPARSE:
@@ -179,6 +168,12 @@ public class BoostMHS implements MHS {
         }
     }
 
+    /**
+     * Genera i figli di un'ipotesi padre.
+     * 
+     * @param parent
+     * @return
+     */
     private List<Hypothesis> generateChildren(Hypothesis parent) {
         List<Hypothesis> children = new ArrayList<>();
         BitVector bin = parent.getBin();
@@ -207,6 +202,14 @@ public class BoostMHS implements MHS {
         return children;
     }
 
+    /**
+     * Confronta due BitVector e restituisce true se il primo è maggiore del
+     * secondo.
+     * 
+     * @param a
+     * @param b
+     * @return
+     */
     private static boolean isGreater(BitVector a, BitVector b) {
         for (int i = 0; i < a.size(); i++) {
             boolean aBit = a.get(i);
@@ -218,6 +221,11 @@ public class BoostMHS implements MHS {
         return false;
     }
 
+    /**
+     * Imposta i campi dell'ipotesi in base alla matrice e al binario.
+     * 
+     * @param hypothesis
+     */
     private void setFields(Hypothesis hypothesis) {
         int n = matrix.length;
         BitVector vector = this.factory.createVector(n);
@@ -234,31 +242,47 @@ public class BoostMHS implements MHS {
         hypothesis.setVector(vector);
     }
 
+    /**
+     * Controlla se l'ipotesi è una soluzione.
+     * 
+     * @param hypothesis
+     * @return
+     */
     private boolean check(Hypothesis hypothesis) {
         return hypothesis.isSolution();
     }
 
+    /**
+     * Propaga le informazioni da un predecessore a un successore.
+     * 
+     * @param predecessor
+     * @param successor
+     */
     private void propagate(Hypothesis predecessor, Hypothesis successor) {
         successor.or(predecessor);
     }
 
+    /**
+     * Propaga le informazioni da un predecessore a un successore.
+     * 
+     * @param successor
+     * @param information
+     */
     private void propagate(Hypothesis successor, BitVector information) {
         successor.update(information);
     }
 
+    /**
+     * Pulisce la matrice rimuovendo le colonne vuote.
+     */
     private void cleanMatrix() {
         if (instance == null || instance.length == 0) {
             matrix = new boolean[0][0];
             nonEmptyColumns = new ArrayList<>();
             return;
         }
-
         int rows = instance.length;
         int cols = instance[0].length;
-
-        //System.out.println("Righe: " + rows);
-        //System.out.println("Colonne: " + cols);
-
         nonEmptyColumns = new ArrayList<>();
         for (int j = 0; j < cols; j++) {
             boolean hasTrue = false;
@@ -272,7 +296,6 @@ public class BoostMHS implements MHS {
                 nonEmptyColumns.add(j);
             }
         }
-
         int newCols = nonEmptyColumns.size();
         matrix = new boolean[rows][newCols];
         for (int i = 0; i < rows; i++) {
@@ -280,10 +303,11 @@ public class BoostMHS implements MHS {
                 matrix[i][j] = instance[i][nonEmptyColumns.get(j)];
             }
         }
-
-        //System.out.println("Colonne eliminate: " + (cols - newCols));
     }
 
+    /**
+     * Ripristina le soluzioni originali dalla matrice compressa.
+     */
     private void restoreSolutions() {
         List<Hypothesis> restored = new ArrayList<>();
         int originalSize = instance[0].length;

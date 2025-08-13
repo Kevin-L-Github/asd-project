@@ -61,7 +61,7 @@ public class BaseMHS implements MHS {
 
         this.current.addAll(generateChildrenEmptyHypothesis(emptyHypothesis));
         DEPTH++;
-
+        //int counter = 0;
         while (!current.isEmpty()) {
             if (System.nanoTime() - startTime > timeoutNanos) {
                 System.out.println("\nTimeout reached. Stopping the algorithm.");
@@ -69,7 +69,6 @@ public class BaseMHS implements MHS {
                 break;
             }
             List<Hypothesis> next = new ArrayList<>();
-
             for (int i = 0; i < current.size(); i++) {
                 if (System.nanoTime() - startTime > timeoutNanos) {
                     System.out.println("\nTimeout reached inside loop. Stopping.");
@@ -77,23 +76,20 @@ public class BaseMHS implements MHS {
                     this.stoppedInsideLoop = true;
                     break;
                 }
-
-                Hypothesis h = current.get(i);
-                // printStatusBar(i, DEPTH, startTime, timeoutNanos);
-
-                if (check(h)) {
-                    solutions.add(h);
+                Hypothesis hypothesis = current.get(i);
+                //counter++;
+                //printStatusBar(i, DEPTH, startTime, timeoutNanos);
+                if (check(hypothesis)) {
+                    solutions.add(hypothesis);
                     current.remove(i);
                     i--;
-                } else if (h.mostSignificantBit() != 0) {
-                    Hypothesis global_initial = h.globalInitial();
+                } else if (hypothesis.mostSignificantBit() != 0) {
+                    Hypothesis global_initial = hypothesis.globalInitial();
                     int r = 0;
-
                     Iterator<Hypothesis> it = current.iterator();
                     boolean searching = true;
                     while (it.hasNext() && searching) {
                         if (isGreater(it.next(), global_initial)) {
-
                             r++;
                             it.remove();
                         } else {
@@ -103,8 +99,8 @@ public class BaseMHS implements MHS {
                     if (r > 0) {
                         i -= r;
                     }
-                    if (!current.isEmpty() && !current.get(0).equals(h)) {
-                        List<Hypothesis> children = generateChildren(h);
+                    if (!current.isEmpty() && !current.get(0).equals(hypothesis)) {
+                        List<Hypothesis> children = generateChildren(hypothesis);
                         next = merge(next, children);
                     }
                 }
@@ -112,7 +108,7 @@ public class BaseMHS implements MHS {
             this.current = next;
             DEPTH++;
         }
-        this.computationTime = (System.nanoTime() - startTime) / 1000000000F;
+        this.computationTime = (System.nanoTime() - startTime);
         this.restoreSolutions();
         this.executed = true;
         return solutions;
@@ -139,8 +135,6 @@ public class BaseMHS implements MHS {
 
     private List<Hypothesis> generateChildrenEmptyHypothesis(Hypothesis parent) {
         List<Hypothesis> children = new ArrayList<>();
-        // System.out.println("Generating children for empty hypothesis");
-
         for (int i = 0; i < parent.length(); i++) {
             Hypothesis child = factory.create(parent.getBin());
             child.set(i);
@@ -153,44 +147,46 @@ public class BaseMHS implements MHS {
     private List<Hypothesis> generateChildren(Hypothesis parent) {
         List<Hypothesis> children = new ArrayList<>();
         int LM1 = parent.getBin().mostSignificantBit();
+        BitVector bin = parent.getBin();
         for (int i = 0; i < LM1; i++) {
-            Hypothesis child = parent.clone();
-            child.set(i);
+            BitVector childBin = (BitVector) bin.clone();
+            childBin.set(i);
+            Hypothesis child = this.factory.create(childBin);
+            child.setVector(this.factory.createVector(matrix.length));
             List<Hypothesis> predecessors = child.predecessors();
             boolean isValid = true;
             for (Hypothesis predecessor : predecessors) {
-                if (!binarySearchContains(predecessor)) {
+                Hypothesis binarySearchResult = binarySearch(predecessor);
+                if (binarySearchResult == null) {
                     isValid = false;
                     break;
+                } else {
+                    propagate(child, binarySearchResult.getVector());
                 }
             }
             if (isValid) {
-                setFields(child);
-                // propagate(parent, child);
+                propagate(parent, child);
                 children.add(child);
             }
         }
         return children;
     }
 
-    private boolean binarySearchContains(Hypothesis target) {
-        // System.out.println("Is " + target + " in current?");
+    private Hypothesis binarySearch(Hypothesis target) {
         int low = 0;
         int high = current.size() - 1;
         while (low <= high) {
             int mid = (low + high) / 2;
             Hypothesis middle = current.get(mid);
-            // System.out.println("Middle: " + middle);
             if (target.equals(middle)) {
-                // System.out.println("Founded!");
-                return true;
+                return middle;
             } else if (isGreater(middle, target)) {
                 low = mid + 1;
             } else {
                 high = mid - 1;
             }
         }
-        return false;
+        return null;
     }
 
     private static boolean isGreater(Hypothesis h1, Hypothesis h2) {
@@ -229,13 +225,22 @@ public class BaseMHS implements MHS {
         hypothesis.setVector(vector);
     }
 
-    private boolean check(Hypothesis h) {
-        return h.isSolution();
+    private boolean check(Hypothesis hypothesis) {
+        return hypothesis.isSolution();
     }
 
-    @SuppressWarnings("unused")
-    private void propagate(Hypothesis parent, Hypothesis child) {
-        child.or(parent);
+    private void propagate(Hypothesis predecessor, Hypothesis successor) {
+        successor.or(predecessor);
+    }
+
+    /**
+     * Propaga le informazioni da un predecessore a un successore.
+     * 
+     * @param successor
+     * @param information
+     */
+    private void propagate(Hypothesis successor, BitVector information) {
+        successor.update(information);
     }
 
     private void cleanMatrix() {

@@ -25,7 +25,6 @@ public class Main {
                 if (benchmarkName.trim().isEmpty()) {
                     continue; // Salta righe vuote
                 }
-                
                 try {
                     // Leggi il benchmark
                     boolean[][] benchmark = BenchmarkReader.readBenchmark(BENCHMARKS_DIR + benchmarkName);
