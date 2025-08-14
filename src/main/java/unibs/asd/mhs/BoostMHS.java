@@ -25,6 +25,7 @@ public class BoostMHS implements MHS {
     private List<Integer> nonEmptyColumns;
     private int DEPTH;
     private long startTime;
+    private int depthLimit;
 
     private double computationTime;
     private boolean executed;
@@ -45,6 +46,8 @@ public class BoostMHS implements MHS {
         this.stoppedInsideLoop = false;
         this.outOfMemoryError = false;
         this.cleanMatrix();
+        this.depthLimit = Math.min(matrix.length, matrix[0].length);
+
     }
 
     public List<Hypothesis> run(BitSetType type, long timeoutMillis) {
@@ -57,6 +60,10 @@ public class BoostMHS implements MHS {
             int m = matrix[0].length;
             int n = matrix.length;
 
+            //System.out.println("Starting MHS with timeout: " + timeoutMillis + " milliseconds");
+            //System.out.println("Matrix size: " + matrix.length + "x" + matrix[0].length);
+            //System.out.println("Depth limit: " + depthLimit);
+
             Hypothesis emptyHypothesis = getInitialHypothesis(type, m, n);
             startTime = System.nanoTime();
             long timeoutNanos = timeoutMillis * 1_000_000;
@@ -67,9 +74,8 @@ public class BoostMHS implements MHS {
             }
 
             DEPTH++;
-            boolean computing = true;
-            //int i = 0;
-            while (computing) {
+            // int i = 0;
+            while (!current.isEmpty() && DEPTH <= depthLimit) {
                 if (System.nanoTime() - startTime > timeoutNanos) {
                     this.stopped = true;
                     break;
@@ -79,14 +85,13 @@ public class BoostMHS implements MHS {
                 Hypothesis first = current.peek();
                 while (!current.isEmpty()) {
                     if (System.nanoTime() - startTime > timeoutNanos) {
-                        // System.out.println("\nTimeout reached inside loop. Stopping.");
                         this.stopped = true;
                         this.stoppedInsideLoop = true;
                         break;
                     }
                     Hypothesis hypothesis = current.poll();
-                    //i++;
-                    //printStatusBar(i, DEPTH, startTime, timeoutNanos);
+                    // i++;
+                    // printStatusBar(i, DEPTH, startTime, timeoutNanos);
                     this.bucket.put(hypothesis.getBin(), hypothesis.getVector());
                     if (check(hypothesis)) {
                         solutions.add(hypothesis);
@@ -98,7 +103,6 @@ public class BoostMHS implements MHS {
                             BitVector element = it.next();
                             if (isGreater(element, globalInitial)) {
                                 it.remove();
-
                             } else {
                                 break;
                             }
@@ -111,12 +115,8 @@ public class BoostMHS implements MHS {
 
                 }
                 DEPTH++;
-                if (next.isEmpty()) {
-                    computing = false;
-                } else {
-                    this.current = next;
-                    this.bucket.clear();
-                }
+                this.current = next;
+                this.bucket.clear();
             }
         } catch (OutOfMemoryError e) {
             this.outOfMemoryError = true;
@@ -124,6 +124,7 @@ public class BoostMHS implements MHS {
             this.stoppedInsideLoop = true;
         }
         this.computationTime = (System.nanoTime() - startTime);
+        DEPTH--;
         this.restoreSolutions();
         this.executed = true;
         return solutions;
@@ -144,23 +145,18 @@ public class BoostMHS implements MHS {
     private Hypothesis getInitialHypothesis(BitSetType type, int m, int n) {
         switch (type) {
             case BitSetType.BITSET:
-                System.out.println("BITSET Implementation");
                 this.factory = new BitSetHypothesisFactory();
                 return new BitSetHypothesis(m, n);
             case BitSetType.BOOLS_ARRAY:
-                System.out.println("BOOLEAN ARRAY Implementation");
                 this.factory = new BoolsHypothesisFactory();
                 return new BoolsHypothesis(m, n);
             case BitSetType.ROARING_BIT_MAP:
-                System.out.println("ROARING BITMAP Implementation");
                 this.factory = new RoaringHypothesisFactory();
                 return new RoaringHypothesis(m, n);
             case BitSetType.FAST_BITSET:
-                // System.out.println("FAST BITSET Implementation");
                 this.factory = new FastBitSetHypothesisFactory();
                 return new FastHypothesis(m, n);
             case BitSetType.SPARSE:
-                System.out.println("SPARSE Implementation");
                 this.factory = new SparseHypothesisFactory();
                 return new SparseHypothesis(m, n);
             default:
@@ -363,6 +359,10 @@ public class BoostMHS implements MHS {
 
     public boolean isOutOfMemoryError() {
         return outOfMemoryError;
+    }
+
+    public int getDepthLimit() {
+        return depthLimit;
     }
 
     @SuppressWarnings("unused")

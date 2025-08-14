@@ -1,0 +1,26 @@
+;;; === EXECUTION SUMMARY ===
+;;; Algorithm completion status: COMPLETED SUCCESSFULLY
+;;; Number of solutions found: 6
+;;; Min cardinality: 3
+;;; Max cardinality: 3
+;;; Maximum search depth: 3
+;;; Depth reached: 3/3
+
+;;; === MATRIX INFORMATION ===
+;;; Number of rows (elements): 3
+;;; Total number of columns: 20
+;;; Number of non-empty columns: 6
+;;; Number of empty columns: 14
+
+;;; === PERFORMANCE METRICS ===
+;;; Total computation time (nanoseconds): 156700.0
+;;; Human-readable computation time: 156,7 microseconds
+
+=== SOLUTIONS ===
+
+00100000000000010100
+00100000000000010010
+00100000000000010001
+00100000000000001100
+00100000000000001010
+00100000000000001001

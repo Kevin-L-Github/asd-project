@@ -23,13 +23,14 @@ public interface MHS {
     List<Hypothesis> getSolutions();
 
     /**
-     * Restituisce l'istanza su cui è stato eseguito l'algoritmo.
+     * Restituisce l'istanza su cui è stato eseguito l'algoritmo. Ovvero la matrice booleana
+     * che rappresenta il problema MHS, e che potrebbe avere colonne vuote.
      * @return L'istanza come matrice booleana.
      */
     boolean[][] getInstance();
 
     /**
-     * Restituisce la matrice originale su cui è stato eseguito l'algoritmo.
+     * Restituisce la matrice su cui è stato eseguito l'algoritmo priva di colonne vuote.
      * @return La matrice originale come matrice booleana.
      */
     boolean[][] getMatrix();
@@ -78,5 +79,11 @@ public interface MHS {
      * @return true se l'algoritmo ha incontrato un errore di memoria, false altrimenti.
      */
     boolean isOutOfMemoryError();
+
+    /**
+     * Restituisce il limite di profondità dell'algoritmo.
+     * @return Il limite di profondità come intero.
+     */
+    public int getDepthLimit();
     
 }

@@ -27,6 +27,7 @@ public class BaseMHS implements MHS {
     private boolean[][] matrix;
     private List<Integer> nonEmptyColumns;
     private int DEPTH;
+    private int depthLimit;
 
     private double computationTime;
     private boolean executed;
@@ -43,6 +44,8 @@ public class BaseMHS implements MHS {
         this.stopped = false;
         this.stoppedInsideLoop = false;
         this.cleanMatrix();
+        this.depthLimit = Math.min(matrix.length, matrix[0].length);
+
     }
 
     public List<Hypothesis> run(BitSetType type, long timeoutMillis) {
@@ -50,6 +53,10 @@ public class BaseMHS implements MHS {
         if (matrix == null || matrix.length == 0 || matrix[0].length == 0) {
             throw new IllegalArgumentException("Instance must be a non-empty boolean matrix.");
         }
+
+        System.out.println("Starting MHS with timeout: " + timeoutMillis + " milliseconds");
+        System.out.println("Matrix size: " + matrix.length + "x" + matrix[0].length);
+        System.out.println("Depth limit: " + depthLimit);
 
         long startTime = System.nanoTime();
         long timeoutNanos = timeoutMillis * 1_000_000;
@@ -62,7 +69,7 @@ public class BaseMHS implements MHS {
         this.current.addAll(generateChildrenEmptyHypothesis(emptyHypothesis));
         DEPTH++;
         //int counter = 0;
-        while (!current.isEmpty()) {
+        while (!current.isEmpty() && DEPTH <= depthLimit) {
             if (System.nanoTime() - startTime > timeoutNanos) {
                 System.out.println("\nTimeout reached. Stopping the algorithm.");
                 this.stopped = true;
@@ -108,7 +115,9 @@ public class BaseMHS implements MHS {
             this.current = next;
             DEPTH++;
         }
+
         this.computationTime = (System.nanoTime() - startTime);
+        DEPTH--;
         this.restoreSolutions();
         this.executed = true;
         return solutions;
@@ -329,6 +338,10 @@ public class BaseMHS implements MHS {
         return stopped;
     }
 
+    public int getDepthLimit() {
+        return depthLimit;
+    }
+
     public boolean isStoppedInsideLoop() {
         return stoppedInsideLoop;
     }
@@ -346,13 +359,14 @@ public class BaseMHS implements MHS {
         String progressBar = String.format("%-10s", ">".repeat(progress / 10)).replace(' ', ' ');
 
         String output = String.format(
-                "\rProcess: %3d/%-3d [%s] %3d%% | Solutions: %4d | Depth: %3d | Time: %2ds",
+                "\rProcess: %3d/%-3d [%s] %3d%% | Solutions: %4d | Depth: %3d/%3d | Time: %2ds",
                 i + 1,
                 current.size(),
                 progressBar,
                 progress,
                 solutions.size(),
                 depth,
+                depthLimit,
                 remainingSeconds);
 
         System.out.print(output);

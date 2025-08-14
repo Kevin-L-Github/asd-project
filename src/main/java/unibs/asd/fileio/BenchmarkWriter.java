@@ -12,26 +12,23 @@ import unibs.asd.interfaces.Hypothesis;
 import unibs.asd.interfaces.MHS;
 
 /**
- * Utility class for writing benchmark results to files.
- * Generates detailed reports about MHS algorithm execution including:
- * - Solutions found
- * - Performance metrics
- * - Execution statistics
- * - Algorithm status information
+ * Utility class for writing benchmark results to files in a structured,
+ * parsable format.
+ * Generates detailed reports about MHS algorithm execution with clear section
+ * headers
+ * and key-value pairs for easy parsing, with all comments prefixed by ;;;.
  */
 public class BenchmarkWriter {
 
     private static final DecimalFormat TIME_FORMAT = new DecimalFormat("0.###");
     private static final String COMMENT_PREFIX = ";;; ";
+    private static final String SECTION_PREFIX = ";;; === ";
+    private static final String SECTION_SUFFIX = " ===\n";
+    private static final String SOLUTIONS_SECTION_HEADER = "=== SOLUTIONS ===\n";
 
     /**
-     * Writes benchmark results to a file with comprehensive execution details.
-     * 
-     * @param mhs      The MHS algorithm instance containing results
-     * @param filename Original input filename (will be modified to .mhs extension)
-     * @param destDir  Destination directory for output file
-     * @throws IOException              If file writing fails
-     * @throws IllegalArgumentException If algorithm hasn't been executed
+     * Writes benchmark results to a file in a structured, parsable format.
+     * All descriptive lines are prefixed with ;;; for easy identification.
      */
     public static void writeBenchmark(MHS mhs, String filename, String destDir) throws IOException {
         validateExecutionStatus(mhs);
@@ -42,8 +39,10 @@ public class BenchmarkWriter {
         BenchmarkStatistics stats = collectStatistics(mhs);
 
         try (FileWriter writer = new FileWriter(outputPath.toFile())) {
-            writeSolutions(writer, stats.solutions);
-            writeExecutionReport(writer, mhs, stats);
+            writeExecutionSummary(writer, mhs, stats);
+            writeMatrixInfo(writer, stats);
+            writePerformanceInfo(writer, mhs);
+            writeSolutionsSection(writer, stats.solutions);
         }
     }
 
@@ -63,6 +62,8 @@ public class BenchmarkWriter {
         stats.instance = mhs.getInstance();
         stats.nonEmptyColumns = mhs.getNonEmptyColumns().size();
         stats.emptyColumns = stats.instance[0].length - stats.nonEmptyColumns;
+        stats.DEPTH = mhs.getDEPTH();
+        stats.depthLimit = mhs.getDepthLimit();
 
         stats.minCardinality = stats.solutions.stream()
                 .mapToInt(Hypothesis::cardinality)
@@ -77,108 +78,95 @@ public class BenchmarkWriter {
         return stats;
     }
 
-    /**
-     * Writes the list of solutions to the output file in a clear, readable format.
-     * Each solution is written on its own line with consistent formatting.
-     * 
-     * @param writer    The FileWriter instance used to write the output
-     * @param solutions List of Hypothesis solutions to be written (may be empty)
-     * @throws IOException if an I/O error occurs during writing
-     */
-    private static void writeSolutions(FileWriter writer, List<Hypothesis> solutions) throws IOException {
-        // Write section header
-        writer.write("=== SOLUTIONS ===\n\n");
+    private static void writeExecutionSummary(FileWriter writer, MHS mhs, BenchmarkStatistics stats)
+            throws IOException {
+        writer.write(SECTION_PREFIX + "EXECUTION SUMMARY" + SECTION_SUFFIX);
 
+        writer.write(COMMENT_PREFIX + "Algorithm completion status: " + getExecutionStatus(mhs) + "\n");
+        writer.write(COMMENT_PREFIX + "Number of solutions found: " + stats.solutions.size() + "\n");
+        writer.write(COMMENT_PREFIX + "Min cardinality: " + stats.minCardinality + "\n");
+        writer.write(COMMENT_PREFIX + "Max cardinality: " + stats.maxCardinality + "\n");
+        writer.write(COMMENT_PREFIX + "Maximum search depth: " + stats.depthLimit + "\n");
+        writer.write(COMMENT_PREFIX + "Depth reached: " + stats.DEPTH + "/" + stats.depthLimit + "\n");
+
+        if (mhs.isStopped()) {
+            writer.write(COMMENT_PREFIX + "Execution was interrupted, reason: " + getStopReason(mhs) + "\n");
+        }
+
+        writer.write("\n");
+    }
+
+    private static void writeMatrixInfo(FileWriter writer, BenchmarkStatistics stats) throws IOException {
+        writer.write(SECTION_PREFIX + "MATRIX INFORMATION" + SECTION_SUFFIX);
+
+        writer.write(COMMENT_PREFIX + "Number of rows (elements): " + stats.instance.length + "\n");
+        writer.write(COMMENT_PREFIX + "Total number of columns: " + stats.instance[0].length + "\n");
+        writer.write(COMMENT_PREFIX + "Number of non-empty columns: " + stats.nonEmptyColumns + "\n");
+        writer.write(COMMENT_PREFIX + "Number of empty columns: " + stats.emptyColumns + "\n");
+
+        writer.write("\n");
+    }
+
+    private static void writePerformanceInfo(FileWriter writer, MHS mhs) throws IOException {
+        writer.write(SECTION_PREFIX + "PERFORMANCE METRICS" + SECTION_SUFFIX);
+
+        writer.write(COMMENT_PREFIX + "Total computation time (nanoseconds): " + mhs.getComputationTime() + "\n");
+        writer.write(COMMENT_PREFIX + "Human-readable computation time: " + formatDetailedTime(mhs.getComputationTime())
+                + "\n");
+
+        writer.write("\n");
+    }
+
+    private static void writeSolutionsSection(FileWriter writer, List<Hypothesis> solutions) throws IOException {
+        writer.write(SOLUTIONS_SECTION_HEADER);
+        writer.write("\n");
         if (solutions.isEmpty()) {
             writer.write("No solutions found.\n");
         } else {
-            // Write each solution with consistent spacing
             for (Hypothesis solution : solutions) {
                 writer.write(solution.toString().trim() + "\n");
             }
         }
-
-        // Add section footer
-        writer.write("\n=================\n\n");
-    }
-
-    private static void writeExecutionReport(FileWriter writer, MHS mhs, BenchmarkStatistics stats) throws IOException {
-        writer.write(COMMENT_PREFIX + "Execution Report\n");
-        writer.write(COMMENT_PREFIX + "================\n");
-
-        // Basic information
-        writer.write(COMMENT_PREFIX + "Number of solutions: " + stats.solutions.size() + "\n");
-        writer.write(COMMENT_PREFIX + "Min Cardinality: " + stats.minCardinality + "\n");
-        writer.write(COMMENT_PREFIX + "Max Cardinality: " + stats.maxCardinality + "\n");
-
-        // Matrix information
-        writer.write(COMMENT_PREFIX + "Matrix dimensions (N x M): " +
-                stats.instance.length + " x " + stats.instance[0].length + "\n");
-        writer.write(COMMENT_PREFIX + "Non-empty columns: " + stats.nonEmptyColumns + "\n");
-        writer.write(COMMENT_PREFIX + "Empty columns: " + stats.emptyColumns + "\n");
-
-        // Performance metrics
-        writer.write(COMMENT_PREFIX + "Computation time: " + formatDetailedTime(mhs.getComputationTime()) + "\n");
-
-        // Execution status
-        writer.write(COMMENT_PREFIX + "Execution status: " + getExecutionStatus(mhs) + "\n");
-        if (mhs.isStopped()) {
-            writer.write(COMMENT_PREFIX + "Stopped reason: " + getStopReason(mhs) + "\n");
-        }
-        writer.write(COMMENT_PREFIX + "Search depth: " + mhs.getDEPTH() + "\n");
     }
 
     private static String getExecutionStatus(MHS mhs) {
         if (!mhs.isExecuted())
-            return "Not executed";
+            return "NOT EXECUTED";
         if (mhs.isStopped())
-            return "Stopped before completion";
-        return "Completed successfully";
+            return "STOPPED BEFORE COMPLETION";
+        return "COMPLETED SUCCESSFULLY";
     }
 
     private static String getStopReason(MHS mhs) {
         if (mhs.isOutOfMemoryError())
-            return "Out of memory";
+            return "OUT OF MEMORY";
         if (mhs.isStoppedInsideLoop())
-            return "Timeout during processing";
-        return "Timeout before processing";
+            return "TIMEOUT DURING PROCESSING";
+        return "TIMEOUT BEFORE PROCESSING";
     }
 
-    /**
-     * Formats time with appropriate units and full breakdown.
-     * Example output: "1.234 s (1234 ms, 1234000 µs, 1234000000 ns)"
-     */
     private static String formatDetailedTime(double timeNs) {
         if (timeNs < 1_000) {
-            return TIME_FORMAT.format(timeNs) + " ns";
+            return TIME_FORMAT.format(timeNs) + " nanoseconds";
         }
 
-        StringBuilder sb = new StringBuilder();
-
-        // Main unit
         if (timeNs < 1_000_000) {
-            sb.append(TIME_FORMAT.format(timeNs / 1_000)).append(" µs");
-        } else if (timeNs < 1_000_000_000) {
-            sb.append(TIME_FORMAT.format(timeNs / 1_000_000)).append(" ms");
-        } else {
-            double seconds = timeNs / 1_000_000_000;
-            sb.append(TIME_FORMAT.format(seconds)).append(" s");
-
-            // Add human-readable format for times > 1 second
-            if (seconds >= 60) {
-                long minutes = TimeUnit.NANOSECONDS.toMinutes((long) timeNs);
-                long remainingSeconds = TimeUnit.NANOSECONDS.toSeconds((long) timeNs) -
-                        TimeUnit.MINUTES.toSeconds(minutes);
-                sb.append(" (").append(minutes).append("m ").append(remainingSeconds).append("s)");
-            }
+            return TIME_FORMAT.format(timeNs / 1_000) + " microseconds";
         }
 
-        // Add full breakdown in parentheses
-        sb.append(" (")
-                .append(TIME_FORMAT.format(timeNs / 1_000)).append(" µs, ")
-                .append(TIME_FORMAT.format(timeNs)).append(" ns)");
+        if (timeNs < 1_000_000_000) {
+            return TIME_FORMAT.format(timeNs / 1_000_000) + " milliseconds";
+        }
 
-        return sb.toString();
+        double seconds = timeNs / 1_000_000_000;
+        if (seconds >= 60) {
+            long minutes = TimeUnit.NANOSECONDS.toMinutes((long) timeNs);
+            long remainingSeconds = TimeUnit.NANOSECONDS.toSeconds((long) timeNs) -
+                    TimeUnit.MINUTES.toSeconds(minutes);
+            return TIME_FORMAT.format(seconds) + " seconds (" + minutes + " minutes " + remainingSeconds + " seconds)";
+        }
+
+        return TIME_FORMAT.format(seconds) + " seconds";
     }
 
     /**
@@ -191,5 +179,7 @@ public class BenchmarkWriter {
         int emptyColumns;
         int minCardinality;
         int maxCardinality;
+        int DEPTH;
+        int depthLimit;
     }
 }

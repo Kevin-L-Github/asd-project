@@ -24,7 +24,7 @@ import unibs.asd.mhs.BoostMHS;
 public class Experiment {
 
     private static final String BENCHMARKS_DIRECTORY = "src/mybenchmarks";
-    private static final long TIMEOUT_MS = 180_000; // three minutes
+    private static final long TIMEOUT_MS = 120_000; // two minutes
     private static final DecimalFormat PROGRESS_FORMAT = new DecimalFormat("0.00%");
     private static final int PROGRESS_BAR_LENGTH = 25;
 
