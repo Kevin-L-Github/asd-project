@@ -1,0 +1,22 @@
+;;; === EXECUTION SUMMARY ===
+;;; Algorithm completion status: STOPPED BEFORE COMPLETION
+;;; Number of solutions found: 0
+;;; Min cardinality: 0
+;;; Max cardinality: 0
+;;; Maximum search depth: 120
+;;; Depth reached: 2/120
+;;; Execution was interrupted, reason: TIMEOUT DURING PROCESSING
+
+;;; === MATRIX INFORMATION ===
+;;; Number of rows (elements): 120
+;;; Total number of columns: 3512
+;;; Number of non-empty columns: 1235
+;;; Number of empty columns: 2277
+
+;;; === PERFORMANCE METRICS ===
+;;; Total computation time (nanoseconds): 1.211820777E11
+;;; Human-readable computation time: 121,182 seconds (2 minutes 1 seconds)
+
+=== SOLUTIONS ===
+
+No solutions found.
