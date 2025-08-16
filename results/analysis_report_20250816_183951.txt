@@ -1,0 +1,48 @@
+============================================================
+           BENCHMARK RESULTS ANALYSIS
+============================================================
+Directory: results/time_limited
+Report generated: Sat Aug 16 18:39:51 CEST 2025
+
+EXECUTION SUMMARY
+----------------------------------------
+Total benchmarks processed: 1397
+Successfully completed: 233 (16,68%)
+Stopped before completion: 1164 (83,32%)
+  - Timeout during processing: 1164 (83,32%)
+  - Out of memory: 0 (0,00%)
+  - Timeout before processing: 0 (0,00%)
+
+PERFORMANCE STATISTICS (Completed benchmarks only)
+--------------------------------------------------
+Execution times (milliseconds):
+  Min: 0,009 ms
+  Max: 94239,918 ms
+  Average: 5455,644 ms
+
+Solutions found:
+  Min: 1
+  Max: 44719
+  Average: 638,17
+  Total: 148694
+
+PROBLEM CHARACTERISTICS
+----------------------------------------
+Matrix dimensions:
+  Rows - Min: 1, Max: 192, Avg: 32,7
+  Total columns - Min: 20, Max: 3512, Avg: 1239,6
+  Non-empty columns - Min: 1, Max: 1470, Avg: 285,2
+  Average column sparsity: 64,34%
+
+DETAILED BREAKDOWN
+----------------------------------------
+Large (< 100K cells): 441 total, 0 completed (0,00%)
+Medium (< 10K cells): 547 total, 0 completed (0,00%)
+Small (< 1K cells): 230 total, 97 completed (42,17%)
+Very Large (>= 100K cells): 43 total, 0 completed (0,00%)
+Very Small (< 100 cells): 136 total, 136 completed (100,00%)
+
+FILES ANALYZED
+----------------------------------------
+Total files processed: 1397
+
