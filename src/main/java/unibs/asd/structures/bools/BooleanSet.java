@@ -21,6 +21,18 @@ public class BooleanSet implements BitVector {
         return this.bits;
     }
 
+    public void or(BooleanSet other) {
+        if (this.bits.length != other.bits.length) {
+            throw new IllegalArgumentException("Dimensioni incompatibili: " + 
+                this.bits.length + " vs " + other.bits.length);
+        }
+        
+        // OR bitwise efficient
+        for (int i = 0; i < this.bits.length; i++) {
+            this.bits[i] = this.bits[i] || other.bits[i];
+        }
+    }
+
     @Override
     public int size() {
         return this.bits.length;

@@ -114,7 +114,7 @@ public class FastHypothesis implements Hypothesis {
 
     @Override
     public void flip(int i) {
-        this.flip(i);
+        this.bin.flip(i);
     }
 
     @Override

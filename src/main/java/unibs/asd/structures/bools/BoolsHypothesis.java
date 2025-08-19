@@ -172,9 +172,7 @@ public class BoolsHypothesis implements Hypothesis {
     @Override
     public void or(Hypothesis other) {
         BooleanSet that = (BooleanSet) other.getVector();
-        for (int i = 0; i < vector.size(); i++) {
-            this.vector.set(i, vector.get(i) || that.get(i));
-        }
+        this.vector.or(that);
     }
 
     @Override

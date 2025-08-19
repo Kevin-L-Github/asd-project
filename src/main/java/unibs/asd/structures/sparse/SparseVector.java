@@ -60,8 +60,20 @@ public class SparseVector implements BitVector {
 
     @Override
     public int leastSignificantBit() {
-        return this.bitmap.length() - 1;
+    if (this.bitmap.isEmpty())
+        return -1;  // Convention: -1 if no bit is set
+    
+    // Find the last (rightmost) bit set
+    int lastBit = -1;
+    for (int i = this.bitmap.nextSetBit(0); i >= 0; i = this.bitmap.nextSetBit(i + 1)) {
+        lastBit = i;
+        // Avoid overflow in the extreme case
+        if (i == Integer.MAX_VALUE) {
+            break;
+        }
     }
+    return lastBit;
+}
 
     @Override
     public int mostSignificantBit() {
