@@ -1,0 +1,21 @@
+@startuml
+
+interface Hypothesis {
+    + getBin() : BitVector
+    + getVector() : BitVector
+    + globalInitial() : Hypothesis
+    + mostSignificantBit() : int
+    + cardinality() : int
+    + predecessors() : List<Hypothesis>
+    + equals(o : Object) : boolean
+    + setVector(vector : BitVector) : void
+    + length() : int
+    + clone() : Hypothesis
+    + set(i : int) : void
+    + set(i : int, value : boolean) : void
+    + flip(i : int) : void
+    + or(other : Hypothesis) : void
+    + update(information : BitVector) : void
+    + isSolution() : boolean
+}
+@enduml

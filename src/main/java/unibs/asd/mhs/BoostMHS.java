@@ -50,6 +50,7 @@ public class BoostMHS implements MHS {
 
     }
 
+
     public List<Hypothesis> run(BitSetType type, long timeoutMillis) {
 
         try {
@@ -59,19 +60,17 @@ public class BoostMHS implements MHS {
 
             int m = matrix[0].length;
             int n = matrix.length;
-
-            //System.out.println("Starting MHS with timeout: " + timeoutMillis + " milliseconds");
-            //System.out.println("Matrix size: " + matrix.length + "x" + matrix[0].length);
-            //System.out.println("Depth limit: " + depthLimit);
-
+            
             Hypothesis emptyHypothesis = getInitialHypothesis(type, m, n);
             startTime = System.nanoTime();
             long timeoutNanos = timeoutMillis * 1_000_000;
             List<Hypothesis> initialChildren = generateChildrenEmptyHypothesis(emptyHypothesis);
             this.current.addAll(initialChildren);
+            /* 
             for (Hypothesis init : initialChildren) {
                 this.bucket.put(init.getBin(), init.getVector());
             }
+            */
 
             DEPTH++;
             // int i = 0;
@@ -130,6 +129,12 @@ public class BoostMHS implements MHS {
         return solutions;
     }
 
+    /**
+     * Genera i figli di un'ipotesi vuota
+     * 
+     * @param parent
+     * @return
+     */
     private List<Hypothesis> generateChildrenEmptyHypothesis(Hypothesis parent) {
         List<Hypothesis> children = new ArrayList<>();
         for (int i = 0; i < parent.length(); i++) {
@@ -142,6 +147,14 @@ public class BoostMHS implements MHS {
         return children;
     }
 
+    /**
+     * Crea un'ipotesi iniziale in base al tipo di BitSet specificato.
+     * 
+     * @param type
+     * @param m
+     * @param n
+     * @return
+     */
     private Hypothesis getInitialHypothesis(BitSetType type, int m, int n) {
         switch (type) {
             case BitSetType.BITSET:

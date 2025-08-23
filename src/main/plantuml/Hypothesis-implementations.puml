@@ -1,0 +1,40 @@
+@startuml
+!pragma layout smetana
+
+class BitSetHypothesis {
+    - bin : BitSetAdapter
+    - vector : BitSetAdapter
+    + BitSetHypothesis(size : int, n : int)
+    + BitSetHypothesis(vector : BitSetAdapter)
+}
+
+class FastHypothesis {
+    - bin : FastBitSet
+    - vector : FastBitSet
+    + FastHypothesis(size : int, n : int)
+    + FastHypothesis(h : FastBitSet)
+}
+
+class BoolsHypothesis {
+    - bin : BooleanSet
+    - vector : BooleanSet
+    - cardinality : int
+    + BoolsHypothesis(size : int, n : int)
+    + BoolsHypothesis(bin : BooleanSet)
+}
+
+class RoaringHypothesis {
+    - bin : RoaringBitmapAdapter
+    - vector : RoaringBitmapAdapter
+    + RoaringHypothesis(size : int, n : int)
+    + RoaringHypothesis(h : RoaringBitmapAdapter)
+}
+
+class SparseHypothesis {
+    - bin : SparseVector
+    - vector : SparseVector
+    + SparseHypothesis(size : int, n : int)
+    + SparseHypothesis(h : SparseVector)
+}
+
+@enduml

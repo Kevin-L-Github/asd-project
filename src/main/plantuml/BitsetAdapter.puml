@@ -1,0 +1,32 @@
+@startuml
+
+class BitSetAdapter {
+    - final BitSet bitSet
+    - final int size
+
+    + BitSetAdapter(int size)
+    - BitSetAdapter(BitSetAdapter original)
+
+    + int size()
+    + int mostSignificantBit()
+    + boolean get(int index)
+    + void set(int index)
+    + void set(int index, boolean value)
+    + void clear(int index)
+    + void flip(int index)
+    + int cardinality()
+    + void and(BitSetAdapter other)
+    + void or(BitSetAdapter other)
+    + void xor(BitSetAdapter other)
+    + int leastSignificantBit()
+    + boolean isEmpty()
+    + BitSet toBitSet()
+    + String toBinaryString()
+    + String toBinaryStringLSBFirst()
+    + BitSetAdapter clone()
+    + boolean equals(Object o)
+    + int hashCode()
+    + String toString()
+    + boolean isFull()
+}
+@enduml

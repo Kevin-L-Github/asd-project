@@ -1,0 +1,11 @@
+@startuml
+!pragma layout smetana
+
+class SparseHypothesis {
+    - bin : SparseVector
+    - vector : SparseVector
+    + SparseHypothesis(size : int, n : int)
+    + SparseHypothesis(h : SparseVector)
+}
+
+@enduml

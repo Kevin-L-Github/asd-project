@@ -18,26 +18,51 @@ public class FastBitSet implements BitVector{
         this.words = new long[(size + 63) >>> 6];
     }
 
+    /**
+     * Sets the bit at the specified index to {@code true}.
+     * @param bitIndex the index of the bit to be set to {@code true}
+     */
     public void set(int bitIndex) {
         words[bitIndex >>> 6] |= (1L << bitIndex);
     }
 
+    /**
+     * Sets the bit at the specified index to {@code false}.
+     * @param bitIndex
+     */
     public void clear(int bitIndex) {
         words[bitIndex >>> 6] &= ~(1L << bitIndex);
     }
 
+    /**
+     * Flips the bit at the specified index.
+     * @param bitIndex the index of the bit to be flipped   
+     */
     public void flip(int bitIndex) {
         words[bitIndex >>> 6] ^= (1L << bitIndex);
     }
 
+    /**
+     * Returns the value of the bit with the specified index.
+     * @param bitIndex the index of the bit to be checked
+     * @return the value of the bit with the specified index
+     */
     public boolean get(int bitIndex) {
         return (words[bitIndex >>> 6] & (1L << bitIndex)) != 0;
     }
 
+    /**
+     * Returns the number of bits of space actually in use by this {@code FastBitSet} to represent bit values.
+     * @return the number of bits currently in this bit set
+     */
     public int size() {
         return logicalSize;
     }
 
+    /**
+     * Returns the number of bits set to {@code true} in this {@code FastBitSet}.
+     * @return the number of bits set to {@code true} in this bit set
+     */
     public int cardinality() {
         int count = 0;
         final int len = words.length;
@@ -61,6 +86,10 @@ public class FastBitSet implements BitVector{
         return count;
     }
 
+    /**
+     * Performs a logical OR of this target bit set with the argument bit set.
+     * @param other a bit set whose values are to be ORed with this bit set
+     */
     public void or(FastBitSet other) {
         final long[] otherWords = other.words;
         for (int i = 0; i < words.length; i++) {
@@ -68,6 +97,10 @@ public class FastBitSet implements BitVector{
         }
     }
 
+    /**
+     * Performs a logical AND of this target bit set with the argument bit set.
+     * @param other a bit set whose values are to be ANDed with this bit set
+     */
     public void and(FastBitSet other) {
         final long[] otherWords = other.words;
         for (int i = 0; i < words.length; i++) {
@@ -82,6 +115,10 @@ public class FastBitSet implements BitVector{
         }
     }
 
+    /**
+     * Performs a logical XOR of this target bit set with the argument bit set.
+     * @param other a bit set whose values are to be XORed with this bit set
+     */
     public void xor(FastBitSet other) {
         final long[] otherWords = other.words;
         for (int i = 0; i < words.length; i++) {

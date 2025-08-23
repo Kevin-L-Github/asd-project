@@ -1,0 +1,19 @@
+@startuml
+!pragma layout smetana
+
+interface BitVector {
+    + size() : int
+    + get(index : int) : boolean
+    + set(index : int) : void
+    + set(index : int, value : boolean) : void
+    + flip(index : int) : void
+    + cardinality() : int
+    + isEmpty() : boolean
+    + isFull() : boolean
+    + leastSignificantBit() : int
+    + mostSignificantBit() : int
+    + toBinaryString() : String
+    + clone() : BitVector
+}
+
+@enduml

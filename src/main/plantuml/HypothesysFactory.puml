@@ -1,0 +1,9 @@
+@startuml
+
+interface HypothesisFactory {
+    + create(bin : Object) : Hypothesis
+    + create(size : int) : Hypothesis
+    + createVector(size : int) : BitVector
+}
+
+@enduml

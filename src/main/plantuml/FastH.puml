@@ -1,0 +1,12 @@
+@startuml
+!pragma layout smetana
+
+class FastHypothesis {
+    - bin : FastBitSet
+    - vector : FastBitSet
+    + FastHypothesis(size : int, n : int)
+    + FastHypothesis(h : FastBitSet)
+}
+
+
+@enduml

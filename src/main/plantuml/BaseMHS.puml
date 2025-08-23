@@ -1,0 +1,45 @@
+@startuml
+
+class BaseMHS {
+    - HypothesisFactory factory
+    - List<Hypothesis> current
+    - List<Hypothesis> solutions
+    - boolean[][] instance
+    - boolean[][] matrix
+    - List<Integer> nonEmptyColumns
+    - int DEPTH
+    - int depthLimit
+    - double computationTime
+    - boolean executed
+    - boolean stopped
+    - boolean stoppedInsideLoop
+
+    + BaseMHS(boolean[][] instance)
+    + List<Hypothesis> run(BitSetType type, long timeoutMillis)
+    + List<Hypothesis> getSolutions()
+    + boolean[][] getInstance()
+    + boolean[][] getMatrix()
+    + List<Integer> getNonEmptyColumns()
+    + int getDEPTH()
+    + double getComputationTime()
+    + boolean isExecuted()
+    + boolean isStopped()
+    + int getDepthLimit()
+    + boolean isStoppedInsideLoop()
+    + boolean isOutOfMemoryError()
+
+    - Hypothesis getInitialHypothesis(BitSetType type, int m, int n)
+    - List<Hypothesis> generateChildrenEmptyHypothesis(Hypothesis parent)
+    - List<Hypothesis> generateChildren(Hypothesis parent)
+    - Hypothesis binarySearch(Hypothesis target)
+    - static boolean isGreater(Hypothesis h1, Hypothesis h2)
+    - List<Hypothesis> merge(Collection<Hypothesis> hypotheses, Collection<Hypothesis> toMerge)
+    - void setFields(Hypothesis hypothesis)
+    - boolean check(Hypothesis hypothesis)
+    - void propagate(Hypothesis predecessor, Hypothesis successor)
+    - void propagate(Hypothesis successor, BitVector information)
+    - void cleanMatrix()
+    - void restoreSolutions()
+    - void printStatusBar(int i, int depth, long startTime, long timeoutNanos)
+}
+@enduml

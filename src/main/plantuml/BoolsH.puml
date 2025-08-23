@@ -1,0 +1,13 @@
+@startuml
+!pragma layout smetana
+
+class BoolsHypothesis {
+    - bin : BooleanSet
+    - vector : BooleanSet
+    - cardinality : int
+    + BoolsHypothesis(size : int, n : int)
+    + BoolsHypothesis(bin : BooleanSet)
+}
+
+
+@enduml

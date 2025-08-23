@@ -1,0 +1,8 @@
+@startuml
+!pragma layout smetana
+class BitSetHypothesisFactory {
+    +Hypothesis create(Object bin)
+    +Hypothesis create(int size)
+    +BitVector createVector(int size)
+}
+@enduml

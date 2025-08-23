@@ -1,0 +1,22 @@
+@startuml
+
+    class BenchmarkWriter {
+        - static final DecimalFormat TIME_FORMAT
+        - static final String COMMENT_PREFIX
+        - static final String SECTION_PREFIX
+        - static final String SECTION_SUFFIX
+        - static final String SOLUTIONS_SECTION_HEADER
+
+        + static void writeBenchmark(MHS mhs, String filename, String destDir) throws IOException
+        - static void validateExecutionStatus(MHS mhs)
+        - static String getOutputFilename(String filename)
+        - static BenchmarkStatistics collectStatistics(MHS mhs)
+        - static void writeExecutionSummary(FileWriter writer, MHS mhs, BenchmarkStatistics stats) throws IOException
+        - static void writeMatrixInfo(FileWriter writer, BenchmarkStatistics stats) throws IOException
+        - static void writePerformanceInfo(FileWriter writer, MHS mhs) throws IOException
+        - static void writeSolutionsSection(FileWriter writer, List<Hypothesis> solutions) throws IOException
+        - static String getExecutionStatus(MHS mhs)
+        - static String getStopReason(MHS mhs)
+        - static String formatDetailedTime(double timeNs)
+    }
+@enduml

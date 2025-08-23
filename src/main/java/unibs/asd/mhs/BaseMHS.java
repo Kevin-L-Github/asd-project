@@ -9,6 +9,7 @@ import unibs.asd.factories.BitSetHypothesisFactory;
 import unibs.asd.factories.BoolsHypothesisFactory;
 import unibs.asd.factories.FastBitSetHypothesisFactory;
 import unibs.asd.factories.RoaringHypothesisFactory;
+import unibs.asd.factories.SparseHypothesisFactory;
 import unibs.asd.interfaces.BitVector;
 import unibs.asd.interfaces.Hypothesis;
 import unibs.asd.interfaces.HypothesisFactory;
@@ -17,6 +18,7 @@ import unibs.asd.structures.bitset.BitSetHypothesis;
 import unibs.asd.structures.bools.BoolsHypothesis;
 import unibs.asd.structures.fastbitset.FastHypothesis;
 import unibs.asd.structures.roaringbitmap.RoaringHypothesis;
+import unibs.asd.structures.sparse.SparseHypothesis;
 
 public class BaseMHS implements MHS {
 
@@ -137,6 +139,9 @@ public class BaseMHS implements MHS {
             case BitSetType.FAST_BITSET:
                 this.factory = new FastBitSetHypothesisFactory();
                 return new FastHypothesis(m, n);
+            case BitSetType.SPARSE:
+                this.factory = new SparseHypothesisFactory();
+                return new SparseHypothesis(m, n);
             default:
                 throw new IllegalArgumentException("Scegliere un tipo di implementazione");
         }

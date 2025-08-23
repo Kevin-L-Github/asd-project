@@ -1,0 +1,10 @@
+@startuml
+
+class BenchmarkReader {
+    + static boolean[][] readBenchmark(String filePath)
+    - static List<String> readAndFilterFile(String filePath)
+    - static boolean[][] parseContentToBooleanMatrix(String content)
+    - static boolean[] parseBooleanRow(String block)
+    - static boolean parseBooleanValue(String value)
+}
+@enduml

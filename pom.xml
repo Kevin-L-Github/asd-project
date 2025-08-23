@@ -40,4 +40,39 @@
     </dependency>
   </dependencies>
 
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>com.github.davidmoten</groupId>
+        <artifactId>plantuml-maven-plugin</artifactId>
+        <version>0.2.14</version>
+        <executions>
+          <execution>
+            <id>generate-diagrams</id>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <sources>
+            <directory>${basedir}/src/main/plantuml</directory>
+            <includes>
+              <include>**/*.puml</include>
+            </includes>
+          </sources>
+          <outputDirectory>${project.build.directory}/generated-diagrams</outputDirectory>
+          <formats>
+            <format>png</format>
+            <format>svg</format>
+          </formats>
+          <preserveDirectoryStructure>false</preserveDirectoryStructure>
+          <generateMarkdownIndex>true</generateMarkdownIndex>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+
 </project>

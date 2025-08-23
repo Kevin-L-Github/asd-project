@@ -1,0 +1,18 @@
+@startuml
+
+interface MHS {
+    + run(type : BitSetType, timeoutMillis : long) : List<Hypothesis>
+    + getSolutions() : List<Hypothesis>
+    + getInstance() : boolean[][]
+    + getMatrix() : boolean[][]
+    + getNonEmptyColumns() : List<Integer>
+    + getDEPTH() : int
+    + getComputationTime() : double
+    + isExecuted() : boolean
+    + isStopped() : boolean
+    + isStoppedInsideLoop() : boolean
+    + isOutOfMemoryError() : boolean
+    + getDepthLimit() : int
+}
+
+@enduml
