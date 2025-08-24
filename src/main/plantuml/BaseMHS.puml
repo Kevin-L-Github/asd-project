@@ -1,4 +1,4 @@
-@startuml
+@startuml BaseMHS
 
 class BaseMHS {
     - HypothesisFactory factory
@@ -15,19 +15,6 @@ class BaseMHS {
     - boolean stoppedInsideLoop
 
     + BaseMHS(boolean[][] instance)
-    + List<Hypothesis> run(BitSetType type, long timeoutMillis)
-    + List<Hypothesis> getSolutions()
-    + boolean[][] getInstance()
-    + boolean[][] getMatrix()
-    + List<Integer> getNonEmptyColumns()
-    + int getDEPTH()
-    + double getComputationTime()
-    + boolean isExecuted()
-    + boolean isStopped()
-    + int getDepthLimit()
-    + boolean isStoppedInsideLoop()
-    + boolean isOutOfMemoryError()
-
     - Hypothesis getInitialHypothesis(BitSetType type, int m, int n)
     - List<Hypothesis> generateChildrenEmptyHypothesis(Hypothesis parent)
     - List<Hypothesis> generateChildren(Hypothesis parent)
@@ -37,9 +24,7 @@ class BaseMHS {
     - void setFields(Hypothesis hypothesis)
     - boolean check(Hypothesis hypothesis)
     - void propagate(Hypothesis predecessor, Hypothesis successor)
-    - void propagate(Hypothesis successor, BitVector information)
     - void cleanMatrix()
     - void restoreSolutions()
-    - void printStatusBar(int i, int depth, long startTime, long timeoutNanos)
 }
 @enduml

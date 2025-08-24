@@ -1,4 +1,4 @@
-@startuml
+@startuml BitSetHypothesisFactory
 !pragma layout smetana
 class BitSetHypothesisFactory {
     +Hypothesis create(Object bin)

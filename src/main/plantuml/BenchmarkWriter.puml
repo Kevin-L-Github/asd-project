@@ -1,4 +1,4 @@
-@startuml
+@startuml BenchmarkWriter
 
     class BenchmarkWriter {
         - static final DecimalFormat TIME_FORMAT

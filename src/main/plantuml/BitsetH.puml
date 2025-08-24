@@ -1,4 +1,4 @@
-@startuml
+@startuml BitSetHypothesis
 !pragma layout smetana
 
 class BitSetHypothesis {

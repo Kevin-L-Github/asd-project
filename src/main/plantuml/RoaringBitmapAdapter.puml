@@ -5,22 +5,9 @@ class RoaringBitmapAdapter {
     - final int size
 
     + RoaringBitmapAdapter(int size)
-    + boolean get(int index)
-    + void set(int index)
-    + void set(int index, boolean value)
-    + void clear(int index)
-    + void flip(int index)
-    + int cardinality()
-    + boolean isEmpty()
-    + boolean isFull()
-    + int size()
-    + int mostSignificantBit()
-    + int leastSignificantBit()
     + void or(RoaringBitmapAdapter other)
     + void xor(RoaringBitmapAdapter other)
     + RoaringBitmapAdapter clone()
-    + String toString()
-    + String toBinaryString()
     + int hashCode()
     + boolean equals(Object o)
 }

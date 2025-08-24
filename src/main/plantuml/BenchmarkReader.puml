@@ -1,4 +1,4 @@
-@startuml
+@startuml BenchmarkReader
 
 class BenchmarkReader {
     + static boolean[][] readBenchmark(String filePath)

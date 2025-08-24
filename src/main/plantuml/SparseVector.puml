@@ -5,17 +5,6 @@ class SparseVector {
     - int size
 
     + SparseVector(int size)
-    + int size()
-    + boolean get(int index)
-    + void set(int index)
-    + void set(int index, boolean value)
-    + void flip(int index)
-    + int cardinality()
-    + boolean isEmpty()
-    + boolean isFull()
-    + int leastSignificantBit()
-    + int mostSignificantBit()
-    + String toBinaryString()
     + SparseVector clone()
     + void or(SparseVector other)
     + boolean equals(Object obj)
