@@ -1,0 +1,30 @@
+=== SELECTED BENCHMARKS FOR COMPARISON ===
+74182.038.mhs             5x20    0,001s 12 solutions
+c432.005.mhs              4x161   0,001s 16 solutions
+74181.009.mhs             3x66    0,002s 68 solutions
+74181.008.mhs             3x66    0,005s 1 solutions
+c432.001.mhs              4x161   0,020s 152 solutions
+c499.002.mhs              3x203   0,072s 1712 solutions
+c3540.009.mhs             3x1670  0,261s 86 solutions
+c2670.028.mhs             6x1194  2,189s 308 solutions
+c499.018.mhs              5x203   7,512s 3160 solutions
+74L85.023.mhs             9x33   24,804s 158 solutions
+
+=== RUNNING COMPARISON ===
+Benchmark                 BaseMHS(s)   BoostMHS(s)  Speedup 
+-----------------------------------------------------------------
+74182.038                 0,039        0,001        77,23x
+c432.005                  0,015        0,001        16,56x
+74181.009                 0,023        0,002        11,48x
+74181.008                 0,095        0,005        17,62x
+c432.001                  1,101        0,020        56,03x
+c499.002                  8,563        0,072        118,85x
+c3540.009                 70,270       0,261        268,79x
+c2670.028                 3360,015     2,189        1534,66x
+c499.018                  45765,506    7,512        6092,52x
+74L85.023                 86400,016    24,804       3483,31x
+
+=== PERFORMANCE SUMMARY ===
+Average speedup: 1167,70x
+Maximum speedup: 6092,52x
+Benchmarks completed by both: 10/10
