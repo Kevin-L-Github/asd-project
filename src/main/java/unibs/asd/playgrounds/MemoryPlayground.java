@@ -20,9 +20,9 @@ public class MemoryPlayground {
 
     public static void main(String[] args) {
         // Dimensioni più rappresentative per l'analisi
-        int[] sizes = { 64,256, 1024, 1536, 2048, 4096, 8192 };
+        int[] sizes = { 64, 256, 1024, 1536, 2048, 4096, 8192 };
         // Densità per evidenziare il comportamento delle implementazioni compresse
-        int[] densities = { 1, 5 ,10, 50,100 };
+        int[] densities = { 1, 5, 10, 50, 100 };
 
         Random rnd = new Random(42);
 
