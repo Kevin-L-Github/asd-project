@@ -7,4 +7,12 @@ class BenchmarkReader {
     - static boolean[] parseBooleanRow(String block)
     - static boolean parseBooleanValue(String value)
 }
+
+note right of BenchmarkReader
+    Classe dedicata al parsing dei benchmark, 
+    responsabile della lettura, filtraggio e 
+    conversione dei dati in una rappresentazione 
+    matriciale booleana.
+end note
+
 @enduml

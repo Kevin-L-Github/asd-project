@@ -6,7 +6,6 @@ class BitSetAdapter {
 
     + BitSetAdapter(int size)
     - BitSetAdapter(BitSetAdapter original)
-
     + void and(BitSetAdapter other)
     + void or(BitSetAdapter other)
     + void xor(BitSetAdapter other)

@@ -18,7 +18,7 @@ import unibs.asd.structures.bitset.BitSetHypothesis;
 import unibs.asd.structures.bools.BoolsHypothesis;
 import unibs.asd.structures.fastbitset.FastHypothesis;
 import unibs.asd.structures.roaringbitmap.RoaringHypothesis;
-import unibs.asd.structures.sparse.SparseHypothesis;
+import unibs.asd.structures.sparsebitset.SparseHypothesis;
 
 public class BaseMHS implements MHS {
 
@@ -56,9 +56,9 @@ public class BaseMHS implements MHS {
             throw new IllegalArgumentException("Instance must be a non-empty boolean matrix.");
         }
 
-        System.out.println("Starting MHS with timeout: " + timeoutMillis + " milliseconds");
-        System.out.println("Matrix size: " + matrix.length + "x" + matrix[0].length);
-        System.out.println("Depth limit: " + depthLimit);
+        //System.out.println("Starting MHS with timeout: " + timeoutMillis + " milliseconds");
+        //System.out.println("Matrix size: " + matrix.length + "x" + matrix[0].length);
+        //System.out.println("Depth limit: " + depthLimit);
 
         long startTime = System.nanoTime();
         long timeoutNanos = timeoutMillis * 1_000_000;
@@ -267,8 +267,8 @@ public class BaseMHS implements MHS {
         int rows = instance.length;
         int cols = instance[0].length;
 
-        System.out.println("Righe: " + rows);
-        System.out.println("Colonne: " + cols);
+        //System.out.println("Righe: " + rows);
+        //System.out.println("Colonne: " + cols);
 
         nonEmptyColumns = new ArrayList<>();
         for (int j = 0; j < cols; j++) {
@@ -293,7 +293,7 @@ public class BaseMHS implements MHS {
             }
         }
 
-        System.out.println("Colonne eliminate: " + (cols - newCols));
+        //System.out.println("Colonne eliminate: " + (cols - newCols));
     }
 
     private void restoreSolutions() {

@@ -12,7 +12,7 @@ import unibs.asd.structures.bitset.BitSetHypothesis;
 import unibs.asd.structures.bools.BoolsHypothesis;
 import unibs.asd.structures.fastbitset.FastHypothesis;
 import unibs.asd.structures.roaringbitmap.RoaringHypothesis;
-import unibs.asd.structures.sparse.SparseHypothesis;
+import unibs.asd.structures.sparsebitset.SparseHypothesis;
 
 public class BoostMHS implements MHS {
 

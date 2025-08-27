@@ -7,7 +7,6 @@ import unibs.asd.enums.BitSetType;
 import unibs.asd.fileio.BenchmarkReader;
 import unibs.asd.fileio.BenchmarkWriter;
 import unibs.asd.interfaces.MHS;
-import unibs.asd.mhs.BaseMHS;
 import unibs.asd.mhs.BoostMHS;
 
 public class Playground {

@@ -1,4 +1,4 @@
-package unibs.asd.structures.sparse;
+package unibs.asd.structures.sparsebitset;
 
 import com.zaxxer.sparsebits.SparseBitSet;
 import unibs.asd.interfaces.BitVector;

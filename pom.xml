@@ -71,6 +71,16 @@
           <generateMarkdownIndex>true</generateMarkdownIndex>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>3.5.1</version>
+        <configuration>
+          <mainClass>unibs.asd.playgrounds.Playground</mainClass>
+        </configuration>
+        
+      </plugin>
+
     </plugins>
   </build>
 
