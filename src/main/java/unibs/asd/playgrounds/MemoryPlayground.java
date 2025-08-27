@@ -7,9 +7,10 @@ import unibs.asd.structures.roaringbitmap.RoaringHypothesis;
 import unibs.asd.structures.sparsebitset.SparseHypothesis;
 
 import org.openjdk.jol.info.GraphLayout;
+
+import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
-import java.util.HashSet;
 
 public class MemoryPlayground {
 
@@ -19,18 +20,18 @@ public class MemoryPlayground {
 
     public static void main(String[] args) {
         // Dimensioni più rappresentative per l'analisi
-        int[] sizes = { 64, 128, 256, 512, 1024, 5000, 10000 };
+        int[] sizes = { 64,256, 1024, 1536, 2048, 4096, 8192 };
         // Densità per evidenziare il comportamento delle implementazioni compresse
-        int[] densities = { 25, 50, 75, 100 };
+        int[] densities = { 1, 5 ,10, 50,100 };
 
         Random rnd = new Random(42);
 
         System.out.println("=== MEMORY USAGE ANALYSIS ===");
         System.out.println("Measuring actual memory footprint of different BitSet implementations");
         System.out.println();
-        
+
         System.out.printf("%-8s %-8s %-18s %-18s %-18s %-18s %-18s%n",
-                "Size", "Density%", "RoaringHypothesis", "FastHypothesis", "BoolsHypothesis", 
+                "Size", "Density%", "RoaringHypothesis", "FastHypothesis", "BoolsHypothesis",
                 "BitSetHypothesis", "SparseHypothesis");
         System.out.println("=".repeat(120));
 
@@ -75,7 +76,7 @@ public class MemoryPlayground {
             }
             System.out.println(); // Riga vuota tra diverse dimensioni per leggibilità
         }
-        
+
         // Aggiungi analisi semplice
         System.out.println("\n=== ANALYSIS NOTES ===");
         System.out.println("* All measurements in bytes");
