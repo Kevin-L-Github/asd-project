@@ -12,7 +12,6 @@ import java.text.SimpleDateFormat;
 import unibs.asd.enums.BitSetType;
 import unibs.asd.fileio.BenchmarkReader;
 import unibs.asd.interfaces.MHS;
-import unibs.asd.mhs.BaseMHS;
 import unibs.asd.mhs.BoostMHS;
 
 public class BenchmarkComparison {
@@ -69,7 +68,7 @@ public class BenchmarkComparison {
                     boolean[][] matrix = BenchmarkReader.readBenchmark(BENCHMARKS_DIR + "/" + result.filename.replace(".mhs", ".matrix"));
                     
                     // Test BaseMHS
-                    MHS baseMHS = new BaseMHS(matrix);
+                    MHS baseMHS = new BoostMHS(matrix);
                     long startTime = System.nanoTime();
                     baseMHS.run(BitSetType.FAST_BITSET, 86400000); // 24 ore
                     long baseDuration = System.nanoTime() - startTime;
